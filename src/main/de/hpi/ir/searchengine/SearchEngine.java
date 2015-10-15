@@ -1,4 +1,3 @@
-
 package de.hpi.ir.searchengine;
 
 /**
@@ -11,111 +10,54 @@ package de.hpi.ir.searchengine;
 import java.io.File;
 import java.util.ArrayList;
 
-// Don't change this file!!
+/* The only change you should make in this file is to define your baseDirectory!!
+*  for instance, C:/Users/myuser/Desktop/
+*  In the constructor of your implementation class, namely "public SearchEngineMyTeamName()", you will super the constructor of this abstract class.
+*  Then, as you can see in the "public SearchEngine()", a directory called "SearchEngineMyTeamName" will be created inside the baseDirectory.
+*  This directory is defined in the "teamDirectory" variable.
+*  It will contain all the files that you are using in your search engine.
+*  Namely, all the files that are neccessary for your engine to run (i.e. your stopword list) and all the files that your program generates.
+*/
 public abstract class SearchEngine {
 
         // paths
-		protected static String baseDirectory;
-        protected static String teamDirectory;
-		protected String resultsDirectory; // search engine results
-		protected static String indexDirectory;
-		protected String logFiles;
+	protected static String baseDirectory = "";  /************* Define your baseDirectory here !! ******************/
+        protected static String teamDirectory; // don't change this
         
-        protected boolean compression; // dictionary compression
-        protected int machine; // execution machine
-        
-        protected WebFile wf; // for crawling the google ranking
-        
-        protected int topK; // for limiting the search engine results
-        protected int prf; // for the pseudo relevance feedback implementation
-        
-        /*
-        for each team: 
-        "C:/../teamX"
-        "C:/.../teamX/results/"
-        "C:/.../teamX/logs/timestampK.log"
-        "C:/.../teamX/indices/index.txt"
-        "C:/.../teamX/indices/seeklist.txt"
-        */
+         // we will need these later in the course
+        protected int topK; 
+        protected int prf; 
         
 	public SearchEngine() {
 		
-            if (machine == 0) {
-                baseDirectory = "C:/Users/Konstantina.Lazarid/Dropbox/Konna_IRWS/IRWS/IRWS/data/";
-            } else if (machine == 1) {
-                baseDirectory = "C:/Users/konstantina/Dropbox/Konna_IRWS/IRWS/IRWS/data/";
-            }
-            // for each team
-            teamDirectory = baseDirectory + getClass().getSimpleName();
-            // directory to store index and result logs
+            // the baseDirectory is already defined
+            teamDirectory = baseDirectory + getClass().getSimpleName(); // creates SearchEngineMyTeamName directory
             new File(teamDirectory).mkdirs();
-            indexDirectory = teamDirectory + "/indices/";
-            new File(indexDirectory).mkdirs();
-            logFiles = teamDirectory + "/logs/" + System.currentTimeMillis() + ".log";
-            new File(logFiles).mkdirs();
-            // directory to store query results
-            resultsDirectory = teamDirectory + "/results/";
-            new File(resultsDirectory).mkdirs();
 	}
 
-	Double indexWrapper(){
-		
-            return null;
-	}
-
-	Double[] searchWrapper(String query, int topK, int prf){
-		
-		return null;
-	}
-	
-        // contruct your patent index and save it in a file
+        // contruct your patent index and save it in a file in the teamDirectory
         abstract void index(String directory);
         
-        // load your index from the file where you stored it (load its seek list)
-		abstract boolean loadIndex(String directory);
+        // load the index's seeklist from the teamDirectory
+	abstract boolean loadIndex(String directory);
         
-        // contruct a compressed version of the index
-        abstract void compressedIndex(String directory);
+        // contruct a compressed version of the index and save it in a file in the teamDirectory
+        abstract void compressIndex(String directory);
 
-        // load it in main memory (load its seek list)
+        // load the seeklist for the compressed index from the teamDirectory
         abstract boolean loadCompressedIndex(String directory);
 
-        // search the index for a given query and return the patent titles in an ArrayList of Strings
-		abstract ArrayList<String> search(String query, int topK, int prf);
-        
-        // search the index for a query that contains : AND, OR, NOT (and *) and return the patent titles in an ArrayList of Strings
-        abstract ArrayList<String> booleanSearch(String query, int topK, int prf);
+        // search the index for a given query and return the relevant patent titles in an ArrayList of Strings
+        abstract ArrayList<String> search(String query, int topK, int prf);
 
-        // get the gold ranking from google (already implemented in WebFile class) and compute your engine's quality compared to this ranking
-		abstract Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> myRanking, int at);
-        
-        // helpers
-        public String getBaseDirectory(){
-            return(baseDirectory);
+        // we will need this later in the course
+        public void setTopK(int value){
+            topK = value; 
         }
         
-        public String getIndexDirectory(){
-            return(indexDirectory);
-        }
-        
-        public String getResultsDirectory(){
-            return(resultsDirectory);
-        }
-        
-        public void enableCompression(){
-            compression = true;
-        }
-        
-        public void setMachine(int mainMachine){
-            machine = mainMachine;
-        }
-        
-        public void setTopK(int val){
-            topK = val;
-        }
-        
-        public void setPRF(int val){
-            prf = val;
+        // we will need this later in the course
+        public void setPRF(int value){
+            prf = value;
         }
         
 }

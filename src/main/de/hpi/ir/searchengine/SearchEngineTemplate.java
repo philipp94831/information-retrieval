@@ -21,12 +21,10 @@ package de.hpi.ir.searchengine;
 import java.util.ArrayList;
 
 
+public class SearchEngineTemplate extends SearchEngine { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
 
-public class SearchEngineTemplate extends SearchEngine {
-
-    // Replace 'Template' with your search engine name, i.e. SearchEngineMyTeamName
     
-    public SearchEngineTemplate() {
+    public SearchEngineTemplate() { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
         // This should stay as is! Don't add anything here!
         super();
     }
@@ -41,7 +39,7 @@ public class SearchEngineTemplate extends SearchEngine {
     }
     
     @Override
-    void compressedIndex(String directory) {
+    void compressIndex(String directory) {
     }
 
     @Override
@@ -53,16 +51,5 @@ public class SearchEngineTemplate extends SearchEngine {
     ArrayList<String> search(String query, int topK, int prf) {
         return null;
     }
-    
-    @Override
-    ArrayList<String> booleanSearch(String query, int topK, int prf) {
-        return null; 
-    }
-
-    @Override
-    Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int ndcgAt) {
-        return null;
-    }
-
     
 }
