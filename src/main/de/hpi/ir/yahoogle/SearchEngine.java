@@ -1,4 +1,4 @@
-package de.hpi.ir.searchengine;
+package de.hpi.ir.yahoogle;
 
 /**
  *

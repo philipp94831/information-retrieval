@@ -1,4 +1,4 @@
-package de.hpi.ir.searchengine;
+package de.hpi.ir.yahoogle;
 
 /**
  *
@@ -16,7 +16,8 @@ public class SearchEngineTest {
     
     public static void main(String args[]) throws Exception {
 
-        // SearchEngine myEngine = new SearchEngineMyTeamName();
+       SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
+       myEngine.printPatentTitles();
         
         // long start = System.currentTimeMillis();
         
