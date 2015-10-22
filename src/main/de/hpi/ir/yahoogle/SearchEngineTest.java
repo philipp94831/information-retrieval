@@ -17,7 +17,8 @@ public class SearchEngineTest {
     public static void main(String args[]) throws Exception {
 
        SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
-       myEngine.printPatentTitles();
+       myEngine.index("");
+       myEngine.search("plurality", 0, 0);
         
         // long start = System.currentTimeMillis();
         
