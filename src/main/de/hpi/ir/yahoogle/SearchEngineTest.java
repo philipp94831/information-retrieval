@@ -18,7 +18,7 @@ public class SearchEngineTest {
 
        SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
        myEngine.index("");
-       myEngine.search("plurality", 0, 0);
+       myEngine.search("resources", 0, 0);
         
         // long start = System.currentTimeMillis();
         
