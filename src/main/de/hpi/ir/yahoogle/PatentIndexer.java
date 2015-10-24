@@ -8,7 +8,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class PatentHandler extends DefaultHandler {
+public class PatentIndexer extends DefaultHandler {
 	
 	private Stack<String> parents;
 	private boolean inAbstract = false;
@@ -20,11 +20,12 @@ public class PatentHandler extends DefaultHandler {
 	public void startDocument() {
 		parents = new Stack<String>();
 		index = new YahoogleIndex();
+		index.create();
 	}
 	
 	@Override
 	public void endDocument() {
-			
+		index.write();
 	}
 	
 	@Override
@@ -52,6 +53,7 @@ public class PatentHandler extends DefaultHandler {
 	}
 	
 	private void indexPatent(Patent patent) {
+		index.add(currentPatent);
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
 		for(int i = 0; tokenizer.hasMoreTokens(); i++) {
@@ -79,6 +81,11 @@ public class PatentHandler extends DefaultHandler {
 			}
 			parents.push(tempStore.pop());
 			parents.push(tempStore.pop());
+		}
+		if (parents.peek().equals("invention-title")) {
+			buf = new StringBuffer();
+			buf.append(ch, start, length);
+			currentPatent.setInventionTitle(buf.toString());
 		}
 	}
 	

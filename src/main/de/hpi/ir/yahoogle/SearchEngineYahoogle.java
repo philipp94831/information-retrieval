@@ -18,91 +18,44 @@ package de.hpi.ir.yahoogle;
  * Keep in mind to include your implementation decisions also in the pdf file of each assignment
  */
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Set;
-
 import org.lemurproject.kstem.KrovetzStemmer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
+															// with your search
+															// engine's name,
+															// i.e.
+															// SearchEngineMyTeamName
 
-public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
-
-    private static final String FILENAME = "yahoogle.index";
 	private YahoogleIndex index;
-	
-    public SearchEngineYahoogle() {
-        // This should stay as is! Don't add anything here!
-        super();
-    }
 
-    @Override
+	public SearchEngineYahoogle() {
+		// This should stay as is! Don't add anything here!
+		super();
+	}
+
+	@Override
     void index(String directory) {
-    	index = indexPatents();
-    }
-
-    @Override
-    boolean loadIndex(String directory) {
-        try {
-			FileInputStream fin = new FileInputStream(FILENAME);
-			ObjectInputStream oin = new ObjectInputStream(fin);
-			index = (YahoogleIndex) oin.readObject();
-			oin.close();
-			fin.close();
-		} catch (FileNotFoundException e) {
-			return false;
-		} catch (ClassNotFoundException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		}
-    	return true;
-    }
-    
-    @Override
-    void compressIndex(String directory) {
-    }
-
-    @Override
-    boolean loadCompressedIndex(String directory) {
-        return false;
-    }
-    
-    @Override
-    ArrayList<String> search(String query, int topK, int prf) {
-        KrovetzStemmer stemmer = new KrovetzStemmer();
-    	query = stemmer.stem(query);
-    	Set<String> docNumbers = index.getDocNumbers(query);
-    	if(docNumbers.size() == 0) {
-    		System.out.println("No matches found");
-    	}
-    	for(String docNumber : docNumbers) {
-    		System.out.println(docNumber);
-    	}
-        return null;
-    }
-    
-    YahoogleIndex indexPatents() {
-    	String fileName = "res/testData.xml";
+		String fileName = "res/testData.xml";
     	
     	try {
 			XMLReader xr = XMLReaderFactory.createXMLReader();
 	    	
-			PatentHandler handler = new PatentHandler();
+			PatentIndexer handler = new PatentIndexer();
 			xr.setContentHandler(handler);
 			xr.setErrorHandler(handler);
 			
 			FileReader r = new FileReader(fileName);
 			xr.parse(new InputSource(r));
 			
-			return handler.getIndex();
+			index = handler.getIndex();
 			
 		} catch (SAXException e) {
 			// TODO Auto-generated catch block
@@ -115,8 +68,30 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			e.printStackTrace();
 		}
     	
-    	return null;
-    	
     }
-    
+
+	@Override
+	boolean loadIndex(String directory) {
+		index = new YahoogleIndex();
+		return index.load();
+	}
+
+	@Override
+	void compressIndex(String directory) {
+	}
+
+	@Override
+	boolean loadCompressedIndex(String directory) {
+		return false;
+	}
+
+	@Override
+	ArrayList<String> search(String query, int topK, int prf) {
+		KrovetzStemmer stemmer = new KrovetzStemmer();
+		query = stemmer.stem(query);
+		ArrayList<String> results = new ArrayList<String>();
+		results.addAll(index.getDocNumbers(query));
+		return results;
+	}
+
 }
