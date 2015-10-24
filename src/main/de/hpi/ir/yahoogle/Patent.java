@@ -1,13 +1,7 @@
 package de.hpi.ir.yahoogle;
 
-import java.io.Serializable;
-
-public class Patent implements Serializable {
+public class Patent {
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -5928796102621977656L;
 	private String patentAbstract;
 	private String docNumber;
 	private String inventionTitle;

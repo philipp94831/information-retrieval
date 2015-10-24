@@ -22,8 +22,9 @@ public class YahoogleIndex {
 	private static final String POSTINGS_FILE = "postings.yahoogle";
 	private static final String OFFSETS_FILE = "offsets.yahoogle";
 	private static final String PATENTS_FILE = "patents.yahoogle";
+	private static final String STOPWORDS_FILE = "res/stopwords.txt";
 	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
-	private Set<Patent> patents = new HashSet<Patent>();
+	private Map<String, String> patents = new HashMap<String, String>();
 	private StopWordList stopwords;
 
 	boolean write() {
@@ -32,7 +33,7 @@ public class YahoogleIndex {
 	}
 
 	public YahoogleIndex() {
-		stopwords = new StopWordList("res/stopwords.txt");
+		stopwords = new StopWordList(STOPWORDS_FILE);
 	}
 
 	boolean writeObject(Object o, String fileName) {
@@ -69,6 +70,7 @@ public class YahoogleIndex {
 		return o;
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean load() {
 		try {
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
@@ -76,7 +78,7 @@ public class YahoogleIndex {
 			return false;
 		}
 		tokenOffsets = (Map<String, Long>) loadObject(OFFSETS_FILE);
-		patents = (Set<Patent>) loadObject(PATENTS_FILE);
+		patents = (Map<String, String>) loadObject(PATENTS_FILE);
 		return true;
 	}
 
@@ -147,16 +149,13 @@ public class YahoogleIndex {
 	}
 
 	public void add(Patent patent) {
-		patent.setPatentAbstract(null);
-		patents.add(patent);
+		patents.put(patent.getDocNumber(), patent.getInventionTitle());
 	}
 
 	public ArrayList<String> match(Set<String> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
-		for (Patent patent : patents) {
-			if (docNumbers.contains(patent.getDocNumber())) {
-				results.add(patent.toString());
-			}
+		for (String docNumber : docNumbers) {
+			results.add(patents.get(docNumber));
 		}
 		return results;
 	}

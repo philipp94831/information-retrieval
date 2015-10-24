@@ -19,9 +19,15 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
+		long startTime = System.nanoTime();
 		myEngine.index("");
 		//myEngine.loadIndex("");
-		ArrayList<String> results = myEngine.search("and", 0, 0);
+		long time = (System.nanoTime() - startTime) / 1000000;
+		System.out.println("Time for index creation: " +  time + "ms");
+		startTime = System.nanoTime();
+		ArrayList<String> results = myEngine.search("resources and plurality", 0, 0);
+		time = (System.nanoTime() - startTime) / 1000000;
+		System.out.println("Time for search: " +  time + "ms");
 		if (results.size() == 0) {
 			System.out.println("No matches found");
 		}

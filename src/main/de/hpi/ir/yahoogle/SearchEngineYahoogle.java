@@ -45,7 +45,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
-    void index(String directory) {
+    void index(String directory) {		
 		String fileName = "res/testData.xml";
     	
     	try {
@@ -70,7 +70,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
     }
 
 	@Override
