@@ -22,10 +22,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.lemurproject.kstem.KrovetzStemmer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -90,25 +90,21 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
-		StopWordList stopwords = new StopWordList("res/stopwords.txt");
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		Set<String> docNumbers = null;
-		KrovetzStemmer stemmer = new KrovetzStemmer();
-		if(tokenizer.hasMoreTokens()) {
-			String token = stemmer.stem(tokenizer.nextToken());
-			while (stopwords.contains(token)) {
-				if(tokenizer.hasMoreTokens()) {
-					token = stemmer.stem(tokenizer.nextToken());
-				} else {
-					return new ArrayList<String>();
-				}
+		while(docNumbers == null) {
+			if(tokenizer.hasMoreTokens()) {
+				docNumbers = index.find(tokenizer.nextToken());
+			} else {
+				docNumbers = new HashSet<String>();
+				break;
 			}
-			docNumbers = index.find(token);
 		}
 		while(tokenizer.hasMoreTokens()) {
-			String token = stemmer.stem(tokenizer.nextToken());
-			if (stopwords.contains(token)) continue;
-			docNumbers.retainAll(index.find(token));
+			Set<String> result = index.find(tokenizer.nextToken());
+			if(result != null) {
+				docNumbers.retainAll(result);
+			}
 		}
 		return index.match(docNumbers);
 	}

@@ -1,11 +1,9 @@
 package de.hpi.ir.yahoogle;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -92,11 +90,14 @@ public class YahoogleIndex {
 		}
 		return true;
 	}
+	
+	private String sanitize(String word) {
+		KrovetzStemmer stemmer = new KrovetzStemmer();
+		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));		
+	}
 
 	public void add(String token, YahoogleIndexPosting posting) {
-		KrovetzStemmer stemmer = new KrovetzStemmer();
-		token = stemmer.stem(token.toLowerCase());
-		token = token.replaceAll("\\W", "");
+		token = sanitize(token);
 		if(stopwords.contains(token)) return;
 		Long offset = tokenOffsets.get(token);
 		try {
@@ -124,6 +125,8 @@ public class YahoogleIndex {
 	}
 
 	public Set<String> find(String token) {
+		token = sanitize(token);
+		if (stopwords.contains(token)) return null;
 		Set<String> docNumbers = new HashSet<String>();
 		Long offset = tokenOffsets.get(token);
 		if (offset == null) {
