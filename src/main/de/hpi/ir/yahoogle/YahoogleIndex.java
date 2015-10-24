@@ -47,21 +47,22 @@ public class YahoogleIndex {
     	return true;
     }
     
-    private boolean loadOffsets() {
+    private Object loadObject(String fileName) {
+    	Object o;
     	try {
-			FileInputStream fin = new FileInputStream(OFFSETS_FILE);
+			FileInputStream fin = new FileInputStream(fileName);
 			ObjectInputStream oin = new ObjectInputStream(fin);
-			tokenOffsets = (Map<String, Long>) oin.readObject();
+			o = oin.readObject();
 			oin.close();
 			fin.close();
 		} catch (FileNotFoundException e) {
-			return false;
+			return null;
 		} catch (ClassNotFoundException e) {
-			return false;
+			return null;
 		} catch (IOException e) {
-			return false;
+			return null;
 		}
-    	return true;
+    	return o;
     }
 	
 	public boolean load() {
@@ -70,26 +71,9 @@ public class YahoogleIndex {
 		} catch (FileNotFoundException e) {
 			return false;
 		}
-		loadOffsets();
-		loadPatents();
+		tokenOffsets = (Map<String, Long>) loadObject(OFFSETS_FILE);
+		patents = (Set<Patent>) loadObject(PATENTS_FILE);
 		return true;
-	}
-	
-	private boolean loadPatents() {
-		try {
-			FileInputStream fin = new FileInputStream(PATENTS_FILE);
-			ObjectInputStream oin = new ObjectInputStream(fin);
-			patents = (Set<Patent>) oin.readObject();
-			oin.close();
-			fin.close();
-		} catch (FileNotFoundException e) {
-			return false;
-		} catch (ClassNotFoundException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		}
-    	return true;
 	}
 
 	public boolean create() {
@@ -153,6 +137,7 @@ public class YahoogleIndex {
 	}
 
 	public void add(Patent patent) {
+		patent.setPatentAbstract(null);
 		patents.add(patent);
 	}
 

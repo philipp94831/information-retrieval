@@ -19,9 +19,9 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
-		//myEngine.index("");
-		myEngine.loadIndex("");
-		ArrayList<String> results = myEngine.search("resources and", 0, 0);
+		myEngine.index("");
+		//myEngine.loadIndex("");
+		ArrayList<String> results = myEngine.search("resources plurality", 0, 0);
 		if (results.size() == 0) {
 			System.out.println("No matches found");
 		}

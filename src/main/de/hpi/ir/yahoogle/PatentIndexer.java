@@ -53,7 +53,6 @@ public class PatentIndexer extends DefaultHandler {
 	}
 	
 	private void indexPatent(Patent patent) {
-		index.add(currentPatent);
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
 		for(int i = 0; tokenizer.hasMoreTokens(); i++) {
@@ -63,6 +62,7 @@ public class PatentIndexer extends DefaultHandler {
 			posting.setDocNumber(patent.getDocNumber());
 			index.add(token, posting);
 		}
+		index.add(currentPatent);
 	}
 
 	@Override

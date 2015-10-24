@@ -92,10 +92,13 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
-		Set<String> docNumbers = new HashSet<String>();
+		Set<String> docNumbers = null;
 		KrovetzStemmer stemmer = new KrovetzStemmer();
+		if(tokenizer.hasMoreTokens()) {
+			docNumbers = index.find(stemmer.stem(tokenizer.nextToken()));
+		}
 		while(tokenizer.hasMoreTokens()) {
-			docNumbers.addAll(index.find(stemmer.stem(tokenizer.nextToken())));
+			docNumbers.retainAll(index.find(stemmer.stem(tokenizer.nextToken())));
 		}
 		return index.match(docNumbers);
 	}
