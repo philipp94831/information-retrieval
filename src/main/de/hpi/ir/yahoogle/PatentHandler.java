@@ -58,8 +58,8 @@ public class PatentHandler extends DefaultHandler {
 			String token = tokenizer.nextToken();
 			YahoogleIndexPosting posting = new YahoogleIndexPosting();
 			posting.setPosition(i);
-			posting.setOriginalToken(token);
-			index.add(token, patent.getDocNumber(), posting);
+			posting.setDocNumber(patent.getDocNumber());
+			index.add(token, posting);
 		}
 	}
 

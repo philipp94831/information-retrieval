@@ -20,11 +20,9 @@ package de.hpi.ir.yahoogle;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -48,23 +46,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
     @Override
     void index(String directory) {
     	index = indexPatents();
-    	writeIndex(directory);
-    }
-    
-    boolean writeIndex(String directory) {
-    	try {
-			FileOutputStream fout = new FileOutputStream(FILENAME);
-			ObjectOutputStream oout = new ObjectOutputStream(fout);
-			oout.writeObject(index);
-			oout.close();
-			fout.close();
-		} catch (FileNotFoundException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		}
-    	
-    	return true;
     }
 
     @Override
@@ -99,6 +80,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
         KrovetzStemmer stemmer = new KrovetzStemmer();
     	query = stemmer.stem(query);
     	Set<String> docNumbers = index.getDocNumbers(query);
+    	if(docNumbers.size() == 0) {
+    		System.out.println("No matches found");
+    	}
     	for(String docNumber : docNumbers) {
     		System.out.println(docNumber);
     	}

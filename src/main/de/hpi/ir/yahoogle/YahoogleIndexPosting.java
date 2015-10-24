@@ -10,14 +10,14 @@ public class YahoogleIndexPosting implements Serializable {
 	private static final long serialVersionUID = 834610298197650575L;
 	
 	private int position;
-	private String originalToken;
+	private String docNumber;
 
-	public String getOriginalToken() {
-		return originalToken;
+	public String getDocNumber() {
+		return docNumber;
 	}
 
-	public void setOriginalToken(String originalToken) {
-		this.originalToken = originalToken;
+	public void setDocNumber(String docNumber) {
+		this.docNumber = docNumber;
 	}
 
 	public int getPosition() {
