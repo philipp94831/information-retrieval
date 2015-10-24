@@ -34,7 +34,7 @@ public class YahoogleIndex {
 	}
 
 	public YahoogleIndex() {
-		stopwords = new StopWordList("stopwords.txt");
+		stopwords = new StopWordList("res/stopwords.txt");
 	}
 
 	boolean writeObject(Object o, String fileName) {

@@ -90,14 +90,18 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
-		StopWordList stopwords = new StopWordList("stopwords.txt");
+		StopWordList stopwords = new StopWordList("res/stopwords.txt");
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		Set<String> docNumbers = null;
 		KrovetzStemmer stemmer = new KrovetzStemmer();
 		if(tokenizer.hasMoreTokens()) {
 			String token = stemmer.stem(tokenizer.nextToken());
-			while (stopwords.contains(token) && tokenizer.hasMoreTokens()) {
-				token = stemmer.stem(tokenizer.nextToken());
+			while (stopwords.contains(token)) {
+				if(tokenizer.hasMoreTokens()) {
+					token = stemmer.stem(tokenizer.nextToken());
+				} else {
+					return new ArrayList<String>();
+				}
 			}
 			docNumbers = index.find(token);
 		}
