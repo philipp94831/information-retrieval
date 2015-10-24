@@ -1,9 +1,11 @@
 package de.hpi.ir.yahoogle;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -24,15 +26,19 @@ public class YahoogleIndex {
 	private static final String PATENTS_FILE = "patents.yahoogle";
 	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
 	private Set<Patent> patents = new HashSet<Patent>();
-    
-    boolean write() {
-    	return
-    			writeObject(tokenOffsets, OFFSETS_FILE) &&
-    			writeObject(patents, PATENTS_FILE);
-    }
-    
-    boolean writeObject(Object o, String fileName) {
-    	try {
+	private StopWordList stopwords;
+
+	boolean write() {
+		return writeObject(tokenOffsets, OFFSETS_FILE)
+				&& writeObject(patents, PATENTS_FILE);
+	}
+
+	public YahoogleIndex() {
+		stopwords = new StopWordList("stopwords.txt");
+	}
+
+	boolean writeObject(Object o, String fileName) {
+		try {
 			FileOutputStream fout = new FileOutputStream(fileName);
 			ObjectOutputStream oout = new ObjectOutputStream(fout);
 			oout.writeObject(o);
@@ -43,13 +49,13 @@ public class YahoogleIndex {
 		} catch (IOException e) {
 			return false;
 		}
-    	
-    	return true;
-    }
-    
-    private Object loadObject(String fileName) {
-    	Object o;
-    	try {
+
+		return true;
+	}
+
+	private Object loadObject(String fileName) {
+		Object o;
+		try {
 			FileInputStream fin = new FileInputStream(fileName);
 			ObjectInputStream oin = new ObjectInputStream(fin);
 			o = oin.readObject();
@@ -62,9 +68,9 @@ public class YahoogleIndex {
 		} catch (IOException e) {
 			return null;
 		}
-    	return o;
-    }
-	
+		return o;
+	}
+
 	public boolean load() {
 		try {
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
@@ -91,12 +97,13 @@ public class YahoogleIndex {
 		KrovetzStemmer stemmer = new KrovetzStemmer();
 		token = stemmer.stem(token.toLowerCase());
 		token = token.replaceAll("\\W", "");
+		if(stopwords.contains(token)) return;
 		Long offset = tokenOffsets.get(token);
 		try {
-			if(offset == null) {
+			if (offset == null) {
 				tokenOffsets.put(token, index.length());
 			} else {
-				while(true) {
+				while (true) {
 					index.seek(offset);
 					Long next = index.readLong();
 					if (next == -1) {
@@ -111,19 +118,19 @@ public class YahoogleIndex {
 			index.writeLong(-1);
 			index.writeUTF(posting.getDocNumber());
 			index.writeInt(posting.getPosition());
-		} catch(IOException e) {
-			
+		} catch (IOException e) {
+
 		}
 	}
-	
+
 	public Set<String> find(String token) {
 		Set<String> docNumbers = new HashSet<String>();
 		Long offset = tokenOffsets.get(token);
-		if(offset == null) {
+		if (offset == null) {
 			return docNumbers;
 		}
 		try {
-			while(offset != -1) {
+			while (offset != -1) {
 				index.seek(offset);
 				offset = index.readLong();
 				docNumbers.add(index.readUTF());
@@ -132,7 +139,7 @@ public class YahoogleIndex {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return docNumbers;
 	}
 
@@ -143,12 +150,12 @@ public class YahoogleIndex {
 
 	public ArrayList<String> match(Set<String> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
-		for(Patent patent : patents) {
+		for (Patent patent : patents) {
 			if (docNumbers.contains(patent.getDocNumber())) {
 				results.add(patent.toString());
 			}
 		}
 		return results;
 	}
-	
+
 }
