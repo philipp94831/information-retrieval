@@ -22,6 +22,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+
 import org.lemurproject.kstem.KrovetzStemmer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -87,11 +91,13 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
+		StringTokenizer tokenizer = new StringTokenizer(query);
+		Set<String> docNumbers = new HashSet<String>();
 		KrovetzStemmer stemmer = new KrovetzStemmer();
-		query = stemmer.stem(query);
-		ArrayList<String> results = new ArrayList<String>();
-		results.addAll(index.getDocNumbers(query));
-		return results;
+		while(tokenizer.hasMoreTokens()) {
+			docNumbers.addAll(index.find(stemmer.stem(tokenizer.nextToken())));
+		}
+		return index.match(docNumbers);
 	}
 
 }

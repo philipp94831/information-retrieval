@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -131,8 +132,7 @@ public class YahoogleIndex {
 		}
 	}
 	
-	public Set<String> getDocNumbers(String token) {
-		Set<String> results = new HashSet<String>();
+	public Set<String> find(String token) {
 		Set<String> docNumbers = new HashSet<String>();
 		Long offset = tokenOffsets.get(token);
 		if(offset == null) {
@@ -148,16 +148,22 @@ public class YahoogleIndex {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		for(Patent patent : patents) {
-			if (docNumbers.contains(patent.getDocNumber())) {
-				results.add(patent.getInventionTitle());
-			}
-		}
-		return results;
+		
+		return docNumbers;
 	}
 
 	public void add(Patent patent) {
 		patents.add(patent);
+	}
+
+	public ArrayList<String> match(Set<String> docNumbers) {
+		ArrayList<String> results = new ArrayList<String>();
+		for(Patent patent : patents) {
+			if (docNumbers.contains(patent.getDocNumber())) {
+				results.add(patent.toString());
+			}
+		}
+		return results;
 	}
 	
 }

@@ -21,7 +21,7 @@ public class SearchEngineTest {
 		SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 		//myEngine.index("");
 		myEngine.loadIndex("");
-		ArrayList<String> results = myEngine.search("resources", 0, 0);
+		ArrayList<String> results = myEngine.search("resources and", 0, 0);
 		if (results.size() == 0) {
 			System.out.println("No matches found");
 		}

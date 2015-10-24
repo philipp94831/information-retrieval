@@ -30,5 +30,10 @@ public class Patent implements Serializable {
 	public String getInventionTitle() {
 		return inventionTitle;
 	}
+	
+	@Override
+	public String toString() {
+		return this.getInventionTitle() + ": " + this.getPatentAbstract();
+	}
 
 }
