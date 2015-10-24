@@ -89,7 +89,7 @@ public class YahoogleIndex {
 
 	public void add(String token, YahoogleIndexPosting posting) {
 		KrovetzStemmer stemmer = new KrovetzStemmer();
-		token = stemmer.stem(token);
+		token = stemmer.stem(token.toLowerCase());
 		token = token.replaceAll("\\W", "");
 		Long offset = tokenOffsets.get(token);
 		try {
