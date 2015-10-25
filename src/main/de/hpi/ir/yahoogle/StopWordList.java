@@ -30,7 +30,7 @@ public class StopWordList {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public boolean contains(String word) {
 		return stopwords.contains(word);
 	}

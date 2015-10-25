@@ -21,13 +21,13 @@ public class SearchEngineTest {
 		SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 		long startTime = System.nanoTime();
 		myEngine.index("");
-		//myEngine.loadIndex("");
+//		myEngine.loadIndex("");
 		long time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for index creation: " +  time + "ms");
+		System.out.println("Time for index creation: " + time + "ms");
 		startTime = System.nanoTime();
-		ArrayList<String> results = myEngine.search("resources and plurality", 0, 0);
+		ArrayList<String> results = myEngine.search("and resources and plurality", 0, 0);
 		time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for search: " +  time + "ms");
+		System.out.println("Time for search: " + time + "ms");
 		if (results.size() == 0) {
 			System.out.println("No matches found");
 		}

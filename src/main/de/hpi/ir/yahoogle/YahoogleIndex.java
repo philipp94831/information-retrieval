@@ -19,37 +19,82 @@ import org.lemurproject.kstem.KrovetzStemmer;
 
 public class YahoogleIndex {
 
-	private RandomAccessFile index;
-	private static final String POSTINGS_FILE = "postings.yahoogle";
+	private static final long NO_NEXT_POSTING = -1;
 	private static final String OFFSETS_FILE = "offsets.yahoogle";
 	private static final String PATENTS_FILE = "patents.yahoogle";
+	private static final String POSTINGS_FILE = "postings.yahoogle";
 	private static final String STOPWORDS_FILE = "res/stopwords.txt";
-	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
+	private RandomAccessFile index;
 	private Map<String, String> patents = new HashMap<String, String>();
 	private StopWordList stopwords;
-
-	boolean write() {
-		return writeObject(tokenOffsets, OFFSETS_FILE)
-				&& writeObject(patents, PATENTS_FILE);
-	}
+	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
 
 	public YahoogleIndex() {
 		stopwords = new StopWordList(STOPWORDS_FILE);
 	}
 
-	boolean writeObject(Object o, String fileName) {
+	public void add(Patent patent) {
+		setInventionTitle(patent);
+		String text = patent.getPatentAbstract();
+		StringTokenizer tokenizer = new StringTokenizer(text);
+		for (int i = 0; tokenizer.hasMoreTokens(); i++) {
+			YahoogleIndexPosting posting = new YahoogleIndexPosting(tokenizer.nextToken());
+			posting.setDocNumber(patent.getDocNumber());
+			posting.setPosition(i);
+			post(posting);
+		}
+	}
+
+	public boolean create() {
+		boolean status = deleteIfExists(POSTINGS_FILE) && deleteIfExists(PATENTS_FILE) && deleteIfExists(OFFSETS_FILE);
 		try {
-			FileOutputStream fout = new FileOutputStream(fileName);
-			ObjectOutputStream oout = new ObjectOutputStream(fout);
-			oout.writeObject(o);
-			oout.close();
-			fout.close();
+			index = new RandomAccessFile(POSTINGS_FILE, "rw");
 		} catch (FileNotFoundException e) {
 			return false;
-		} catch (IOException e) {
+		}
+		return status;
+	}
+
+	private boolean deleteIfExists(String fileName) {
+		File f = new File(fileName);
+		return !f.exists() || f.delete();
+	}
+
+	public Set<String> find(String token) {
+		token = sanitize(token);
+		if (stopwords.contains(token)) {
+			return null;
+		}
+		Set<String> docNumbers = new HashSet<String>();
+		Long offset = tokenOffsets.get(token);
+		if (offset != null) {
+			try {
+				while (offset != NO_NEXT_POSTING) {
+					index.seek(offset);
+					offset = index.readLong();
+					docNumbers.add(index.readUTF());
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return docNumbers;
+	}
+
+	private String getInventionTitle(String docNumber) {
+		return patents.get(docNumber);
+	}
+
+	@SuppressWarnings("unchecked")
+	public boolean load() {
+		try {
+			index = new RandomAccessFile(POSTINGS_FILE, "rw");
+		} catch (FileNotFoundException e) {
 			return false;
 		}
-
+		tokenOffsets = (Map<String, Long>) loadObject(OFFSETS_FILE);
+		patents = (Map<String, String>) loadObject(PATENTS_FILE);
 		return true;
 	}
 
@@ -71,37 +116,19 @@ public class YahoogleIndex {
 		return o;
 	}
 
-	@SuppressWarnings("unchecked")
-	public boolean load() {
-		try {
-			index = new RandomAccessFile(POSTINGS_FILE, "rw");
-		} catch (FileNotFoundException e) {
-			return false;
+	public ArrayList<String> match(Set<String> docNumbers) {
+		ArrayList<String> results = new ArrayList<String>();
+		for (String docNumber : docNumbers) {
+			results.add(getInventionTitle(docNumber));
 		}
-		tokenOffsets = (Map<String, Long>) loadObject(OFFSETS_FILE);
-		patents = (Map<String, String>) loadObject(PATENTS_FILE);
-		return true;
+		return results;
 	}
 
-	public boolean create() {
-		File f = new File(POSTINGS_FILE);
-		f.delete();
-		try {
-			index = new RandomAccessFile(POSTINGS_FILE, "rw");
-		} catch (FileNotFoundException e) {
-			return false;
+	private void post(YahoogleIndexPosting posting) {
+		String token = sanitize(posting.getToken());
+		if (stopwords.contains(token)) {
+			return;
 		}
-		return true;
-	}
-	
-	private String sanitize(String word) {
-		KrovetzStemmer stemmer = new KrovetzStemmer();
-		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));		
-	}
-
-	private void post(String token, int position, String docNumber) {
-		token = sanitize(token);
-		if(stopwords.contains(token)) return;
 		Long offset = tokenOffsets.get(token);
 		try {
 			if (offset == null) {
@@ -110,7 +137,7 @@ public class YahoogleIndex {
 				while (true) {
 					index.seek(offset);
 					Long next = index.readLong();
-					if (next == -1) {
+					if (next == NO_NEXT_POSTING) {
 						index.seek(offset);
 						index.writeLong(index.length());
 						break;
@@ -119,52 +146,42 @@ public class YahoogleIndex {
 				}
 			}
 			index.seek(index.length());
-			index.writeLong(-1);
-			index.writeUTF(docNumber);
-			index.writeInt(position);
-		} catch (IOException e) {
-
-		}
-	}
-
-	public Set<String> find(String token) {
-		token = sanitize(token);
-		if (stopwords.contains(token)) return null;
-		Set<String> docNumbers = new HashSet<String>();
-		Long offset = tokenOffsets.get(token);
-		if (offset == null) {
-			return docNumbers;
-		}
-		try {
-			while (offset != -1) {
-				index.seek(offset);
-				offset = index.readLong();
-				docNumbers.add(index.readUTF());
-			}
+			index.writeLong(NO_NEXT_POSTING);
+			index.writeUTF(posting.getDocNumber());
+			index.writeInt(posting.getPosition());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		return docNumbers;
 	}
 
-	public void add(Patent patent) {
+	private String sanitize(String word) {
+		KrovetzStemmer stemmer = new KrovetzStemmer();
+		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));
+	}
+
+	private void setInventionTitle(Patent patent) {
 		patents.put(patent.getDocNumber(), patent.getInventionTitle());
-		String text = patent.getPatentAbstract();
-		StringTokenizer tokenizer = new StringTokenizer(text);
-		for(int i = 0; tokenizer.hasMoreTokens(); i++) {
-			String token = tokenizer.nextToken();
-			post(token, i, patent.getDocNumber());
-		}
 	}
 
-	public ArrayList<String> match(Set<String> docNumbers) {
-		ArrayList<String> results = new ArrayList<String>();
-		for (String docNumber : docNumbers) {
-			results.add(patents.get(docNumber));
+	public boolean write() {
+		return writeObject(tokenOffsets, OFFSETS_FILE) && writeObject(patents, PATENTS_FILE);
+	}
+
+	private boolean writeObject(Object o, String fileName) {
+		try {
+			FileOutputStream fout = new FileOutputStream(fileName);
+			ObjectOutputStream oout = new ObjectOutputStream(fout);
+			oout.writeObject(o);
+			oout.close();
+			fout.close();
+		} catch (FileNotFoundException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
 		}
-		return results;
+
+		return true;
 	}
 
 }

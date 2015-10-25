@@ -1,5 +1,7 @@
 package de.hpi.ir.yahoogle;
 
+import java.io.File;
+
 /**
  *
  * @author: Yahoogle
@@ -37,6 +39,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// i.e.
 															// SearchEngineMyTeamName
 
+	private static final String PATENT_LOCATION = "res/patents/";
 	private YahoogleIndex index;
 
 	public SearchEngineYahoogle() {
@@ -45,21 +48,30 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
-    void index(String directory) {		
-		String fileName = "res/testData.xml";
-    	
-    	try {
+	void compressIndex(String directory) {
+	}
+
+	@Override
+	void index(String directory) {
+
+		try {
 			XMLReader xr = XMLReaderFactory.createXMLReader();
-	    	
+
 			PatentIndexer handler = new PatentIndexer();
 			xr.setContentHandler(handler);
 			xr.setErrorHandler(handler);
-			
-			FileReader r = new FileReader(fileName);
-			xr.parse(new InputSource(r));
-			
+
+			File patents = new File(PATENT_LOCATION);
+			for (File file : patents.listFiles()) {
+				if (isPatentFile(file)) {
+					FileReader fr = new FileReader(PATENT_LOCATION + file.getName());
+					xr.parse(new InputSource(fr));
+				}
+			}
+
 			index = handler.getIndex();
-			
+			index.write();
+
 		} catch (SAXException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,16 +82,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    }
-
-	@Override
-	boolean loadIndex(String directory) {
-		index = new YahoogleIndex();
-		return index.load();
 	}
 
-	@Override
-	void compressIndex(String directory) {
+	private boolean isPatentFile(File file) {
+		return !file.isDirectory() && file.getName().endsWith(".xml");
 	}
 
 	@Override
@@ -88,19 +94,25 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
+	boolean loadIndex(String directory) {
+		index = new YahoogleIndex();
+		return index.load();
+	}
+
+	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		Set<String> docNumbers = null;
-		while(docNumbers == null) {
-			if(tokenizer.hasMoreTokens()) {
+		while (docNumbers == null) {
+			if (tokenizer.hasMoreTokens()) {
 				docNumbers = index.find(tokenizer.nextToken());
 			} else {
 				docNumbers = new HashSet<String>();
 			}
 		}
-		while(tokenizer.hasMoreTokens()) {
+		while (tokenizer.hasMoreTokens()) {
 			Set<String> result = index.find(tokenizer.nextToken());
-			if(result != null) {
+			if (result != null) {
 				docNumbers.retainAll(result);
 			}
 		}
