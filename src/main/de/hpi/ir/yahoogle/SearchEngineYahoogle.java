@@ -96,7 +96,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				docNumbers = index.find(tokenizer.nextToken());
 			} else {
 				docNumbers = new HashSet<String>();
-				break;
 			}
 		}
 		while(tokenizer.hasMoreTokens()) {

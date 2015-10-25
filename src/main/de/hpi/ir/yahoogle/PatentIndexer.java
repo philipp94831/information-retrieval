@@ -2,8 +2,6 @@ package de.hpi.ir.yahoogle;
 
 import java.io.ByteArrayInputStream;
 import java.util.Stack;
-import java.util.StringTokenizer;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
@@ -48,21 +46,8 @@ public class PatentIndexer extends DefaultHandler {
 			currentPatent.setPatentAbstract(buf.toString());
 		}
 		if(qName.equals("us-patent-grant")) {
-			indexPatent(currentPatent);
+			index.add(currentPatent);
 		};
-	}
-	
-	private void indexPatent(Patent patent) {
-		String text = patent.getPatentAbstract();
-		StringTokenizer tokenizer = new StringTokenizer(text);
-		for(int i = 0; tokenizer.hasMoreTokens(); i++) {
-			String token = tokenizer.nextToken();
-			YahoogleIndexPosting posting = new YahoogleIndexPosting();
-			posting.setPosition(i);
-			posting.setDocNumber(patent.getDocNumber());
-			index.add(token, posting);
-		}
-		index.add(currentPatent);
 	}
 
 	@Override

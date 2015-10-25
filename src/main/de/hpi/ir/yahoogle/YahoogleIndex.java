@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.lemurproject.kstem.KrovetzStemmer;
 
@@ -98,7 +99,7 @@ public class YahoogleIndex {
 		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));		
 	}
 
-	public void add(String token, YahoogleIndexPosting posting) {
+	private void post(String token, int position, String docNumber) {
 		token = sanitize(token);
 		if(stopwords.contains(token)) return;
 		Long offset = tokenOffsets.get(token);
@@ -119,8 +120,8 @@ public class YahoogleIndex {
 			}
 			index.seek(index.length());
 			index.writeLong(-1);
-			index.writeUTF(posting.getDocNumber());
-			index.writeInt(posting.getPosition());
+			index.writeUTF(docNumber);
+			index.writeInt(position);
 		} catch (IOException e) {
 
 		}
@@ -150,6 +151,12 @@ public class YahoogleIndex {
 
 	public void add(Patent patent) {
 		patents.put(patent.getDocNumber(), patent.getInventionTitle());
+		String text = patent.getPatentAbstract();
+		StringTokenizer tokenizer = new StringTokenizer(text);
+		for(int i = 0; tokenizer.hasMoreTokens(); i++) {
+			String token = tokenizer.nextToken();
+			post(token, i, patent.getDocNumber());
+		}
 	}
 
 	public ArrayList<String> match(Set<String> docNumbers) {
