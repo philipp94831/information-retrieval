@@ -134,16 +134,14 @@ public class YahoogleIndex {
 			if (offset == null) {
 				tokenOffsets.put(token, index.length());
 			} else {
-				while (true) {
-					index.seek(offset);
-					Long next = index.readLong();
-					if (next == NO_NEXT_POSTING) {
-						index.seek(offset);
-						index.writeLong(index.length());
-						break;
-					}
+				index.seek(offset);
+				Long next;
+				while ((next = index.readLong()) != NO_NEXT_POSTING) {
+					index.seek(next);
 					offset = next;
 				}
+				index.seek(offset);
+				index.writeLong(index.length());
 			}
 			index.seek(index.length());
 			index.writeLong(NO_NEXT_POSTING);

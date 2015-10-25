@@ -114,6 +114,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			Set<String> result = index.find(tokenizer.nextToken());
 			if (result != null) {
 				docNumbers.retainAll(result);
+//				docNumbers.addAll(result);
 			}
 		}
 		return index.match(docNumbers);
