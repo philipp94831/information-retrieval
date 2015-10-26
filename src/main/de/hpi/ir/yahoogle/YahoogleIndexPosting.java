@@ -1,6 +1,6 @@
 package de.hpi.ir.yahoogle;
 
-public class YahoogleIndexPosting implements Comparable<YahoogleIndexPosting> {
+public class YahoogleIndexPosting {
 
 	private String docNumber;
 	private int position;
@@ -32,11 +32,6 @@ public class YahoogleIndexPosting implements Comparable<YahoogleIndexPosting> {
 
 	public void setToken(String token) {
 		this.token = token;
-	}
-
-	@Override
-	public int compareTo(YahoogleIndexPosting post) {
-		return token.compareTo(post.getToken());
 	}
 
 }

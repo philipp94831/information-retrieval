@@ -116,7 +116,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
 			if (!YahoogleIndex.isStopword(token)) {
-				docNumbers.retainAll(index.find(token));
+				Set<String> result = index.find(token);
+				docNumbers.retainAll(result);
 				// docNumbers.addAll(index.find(token));
 			}
 		}

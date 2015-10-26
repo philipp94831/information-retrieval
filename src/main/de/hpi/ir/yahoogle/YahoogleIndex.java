@@ -8,24 +8,28 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-
+import java.util.TreeMap;
 import org.lemurproject.kstem.KrovetzStemmer;
 
 public class YahoogleIndex {
 
+	private static final int DOCNUMBER_LENGTH = 8;
 	private static final int FLUSH_THRESHOLD = 1000;
 	private static final long NO_NEXT_POSTING = -1;
 	private static final String OFFSETS_FILE = "offsets.yahoogle";
 	private static final String PATENTS_FILE = "patents.yahoogle";
 	private static final String POSTINGS_FILE = "postings.yahoogle";
+	private static final int POST_SIZE = Integer.BYTES + DOCNUMBER_LENGTH * Character.BYTES;
 	private static final String STOPWORDS_FILE = "res/stopwords.txt";
 	private static StopWordList stopwords = new StopWordList(STOPWORDS_FILE);
 
@@ -34,8 +38,9 @@ public class YahoogleIndex {
 	}
 
 	private RandomAccessFile index;
+	private int queue_size = 0;
 	private Map<String, String> patents = new HashMap<String, String>();
-	private List<YahoogleIndexPosting> posts = new ArrayList<YahoogleIndexPosting>();
+	private Map<String, List<YahoogleIndexPosting>> posts = new TreeMap<String, List<YahoogleIndexPosting>>();
 	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
 
 	public void add(Patent patent) {
@@ -50,25 +55,10 @@ public class YahoogleIndex {
 			YahoogleIndexPosting posting = new YahoogleIndexPosting(token);
 			posting.setDocNumber(patent.getDocNumber());
 			posting.setPosition(i);
-			posts.add(posting);
-		}
-		if (posts.size() > FLUSH_THRESHOLD) {
-			flush();
+			queue(posting);
 		}
 	}
-
-	public void finish() {
-		flush();
-	}
-
-	private void flush() {
-		Collections.sort(posts);
-		for (YahoogleIndexPosting post : posts) {
-			post(post);
-		}
-		posts.clear();
-	}
-
+	
 	public boolean create() {
 		boolean status = deleteIfExists(POSTINGS_FILE)
 				&& deleteIfExists(PATENTS_FILE) && deleteIfExists(OFFSETS_FILE);
@@ -94,7 +84,14 @@ public class YahoogleIndex {
 				while (offset != NO_NEXT_POSTING) {
 					index.seek(offset);
 					offset = index.readLong();
-					docNumbers.add(index.readUTF());
+					int size = index.readInt();
+					byte[] b = new byte[size * POST_SIZE];
+					index.readFully(b);
+					CharsetDecoder d = Charset.forName("UTF-16").newDecoder();
+					for (int i = 0; i < size; i++) {
+						ByteBuffer bb = ByteBuffer.wrap(b, i * POST_SIZE, DOCNUMBER_LENGTH * Character.BYTES);
+						docNumbers.add(d.decode(bb).toString());
+					}
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -102,6 +99,18 @@ public class YahoogleIndex {
 			}
 		}
 		return docNumbers;
+	}
+
+	public void finish() {
+		flush();
+	}
+
+	private void flush() {
+		for (Map.Entry<String, List<YahoogleIndexPosting>> entry : posts.entrySet()) {
+			postBlock(entry.getKey(), entry.getValue());
+		}
+		posts.clear();
+		queue_size = 0;
 	}
 
 	private String getInventionTitle(String docNumber) {
@@ -146,8 +155,17 @@ public class YahoogleIndex {
 		return results;
 	}
 
-	private void post(YahoogleIndexPosting posting) {
-		String token = posting.getToken();
+	private void post(YahoogleIndexPosting posting) throws IOException {
+		index.seek(index.length());
+		String docNumber = posting.getDocNumber();
+		if (docNumber.length() != DOCNUMBER_LENGTH) {
+			docNumber = docNumber.substring(0, DOCNUMBER_LENGTH);
+		}
+		index.writeChars(docNumber);
+		index.writeInt(posting.getPosition());
+	}
+
+	private void postBlock(String token, List<YahoogleIndexPosting> postList) {
 		Long offset = tokenOffsets.get(token);
 		try {
 			if (offset == null) {
@@ -164,11 +182,25 @@ public class YahoogleIndex {
 			}
 			index.seek(index.length());
 			index.writeLong(NO_NEXT_POSTING);
-			index.writeUTF(posting.getDocNumber());
-			index.writeInt(posting.getPosition());
+			index.writeInt(postList.size());
+			for (YahoogleIndexPosting post : postList) {
+				post(post);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	private void queue(YahoogleIndexPosting posting) {
+		String token = posting.getToken();
+		if(posts.get(token) == null) {
+			posts.put(token, new ArrayList<YahoogleIndexPosting>());
+		}
+		posts.get(token).add(posting);
+		queue_size++;
+		if (queue_size > FLUSH_THRESHOLD) {
+			flush();
 		}
 	}
 
