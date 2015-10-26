@@ -46,7 +46,7 @@ public class PatentIndexer extends DefaultHandler {
 		}
 		if (isInDocNumber(qName)) {
 			inDocNumber = false;
-			currentPatent.setDocNumber(buf.toString());
+			currentPatent.setDocNumber(Integer.parseInt(buf.toString()));
 		}
 		if (isInPatent(qName)) {
 			index.add(currentPatent);

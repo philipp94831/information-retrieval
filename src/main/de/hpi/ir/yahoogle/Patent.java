@@ -2,11 +2,11 @@ package de.hpi.ir.yahoogle;
 
 public class Patent {
 
-	private String docNumber;
+	private int docNumber;
 	private String inventionTitle;
 	private String patentAbstract;
 
-	public String getDocNumber() {
+	public int getDocNumber() {
 		return docNumber;
 	}
 
@@ -18,7 +18,7 @@ public class Patent {
 		return patentAbstract;
 	}
 
-	public void setDocNumber(String docNumber) {
+	public void setDocNumber(int docNumber) {
 		this.docNumber = docNumber;
 	}
 

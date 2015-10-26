@@ -102,7 +102,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
-		Set<String> docNumbers = null;
+		Set<Integer> docNumbers = null;
 		while (docNumbers == null) {
 			if (tokenizer.hasMoreTokens()) {
 				String token = tokenizer.nextToken();
@@ -116,8 +116,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
 			if (!YahoogleIndex.isStopword(token)) {
-				Set<String> result = index.find(token);
-				docNumbers.retainAll(result);
+				docNumbers.retainAll(index.find(token));
 				// docNumbers.addAll(index.find(token));
 			}
 		}

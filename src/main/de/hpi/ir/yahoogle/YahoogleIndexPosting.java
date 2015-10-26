@@ -2,19 +2,19 @@ package de.hpi.ir.yahoogle;
 
 public class YahoogleIndexPosting {
 
-	private String docNumber;
-	private int position;
+	private int docNumber;
+	private short position;
 	private String token;
 
 	public YahoogleIndexPosting(String token) {
 		this.token = token;
 	}
 
-	public String getDocNumber() {
+	public int getDocNumber() {
 		return docNumber;
 	}
 
-	public int getPosition() {
+	public short getPosition() {
 		return position;
 	}
 
@@ -22,11 +22,11 @@ public class YahoogleIndexPosting {
 		return token;
 	}
 
-	public void setDocNumber(String docNumber) {
+	public void setDocNumber(int docNumber) {
 		this.docNumber = docNumber;
 	}
 
-	public void setPosition(int position) {
+	public void setPosition(short position) {
 		this.position = position;
 	}
 
