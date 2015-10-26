@@ -109,14 +109,10 @@ public class YahoogleIndex {
 
 	private void flush() {
 		for (String token : posts.keySet()) {
-			flush(token);
+			postBlock(token, posts.get(token));
 		}
+		posts.clear();
 		flushCounter = 0;
-	}
-
-	private void flush(String token) {
-		postBlock(token, posts.get(token));
-		posts.get(token).clear();
 	}
 
 	private String getInventionTitle(Integer docNumber) {
