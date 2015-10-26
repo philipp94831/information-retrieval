@@ -21,7 +21,7 @@ import org.lemurproject.kstem.KrovetzStemmer;
 
 public class YahoogleIndex {
 
-	private static final int FLUSH_THRESHOLD = 1000;
+	private static final int FLUSH_THRESHOLD = 10000;
 	private static final long NO_NEXT_POSTING = -1;
 	private static final String OFFSETS_FILE = "offsets.yahoogle";
 	private static final String PATENTS_FILE = "patents.yahoogle";
@@ -35,7 +35,6 @@ public class YahoogleIndex {
 	}
 
 	private RandomAccessFile index;
-	private int queue_size = 0;
 	private Map<Integer, PatentResume> patents = new HashMap<Integer, PatentResume>();
 	private Map<String, List<YahoogleIndexPosting>> posts = new TreeMap<String, List<YahoogleIndexPosting>>();
 	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
@@ -100,13 +99,16 @@ public class YahoogleIndex {
 	public void finish() {
 		flush();
 	}
-
+	
 	private void flush() {
-		for (Map.Entry<String, List<YahoogleIndexPosting>> entry : posts.entrySet()) {
-			postBlock(entry.getKey(), entry.getValue());
+		for (String token : posts.keySet()) {
+			flush(token);
 		}
-		posts.clear();
-		queue_size = 0;
+	}
+
+	private void flush(String token) {
+		postBlock(token, posts.get(token));
+		posts.get(token).clear();
 	}
 
 	private String getInventionTitle(Integer docNumber) {
@@ -190,10 +192,10 @@ public class YahoogleIndex {
 		if(posts.get(token) == null) {
 			posts.put(token, new ArrayList<YahoogleIndexPosting>());
 		}
-		posts.get(token).add(posting);
-		queue_size++;
-		if (queue_size > FLUSH_THRESHOLD) {
-			flush();
+		List<YahoogleIndexPosting> list = posts.get(token);
+		list.add(posting);
+		if (list.size() > FLUSH_THRESHOLD) {
+			flush(token);
 		}
 	}
 

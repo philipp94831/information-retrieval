@@ -2,8 +2,11 @@ package de.hpi.ir.yahoogle;
 
 import java.io.ByteArrayInputStream;
 import java.util.Stack;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class PatentIndexer extends DefaultHandler {
@@ -53,6 +56,21 @@ public class PatentIndexer extends DefaultHandler {
 		}
 	}
 
+	@Override
+	public void error(SAXParseException ex) throws SAXException {
+		System.out.println("ERROR: [at " + ex.getLineNumber() + "] " + ex);
+	}
+
+	@Override
+	public void fatalError(SAXParseException ex) throws SAXException {
+		System.out.println("FATAL_ERROR: [at " + ex.getLineNumber() + "] " + ex);
+	}
+
+	@Override
+	public void warning(SAXParseException ex) throws SAXException {
+		System.out.println("WARNING: [at " + ex.getLineNumber() + "] " + ex);
+	}
+
 	public YahoogleIndex getIndex() {
 		return index;
 	}
@@ -62,7 +80,9 @@ public class PatentIndexer extends DefaultHandler {
 	}
 
 	private boolean isInDocNumber(String qName) {
-		return qName.equals("doc-number") && parents.elementAt(parents.size() - 2).equals("publication-reference");
+		return qName.equals("doc-number")
+				&& parents.elementAt(parents.size() - 2).equals(
+						"publication-reference");
 	}
 
 	private boolean isInPatent(String qName) {
@@ -75,7 +95,8 @@ public class PatentIndexer extends DefaultHandler {
 
 	@Override
 	public InputSource resolveEntity(String publicId, String systemId) {
-		return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
+		return new InputSource(new ByteArrayInputStream(
+				"<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
 	}
 
 	@Override
@@ -84,7 +105,8 @@ public class PatentIndexer extends DefaultHandler {
 	}
 
 	@Override
-	public void startElement(String uri, String name, String qName, Attributes atts) {
+	public void startElement(String uri, String name, String qName,
+			Attributes atts) {
 		if (isInPatent(qName)) {
 			currentPatent = new Patent();
 		}
