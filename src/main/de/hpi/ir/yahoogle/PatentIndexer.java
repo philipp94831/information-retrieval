@@ -33,7 +33,7 @@ public class PatentIndexer extends DefaultHandler {
 
 	@Override
 	public void endDocument() {
-		index.finish();
+		
 	}
 
 	@Override

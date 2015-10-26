@@ -16,24 +16,12 @@ import java.util.ArrayList;
 
 public class SearchEngineTest {
 
+	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
+
 	public static void main(String args[]) throws Exception {
 
-		SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
-		long startTime = System.nanoTime();
-		myEngine.index("");
-//		myEngine.loadIndex("");
-		long time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for index creation: " + time + "ms");
-		startTime = System.nanoTime();
-		ArrayList<String> results = myEngine.search("and resources and plurality", 0, 0);
-		time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for search: " + time + "ms");
-		if (results.size() == 0) {
-			System.out.println("No matches found");
-		}
-		for (String result : results) {
-			System.out.println(result);
-		}
+		initialize(false);
+		printResults(search("and resources and plurality"));
 
 		// long start = System.currentTimeMillis();
 
@@ -51,6 +39,34 @@ public class SearchEngineTest {
 
 		// results = myEngine.search(String query, int topK, int prf)
 
+	}
+
+	private static void printResults(ArrayList<String> results) {
+		if (results.size() == 0) {
+			System.out.println("No matches found");
+		}
+		for (String result : results) {
+			System.out.println(result);
+		}
+	}
+
+	private static ArrayList<String> search(String query) {
+		long startTime = System.nanoTime();
+		ArrayList<String> results = myEngine.search(query, 0, 0);
+		long time = (System.nanoTime() - startTime) / 1000000;
+		System.out.println("Time for search: " + time + "ms");
+		return results;
+	}
+
+	private static void initialize(boolean create) {
+		long startTime = System.nanoTime();
+		if (create) {
+			myEngine.index("");
+		} else {
+			myEngine.loadIndex("");
+		}
+		long time = (System.nanoTime() - startTime) / 1000000;
+		System.out.println("Time for index creation: " + time + "ms");
 	}
 
 }

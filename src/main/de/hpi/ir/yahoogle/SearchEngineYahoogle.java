@@ -70,6 +70,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			}
 
 			index = handler.getIndex();
+			index.finish();
 			index.write();
 
 		} catch (SAXException e) {
