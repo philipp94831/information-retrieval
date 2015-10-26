@@ -24,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -64,7 +63,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			File patents = new File(PATENT_LOCATION);
 			for (File file : patents.listFiles()) {
 				if (isPatentFile(file)) {
-					FileReader fr = new FileReader(PATENT_LOCATION + file.getName());
+					FileReader fr = new FileReader(PATENT_LOCATION
+							+ file.getName());
 					xr.parse(new InputSource(fr));
 				}
 			}
@@ -105,16 +105,19 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		Set<String> docNumbers = null;
 		while (docNumbers == null) {
 			if (tokenizer.hasMoreTokens()) {
-				docNumbers = index.find(tokenizer.nextToken());
+				String token = tokenizer.nextToken();
+				if (!YahoogleIndex.isStopword(token)) {
+					docNumbers = index.find(token);
+				}
 			} else {
-				docNumbers = new HashSet<String>();
+				return new ArrayList<String>();
 			}
 		}
 		while (tokenizer.hasMoreTokens()) {
-			Set<String> result = index.find(tokenizer.nextToken());
-			if (result != null) {
-				docNumbers.retainAll(result);
-//				docNumbers.addAll(result);
+			String token = tokenizer.nextToken();
+			if (!YahoogleIndex.isStopword(token)) {
+				docNumbers.retainAll(index.find(token));
+				// docNumbers.addAll(index.find(token));
 			}
 		}
 		return index.match(docNumbers);

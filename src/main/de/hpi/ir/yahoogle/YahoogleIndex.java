@@ -9,8 +9,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -24,29 +26,46 @@ public class YahoogleIndex {
 	private static final String PATENTS_FILE = "patents.yahoogle";
 	private static final String POSTINGS_FILE = "postings.yahoogle";
 	private static final String STOPWORDS_FILE = "res/stopwords.txt";
+	private static StopWordList stopwords = new StopWordList(STOPWORDS_FILE);
+
+	public static boolean isStopword(String word) {
+		return stopwords.contains(word);
+	}
+
 	private RandomAccessFile index;
 	private Map<String, String> patents = new HashMap<String, String>();
-	private StopWordList stopwords;
+	private List<YahoogleIndexPosting> posts = new ArrayList<YahoogleIndexPosting>();
 	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
-
-	public YahoogleIndex() {
-		stopwords = new StopWordList(STOPWORDS_FILE);
-	}
 
 	public void add(Patent patent) {
 		setInventionTitle(patent);
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
 		for (int i = 0; tokenizer.hasMoreTokens(); i++) {
-			YahoogleIndexPosting posting = new YahoogleIndexPosting(tokenizer.nextToken());
+			String token = sanitize(tokenizer.nextToken());
+			if (stopwords.contains(token)) {
+				continue;
+			}
+			YahoogleIndexPosting posting = new YahoogleIndexPosting(token);
 			posting.setDocNumber(patent.getDocNumber());
 			posting.setPosition(i);
-			post(posting);
+			posts.add(posting);
 		}
+		flush();
+	}
+
+	private void flush() {
+		Collections.sort(posts);
+		for (YahoogleIndexPosting post : posts) {
+			post(post);
+		}
+		posts.clear();
 	}
 
 	public boolean create() {
-		boolean status = deleteIfExists(POSTINGS_FILE) && deleteIfExists(PATENTS_FILE) && deleteIfExists(OFFSETS_FILE);
+		boolean status = deleteIfExists(POSTINGS_FILE)
+				&& deleteIfExists(PATENTS_FILE)
+				&& deleteIfExists(OFFSETS_FILE);
 		try {
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
 		} catch (FileNotFoundException e) {
@@ -62,9 +81,6 @@ public class YahoogleIndex {
 
 	public Set<String> find(String token) {
 		token = sanitize(token);
-		if (stopwords.contains(token)) {
-			return null;
-		}
 		Set<String> docNumbers = new HashSet<String>();
 		Long offset = tokenOffsets.get(token);
 		if (offset != null) {
@@ -125,10 +141,7 @@ public class YahoogleIndex {
 	}
 
 	private void post(YahoogleIndexPosting posting) {
-		String token = sanitize(posting.getToken());
-		if (stopwords.contains(token)) {
-			return;
-		}
+		String token = posting.getToken();
 		Long offset = tokenOffsets.get(token);
 		try {
 			if (offset == null) {
@@ -163,7 +176,8 @@ public class YahoogleIndex {
 	}
 
 	public boolean write() {
-		return writeObject(tokenOffsets, OFFSETS_FILE) && writeObject(patents, PATENTS_FILE);
+		return writeObject(tokenOffsets, OFFSETS_FILE)
+				&& writeObject(patents, PATENTS_FILE);
 	}
 
 	private boolean writeObject(Object o, String fileName) {
