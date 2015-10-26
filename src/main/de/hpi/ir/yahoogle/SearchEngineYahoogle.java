@@ -59,12 +59,12 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			PatentIndexer handler = new PatentIndexer();
 			xr.setContentHandler(handler);
 			xr.setErrorHandler(handler);
+			xr.setEntityResolver(handler);
 
 			File patents = new File(PATENT_LOCATION);
 			for (File file : patents.listFiles()) {
 				if (isPatentFile(file)) {
-					FileReader fr = new FileReader(PATENT_LOCATION
-							+ file.getName());
+					FileReader fr = new FileReader(PATENT_LOCATION + file.getName());
 					xr.parse(new InputSource(fr));
 				}
 			}

@@ -33,7 +33,7 @@ public class PatentIndexer extends DefaultHandler {
 
 	@Override
 	public void endDocument() {
-		
+
 	}
 
 	@Override
@@ -80,9 +80,7 @@ public class PatentIndexer extends DefaultHandler {
 	}
 
 	private boolean isInDocNumber(String qName) {
-		return qName.equals("doc-number")
-				&& parents.elementAt(parents.size() - 2).equals(
-						"publication-reference");
+		return qName.equals("doc-number") && parents.elementAt(parents.size() - 2).equals("publication-reference");
 	}
 
 	private boolean isInPatent(String qName) {
@@ -95,8 +93,7 @@ public class PatentIndexer extends DefaultHandler {
 
 	@Override
 	public InputSource resolveEntity(String publicId, String systemId) {
-		return new InputSource(new ByteArrayInputStream(
-				"<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
+		return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
 	}
 
 	@Override
@@ -105,8 +102,7 @@ public class PatentIndexer extends DefaultHandler {
 	}
 
 	@Override
-	public void startElement(String uri, String name, String qName,
-			Attributes atts) {
+	public void startElement(String uri, String name, String qName, Attributes atts) {
 		if (isInPatent(qName)) {
 			currentPatent = new Patent();
 		}
