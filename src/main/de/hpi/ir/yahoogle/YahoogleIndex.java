@@ -126,7 +126,6 @@ public class YahoogleIndex {
 	@SuppressWarnings("unchecked")
 	public boolean load() {
 		try {
-			tmp_index = new RandomAccessFile(TMP_POSTINGS_FILE, "rw");
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
 		} catch (FileNotFoundException e) {
 			return false;
