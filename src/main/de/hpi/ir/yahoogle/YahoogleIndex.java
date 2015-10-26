@@ -21,6 +21,7 @@ import org.lemurproject.kstem.KrovetzStemmer;
 
 public class YahoogleIndex {
 
+	private static final int FLUSH_THRESHOLD = 1000;
 	private static final long NO_NEXT_POSTING = -1;
 	private static final String OFFSETS_FILE = "offsets.yahoogle";
 	private static final String PATENTS_FILE = "patents.yahoogle";
@@ -51,6 +52,12 @@ public class YahoogleIndex {
 			posting.setPosition(i);
 			posts.add(posting);
 		}
+		if (posts.size() > FLUSH_THRESHOLD) {
+			flush();
+		}
+	}
+
+	public void finish() {
 		flush();
 	}
 
@@ -64,8 +71,7 @@ public class YahoogleIndex {
 
 	public boolean create() {
 		boolean status = deleteIfExists(POSTINGS_FILE)
-				&& deleteIfExists(PATENTS_FILE)
-				&& deleteIfExists(OFFSETS_FILE);
+				&& deleteIfExists(PATENTS_FILE) && deleteIfExists(OFFSETS_FILE);
 		try {
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
 		} catch (FileNotFoundException e) {
