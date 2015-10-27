@@ -9,19 +9,19 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class PatentIndexer extends DefaultHandler {
+public class PatentParser extends DefaultHandler {
 
 	private StringBuffer buf = new StringBuffer();
 	private Patent currentPatent;
 	private boolean inAbstract = false;
-	private YahoogleIndex index = new YahoogleIndex();
+	private YahoogleIndex index;
 	private boolean inDocNumber = false;
 	private boolean inTitle = false;
 	private Stack<String> parents;
 
-	public PatentIndexer() {
+	public PatentParser(YahoogleIndex index) {
 		super();
-		index.create();
+		this.index = index;
 	}
 
 	@Override
@@ -69,10 +69,6 @@ public class PatentIndexer extends DefaultHandler {
 	@Override
 	public void warning(SAXParseException ex) throws SAXException {
 		System.out.println("WARNING: [at " + ex.getLineNumber() + "] " + ex);
-	}
-
-	public YahoogleIndex getIndex() {
-		return index;
 	}
 
 	private boolean isInAbstract(String qName) {

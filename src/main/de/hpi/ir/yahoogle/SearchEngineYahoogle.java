@@ -39,7 +39,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// SearchEngineMyTeamName
 
 	private static final String PATENT_LOCATION = "res/patents/";
-	private YahoogleIndex index;
+	private YahoogleIndex index = new YahoogleIndex();
 
 	public SearchEngineYahoogle() {
 		// This should stay as is! Don't add anything here!
@@ -56,7 +56,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		try {
 			XMLReader xr = XMLReaderFactory.createXMLReader();
 
-			PatentIndexer handler = new PatentIndexer();
+			index.create();
+			PatentParser handler = new PatentParser(index);
 			xr.setContentHandler(handler);
 			xr.setErrorHandler(handler);
 			xr.setEntityResolver(handler);
@@ -69,7 +70,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				}
 			}
 
-			index = handler.getIndex();
 			index.finish();
 			index.write();
 
@@ -96,7 +96,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	boolean loadIndex(String directory) {
-		index = new YahoogleIndex();
 		return index.load();
 	}
 
@@ -121,7 +120,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				// docNumbers.addAll(index.find(token));
 			}
 		}
-		return index.match(docNumbers);
+		return index.matchInventionTitles(docNumbers);
 	}
 
 }

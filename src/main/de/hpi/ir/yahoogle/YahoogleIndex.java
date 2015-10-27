@@ -1,5 +1,6 @@
 package de.hpi.ir.yahoogle;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,14 +18,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 
 import org.lemurproject.kstem.KrovetzStemmer;
 
 public class YahoogleIndex {
 
-	private static final int FLUSH_COUNTER_THRESHOLD = 100;
-	private static final long FLUSH_MEM_THRESHOLD = 20000000;
+	private static final int MEM_CHECK_THRESHOLD = 100; // check free memory every 100 tokens
+	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // write to file at 20MB free memory
 	private static final long NO_NEXT_POSTING = -1;
 	private static final String OFFSETS_FILE = "offsets.yahoogle";
 	private static final String PATENTS_FILE = "patents.yahoogle";
@@ -40,11 +40,16 @@ public class YahoogleIndex {
 
 	private int flushCounter = 0;
 	private Map<Integer, PatentResume> patents = new HashMap<Integer, PatentResume>();
-	private Map<String, List<YahoogleIndexPosting>> posts = new TreeMap<String, List<YahoogleIndexPosting>>();
+	private Map<String, List<YahoogleIndexPosting>> indexBuffer = new HashMap<String, List<YahoogleIndexPosting>>();
 	private RandomAccessFile tmp_index, index;
 	private Map<String, Long> tmp_tokenOffsets = new HashMap<String, Long>();
 	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
 
+	
+	/**
+	 * processes the patent and adds its tokens to the indexBuffer
+	 * @param patent
+	 */
 	public void add(Patent patent) {
 		setInventionTitle(patent);
 		String text = patent.getPatentAbstract();
@@ -57,7 +62,7 @@ public class YahoogleIndex {
 			YahoogleIndexPosting posting = new YahoogleIndexPosting();
 			posting.setDocNumber(patent.getDocNumber());
 			posting.setPosition(i);
-			queue(token, posting);
+			buffer(token, posting);
 		}
 	}
 
@@ -79,6 +84,10 @@ public class YahoogleIndex {
 		return !f.exists() || f.delete();
 	}
 
+	/**
+	 * @param token
+	 * @return docnumbers of patents that contain the token
+	 */
 	public Set<Integer> find(String token) {
 		token = sanitize(token);
 		Set<Integer> docNumbers = new HashSet<Integer>();
@@ -102,16 +111,22 @@ public class YahoogleIndex {
 		return docNumbers;
 	}
 
+	/**
+	 * flushes indexBuffer and reorganzie temporary index to final index
+	 */
 	public void finish() {
 		flush();
 		reorganize();
 	}
 
+	/**
+	 * writes indexBuffer to temporary index on disk  
+	 */
 	private void flush() {
-		for (String token : posts.keySet()) {
-			postBlock(token, posts.get(token));
+		for (Entry<String, List<YahoogleIndexPosting>> entry : indexBuffer.entrySet()) {
+			writePostingBlock(entry.getKey(), entry.getValue());
 		}
-		posts.clear();
+		indexBuffer.clear();
 		flushCounter = 0;
 	}
 
@@ -119,6 +134,10 @@ public class YahoogleIndex {
 		return patents.get(docNumber).getInventionTitle();
 	}
 
+	/**
+	 * loads index from disk
+	 * @return success value
+	 */
 	@SuppressWarnings("unchecked")
 	public boolean load() {
 		try {
@@ -131,6 +150,11 @@ public class YahoogleIndex {
 		return true;
 	}
 
+	/**
+	 * loads object from disk
+	 * @param fileName the file where object is stored on disk
+	 * @return deserialized object
+	 */
 	private Object loadObject(String fileName) {
 		Object o;
 		try {
@@ -149,7 +173,12 @@ public class YahoogleIndex {
 		return o;
 	}
 
-	public ArrayList<String> match(Set<Integer> docNumbers) {
+	/**
+	 * matches given docNumbers to invention titles
+	 * @param docNumbers a set of docNumbers
+	 * @return list of invention titles
+	 */
+	public ArrayList<String> matchInventionTitles(Set<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
 			results.add(getInventionTitle(docNumber));
@@ -157,14 +186,12 @@ public class YahoogleIndex {
 		return results;
 	}
 
-	private void post(YahoogleIndexPosting posting) throws IOException {
-		tmp_index.seek(tmp_index.length());
-		int docNumber = posting.getDocNumber();
-		tmp_index.writeInt(docNumber);
-		tmp_index.writeShort(posting.getPosition());
+	private void writePostToStream(YahoogleIndexPosting posting, ByteArrayOutputStream bout) throws IOException {
+		bout.write(ByteBuffer.allocate(Integer.BYTES).putInt(posting.getDocNumber()).array());
+		bout.write(ByteBuffer.allocate(Short.BYTES).putShort(posting.getPosition()).array());
 	}
 
-	private void postBlock(String token, List<YahoogleIndexPosting> postList) {
+	private void writePostingBlock(String token, List<YahoogleIndexPosting> postList) {
 		Long offset = tmp_tokenOffsets.get(token);
 		try {
 			if (offset == null) {
@@ -182,22 +209,26 @@ public class YahoogleIndex {
 			tmp_index.seek(tmp_index.length());
 			tmp_index.writeLong(NO_NEXT_POSTING);
 			tmp_index.writeInt(postList.size());
+			
+			ByteArrayOutputStream bout = new ByteArrayOutputStream(postList.size() * POST_SIZE);
+			
 			for (YahoogleIndexPosting post : postList) {
-				post(post);
+				writePostToStream(post, bout);
 			}
+			tmp_index.write(bout.toByteArray());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	private void queue(String token, YahoogleIndexPosting posting) {
-		if (posts.get(token) == null) {
-			posts.put(token, new ArrayList<YahoogleIndexPosting>());
+	private void buffer(String token, YahoogleIndexPosting posting) {
+		if (indexBuffer.get(token) == null) {
+			indexBuffer.put(token, new ArrayList<YahoogleIndexPosting>());
 		}
-		posts.get(token).add(posting);
+		indexBuffer.get(token).add(posting);
 		flushCounter++;
-		if (flushCounter > FLUSH_COUNTER_THRESHOLD) {
+		if (flushCounter > MEM_CHECK_THRESHOLD) {
 			if (Runtime.getRuntime().freeMemory() < FLUSH_MEM_THRESHOLD) {
 				flush();
 			}
