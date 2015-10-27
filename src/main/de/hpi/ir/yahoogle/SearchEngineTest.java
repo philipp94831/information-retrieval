@@ -20,7 +20,7 @@ public class SearchEngineTest {
 
 	public static void main(String args[]) throws Exception {
 
-		initialize(true);
+		initialize(false);
 		printResults(search("and resources and plurality"));
 
 		// long start = System.currentTimeMillis();
