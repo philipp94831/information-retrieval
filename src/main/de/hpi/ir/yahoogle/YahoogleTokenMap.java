@@ -15,7 +15,6 @@ public class YahoogleTokenMap {
 	private static final long NO_NEXT_POSTING = -1;
 
 	private Map<Integer, List<YahoogleIndexPosting>> documentMap = new HashMap<Integer, List<YahoogleIndexPosting>>();
-	private Long offset;
 
 	public void add(int docNumber, YahoogleIndexPosting posting) {
 		if (documentMap.get(docNumber) == null) {
@@ -24,7 +23,7 @@ public class YahoogleTokenMap {
 		documentMap.get(docNumber).add(posting);
 	}
 
-	public void write(String token, RandomAccessFile tmp_index) {
+	public void write(String token, Long offset, RandomAccessFile tmp_index) {
 		try {
 			if (offset == null) {
 				offset = tmp_index.length();
@@ -59,7 +58,6 @@ public class YahoogleTokenMap {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		documentMap.clear();
 	}
 
 	private void writeInt(ByteArrayOutputStream bout, int value) throws IOException {
@@ -68,29 +66,6 @@ public class YahoogleTokenMap {
 
 	private void writeShort(ByteArrayOutputStream bout, short value) throws IOException {
 			bout.write(ByteBuffer.allocate(Short.BYTES).putShort(value).array());
-	}
-
-	public void reorganize(RandomAccessFile index, RandomAccessFile tmp_index, long start) {
-		try {
-			int total_size = 0;
-			long next = offset;
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			while (next != NO_NEXT_POSTING) {
-				tmp_index.seek(offset);
-				next = tmp_index.readLong();
-				int size = tmp_index.readInt();
-				total_size += size;
-				byte[] b = new byte[size];
-				tmp_index.readFully(b);
-				bout.write(b);
-			}
-			index.seek(start);
-			index.writeInt(total_size);
-			index.write(bout.toByteArray());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 }
