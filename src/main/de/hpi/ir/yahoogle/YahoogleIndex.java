@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
-import org.lemurproject.kstem.KrovetzStemmer;
-
 public class YahoogleIndex {
 
 	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
@@ -43,7 +41,7 @@ public class YahoogleIndex {
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
 		for (short i = 0; tokenizer.hasMoreTokens(); i++) {
-			String token = sanitize(tokenizer.nextToken());
+			String token = YahoogleUtils.sanitize(tokenizer.nextToken());
 			if (YahoogleUtils.isStopword(token)) {
 				continue;
 			}
@@ -80,7 +78,7 @@ public class YahoogleIndex {
 	 * @return docnumbers of patents that contain the token
 	 */
 	public Set<Integer> find(String token) {
-		token = sanitize(token);
+		token = YahoogleUtils.sanitize(token);
 		Set<Integer> docNumbers = new HashSet<Integer>();
 		Long offset = tokenOffsets.get(token);
 		if (offset != null) {
@@ -105,7 +103,7 @@ public class YahoogleIndex {
 	}
 
 	/**
-	 * flushes indexBuffer and reorganzie temporary index to final index
+	 * flushes indexBuffer and reorganize temporary index to final index
 	 */
 	public void finish() {
 		flush();
@@ -204,11 +202,6 @@ public class YahoogleIndex {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	private String sanitize(String word) {
-		KrovetzStemmer stemmer = new KrovetzStemmer();
-		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));
 	}
 
 	public boolean write() {

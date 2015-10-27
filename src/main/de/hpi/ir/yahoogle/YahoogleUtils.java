@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.lemurproject.kstem.KrovetzStemmer;
+
 public class YahoogleUtils {
 
 	private static final String STOPWORDS_FILE = "res/stopwords.txt";
@@ -45,6 +47,11 @@ public class YahoogleUtils {
 			return null;
 		}
 		return o;
+	}
+
+	public static String sanitize(String word) {
+		KrovetzStemmer stemmer = new KrovetzStemmer();
+		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));
 	}
 
 	public static boolean writeObject(Object o, String fileName) {
