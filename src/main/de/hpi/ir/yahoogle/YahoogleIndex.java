@@ -10,23 +10,11 @@ import org.lemurproject.kstem.KrovetzStemmer;
 
 public class YahoogleIndex {
 
-	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // write
-																		// to
-																		// file
-																		// at
-																		// 20MB
-																		// free
-																		// memory
+	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
 	private static final String PATENTS_FILE = "patents.yahoogle";
-	private static final String STOPWORDS_FILE = "res/stopwords.txt";
-	private static StopWordList stopwords = new StopWordList(STOPWORDS_FILE);
-
-	public static boolean isStopword(String word) {
-		return stopwords.contains(word);
-	}
 
 	private Map<Integer, PatentResume> patents = new HashMap<Integer, PatentResume>();
-	private YahoogleInMemoryIndex indexBuffer = new YahoogleInMemoryIndex();
+	private YahoogleOnDiskIndex diskIndex = new YahoogleOnDiskIndex();
 
 	/**
 	 * processes the patent and adds its tokens to the indexBuffer
@@ -34,28 +22,26 @@ public class YahoogleIndex {
 	 * @param patent
 	 */
 	public void add(Patent patent) {
-		setInventionTitle(patent);
+		index(patent);
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
 		for (short i = 0; tokenizer.hasMoreTokens(); i++) {
 			String token = sanitize(tokenizer.nextToken());
-			if (stopwords.contains(token)) {
+			if (YahoogleUtils.isStopword(token)) {
 				continue;
 			}
 			YahoogleIndexPosting posting = new YahoogleIndexPosting();
 			posting.setPosition(i);
-			buffer(token, patent.getDocNumber(), posting);
+			diskIndex.add(token, patent.getDocNumber(), posting);
 		}
 
 		if (Runtime.getRuntime().freeMemory() < FLUSH_MEM_THRESHOLD) {
-			flush();
+			diskIndex.flush();
 		}
 	}
 
 	public boolean create() {
-		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE);
-		indexBuffer.create();
-		return status;
+		return YahoogleUtils.deleteIfExists(PATENTS_FILE) && diskIndex.create();
 	}
 
 	/**
@@ -63,23 +49,15 @@ public class YahoogleIndex {
 	 * @return docnumbers of patents that contain the token
 	 */
 	public Set<Integer> find(String token) {
-		token = sanitize(token);
-		return indexBuffer.find(token);
+		return diskIndex.find(sanitize(token));
 	}
 
 	/**
 	 * flushes indexBuffer and reorganzie temporary index to final index
 	 */
 	public void finish() {
-		flush();
-		reorganize();
-	}
-
-	/**
-	 * writes indexBuffer to temporary index on disk
-	 */
-	private void flush() {
-		indexBuffer.flush();
+		diskIndex.flush();
+		diskIndex.reorganize();
 	}
 
 	private String getInventionTitle(Integer docNumber) {
@@ -93,16 +71,14 @@ public class YahoogleIndex {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean load() {
-		indexBuffer.load();
 		patents = (Map<Integer, PatentResume>) YahoogleUtils.loadObject(PATENTS_FILE);
-		return true;
+		return diskIndex.load() && (patents != null);
 	}
 
 	/**
 	 * matches given docNumbers to invention titles
 	 * 
-	 * @param docNumbers
-	 *            a set of docNumbers
+	 * @param docNumbers a set of docNumbers
 	 * @return list of invention titles
 	 */
 	public ArrayList<String> matchInventionTitles(Set<Integer> docNumbers) {
@@ -113,27 +89,18 @@ public class YahoogleIndex {
 		return results;
 	}
 
-	private void buffer(String token, int docNumber, YahoogleIndexPosting posting) {
-		indexBuffer.add(token, docNumber, posting);
-	}
-
-	private void reorganize() {
-		indexBuffer.reorganize();
-	}
-
 	private String sanitize(String word) {
 		KrovetzStemmer stemmer = new KrovetzStemmer();
 		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));
 	}
 
-	private void setInventionTitle(Patent patent) {
+	private void index(Patent patent) {
 		PatentResume resume = new PatentResume(patent);
 		patents.put(patent.getDocNumber(), resume);
 	}
 
 	public boolean write() {
-		return indexBuffer.write()
-				&& YahoogleUtils.writeObject(patents, PATENTS_FILE);
+		return diskIndex.write() && YahoogleUtils.writeObject(patents, PATENTS_FILE);
 	}
 
 }

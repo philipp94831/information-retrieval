@@ -106,7 +106,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		while (docNumbers == null) {
 			if (tokenizer.hasMoreTokens()) {
 				String token = tokenizer.nextToken();
-				if (!YahoogleIndex.isStopword(token)) {
+				if (!YahoogleUtils.isStopword(token)) {
 					docNumbers = index.find(token);
 				}
 			} else {
@@ -115,7 +115,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		}
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
-			if (!YahoogleIndex.isStopword(token)) {
+			if (!YahoogleUtils.isStopword(token)) {
 				docNumbers.retainAll(index.find(token));
 				// docNumbers.addAll(index.find(token));
 			}
