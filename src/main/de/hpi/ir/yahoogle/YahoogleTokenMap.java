@@ -28,10 +28,10 @@ public class YahoogleTokenMap {
 			tmp_index.writeLong(fileLength);
 		}
 		tmp_index.seek(fileLength);
-		tmp_index.writeLong(YahoogleOnDiskIndex.NO_NEXT_POSTING);
+		tmp_index.writeLong(YahoogleIndex.NO_NEXT_POSTING);
 		int totalSize = 0;
 		for (Entry<Integer, List<YahoogleIndexPosting>> entry : documentMap.entrySet()) {
-			totalSize += Integer.BYTES + Short.BYTES + entry.getValue().size() * YahoogleOnDiskIndex.POST_SIZE;
+			totalSize += Integer.BYTES + Short.BYTES + entry.getValue().size() * YahoogleIndex.POST_SIZE;
 		}
 		ByteArrayOutputStream bout = new ByteArrayOutputStream(totalSize);
 		writeInt(bout, totalSize);
