@@ -40,7 +40,7 @@ public class YahoogleIndex {
 		index(patent);
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
-		for (short i = 0; tokenizer.hasMoreTokens(); i++) {
+		for (short i = 1; tokenizer.hasMoreTokens(); i++) {
 			String token = YahoogleUtils.sanitize(tokenizer.nextToken());
 			if (YahoogleUtils.isStopword(token)) {
 				continue;
@@ -90,9 +90,10 @@ public class YahoogleIndex {
 				int i = 0;
 				while (i < b.length) {
 					ByteBuffer bb = ByteBuffer.wrap(b, i, Integer.BYTES + Short.BYTES);
-					docNumbers.add(bb.getInt());
-					short postingNumber = bb.getShort();
-					i += Integer.BYTES + Short.BYTES + POST_SIZE * postingNumber;
+					int docNumber = bb.getInt();
+					docNumbers.add(docNumber);
+					short bsize = bb.getShort();
+					i += Integer.BYTES + Short.BYTES + bsize;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -206,6 +207,25 @@ public class YahoogleIndex {
 
 	public boolean write() {
 		return YahoogleUtils.writeObject(tokenOffsets, OFFSETS_FILE) && YahoogleUtils.writeObject(patents, PATENTS_FILE);
+	}
+	
+	private static short decode(BitReader in) throws IOException {
+		short num = 1;
+		int len = 1;
+		int lengthOfLen = 0;
+		while (!in.read()) // potentially dangerous with malformed files.
+			lengthOfLen++;
+		for (int i = 0; i < lengthOfLen; i++) {
+			len <<= 1;
+			if (in.read())
+				len |= 1;
+		}
+		for (int i = 0; i < len - 1; i++) {
+			num <<= 1;
+			if (in.read())
+				num |= 1;
+		}
+		return (num);
 	}
 
 }

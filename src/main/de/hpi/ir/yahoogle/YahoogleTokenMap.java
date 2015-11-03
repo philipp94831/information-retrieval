@@ -29,20 +29,44 @@ public class YahoogleTokenMap {
 		}
 		tmp_index.seek(fileLength);
 		tmp_index.writeLong(YahoogleIndex.NO_NEXT_POSTING);
-		int totalSize = 0;
+		ByteArrayOutputStream temp = new ByteArrayOutputStream();
 		for (Entry<Integer, List<YahoogleIndexPosting>> entry : documentMap.entrySet()) {
-			totalSize += Integer.BYTES + Short.BYTES + entry.getValue().size() * YahoogleIndex.POST_SIZE;
-		}
-		ByteArrayOutputStream bout = new ByteArrayOutputStream(totalSize);
-		writeInt(bout, totalSize);
-		for (Entry<Integer, List<YahoogleIndexPosting>> entry : documentMap.entrySet()) {
-			writeInt(bout, entry.getKey()); // docNumber
-			writeShort(bout, (short) entry.getValue().size()); // number of postings
+			BitWriter out = new BitWriter();
+			short oldPos = 0;
 			for (YahoogleIndexPosting posting : entry.getValue()) {
-				writeShort(bout, posting.getPosition());
+				encode(out, (short) (posting.getPosition() - oldPos));
+				oldPos = posting.getPosition();
 			}
+			byte[] encoded = out.toByteArray();
+			writeInt(temp, entry.getKey()); // docNumber
+			writeShort(temp, (short) encoded.length); // size of block
+			temp.write(encoded);
 		}
+		byte[] block = temp.toByteArray();
+		ByteArrayOutputStream bout = new ByteArrayOutputStream(Integer.BYTES + block.length);
+		writeInt(bout, block.length);
+		bout.write(temp.toByteArray());
 		tmp_index.write(bout.toByteArray());
+	}
+	
+	private static void encode(BitWriter out, short s) throws IOException {
+		int len = 0;
+		int lengthOfLen = 0;
+		for (short temp = s; temp > 0; temp >>= 1) { // calculate 1+floor(log2(num))
+			len++;
+		}
+		for (int temp = len; temp > 1; temp >>= 1) { // calculate floor(log2(len))
+			lengthOfLen++;
+		}
+		for (int i = lengthOfLen; i > 0; --i) {
+			out.write(0);
+		}
+		for (int i = lengthOfLen; i >= 0; --i) {
+			out.write((len >> i) & 1);
+		}
+		for (int i = len - 2; i >= 0; i--) {
+			out.write((s >> i) & 1);
+		}
 	}
 
 	private static void writeInt(ByteArrayOutputStream bout, int value) throws IOException {
