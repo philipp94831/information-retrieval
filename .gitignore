@@ -1,3 +1,5 @@
 bin/
 **/*.yahoogle
 res/patents/
+res/patentfetcher.py
+res/patents.zip

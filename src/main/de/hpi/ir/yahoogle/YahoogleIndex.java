@@ -1,10 +1,8 @@
 package de.hpi.ir.yahoogle;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
+
+import de.hpi.ir.yahoogle.io.ByteReader;
+import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class YahoogleIndex {
 
@@ -89,10 +90,10 @@ public class YahoogleIndex {
 				index.readFully(b);
 				int i = 0;
 				while (i < b.length) {
-					ByteBuffer bb = ByteBuffer.wrap(b, i, Integer.BYTES + Short.BYTES);
-					int docNumber = bb.getInt();
+					ByteReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
+					int docNumber = in.readInt();
 					docNumbers.add(docNumber);
-					short bsize = bb.getShort();
+					short bsize = in.readShort();
 					i += Integer.BYTES + Short.BYTES + bsize;
 				}
 			} catch (IOException e) {
@@ -179,7 +180,7 @@ public class YahoogleIndex {
 					int total_size = 0;
 					long offset = entry.getValue();
 					long next = offset;
-					ByteArrayOutputStream bout = new ByteArrayOutputStream();
+					ByteWriter bout = new ByteWriter();
 					while (next != NO_NEXT_POSTING) {
 						tmp_index.seek(offset);
 						next = tmp_index.readLong();
@@ -207,25 +208,6 @@ public class YahoogleIndex {
 
 	public boolean write() {
 		return YahoogleUtils.writeObject(tokenOffsets, OFFSETS_FILE) && YahoogleUtils.writeObject(patents, PATENTS_FILE);
-	}
-	
-	private static short decode(BitReader in) throws IOException {
-		short num = 1;
-		int len = 1;
-		int lengthOfLen = 0;
-		while (!in.read()) // potentially dangerous with malformed files.
-			lengthOfLen++;
-		for (int i = 0; i < lengthOfLen; i++) {
-			len <<= 1;
-			if (in.read())
-				len |= 1;
-		}
-		for (int i = 0; i < len - 1; i++) {
-			num <<= 1;
-			if (in.read())
-				num |= 1;
-		}
-		return (num);
 	}
 
 }

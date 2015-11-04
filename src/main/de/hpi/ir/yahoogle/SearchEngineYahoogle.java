@@ -48,6 +48,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	void compressIndex(String directory) {
+		index(directory);
 	}
 
 	@Override
@@ -91,7 +92,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	boolean loadCompressedIndex(String directory) {
-		return false;
+		return loadIndex(directory);
 	}
 
 	@Override
