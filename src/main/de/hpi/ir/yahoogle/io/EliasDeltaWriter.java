@@ -2,14 +2,16 @@ package de.hpi.ir.yahoogle.io;
 
 import java.io.IOException;
 
-public class EliasDeltaWriter {
+public class EliasDeltaWriter extends AbstractWriter {
 	
 	private BitWriter out = new BitWriter();
 	
+	@Override
 	public void writeShort(short s) throws IOException {
 		writeInt((int) s);
 	}
 	
+	@Override
 	public void writeInt(int i) throws IOException {
 		int len = 0;
 		int lengthOfLen = 0;
@@ -30,6 +32,7 @@ public class EliasDeltaWriter {
 		}
 	}
 	
+	@Override
 	public byte[] toByteArray() {
 		return out.toByteArray();
 	}

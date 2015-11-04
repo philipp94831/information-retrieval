@@ -2,7 +2,7 @@ package de.hpi.ir.yahoogle.io;
 
 import java.io.IOException;
 
-public class EliasDeltaReader {
+public class EliasDeltaReader extends AbstractReader {
 	
 	private BitReader in;
 
@@ -10,14 +10,17 @@ public class EliasDeltaReader {
 		in = new BitReader(bytes);
 	}
 	
+	@Override
 	public boolean hasLeft() {
 		return in.hasLeft();
 	}
 	
+	@Override
 	public short readShort() throws IOException {
 		return (short) readInt();
 	}
 	
+	@Override
 	public int readInt() throws IOException {
 		int num = 1;
 		int len = 1;

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import de.hpi.ir.yahoogle.io.AbstractWriter;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.EliasDeltaWriter;
 
@@ -32,7 +33,7 @@ public class YahoogleTokenMap {
 		tmp_index.writeLong(YahoogleIndex.NO_NEXT_POSTING);
 		ByteWriter temp = new ByteWriter();
 		for (Entry<Integer, List<YahoogleIndexPosting>> entry : documentMap.entrySet()) {
-			EliasDeltaWriter out = new EliasDeltaWriter();
+			AbstractWriter out = new EliasDeltaWriter();
 			short oldPos = 0;
 			for (YahoogleIndexPosting posting : entry.getValue()) {
 				out.writeShort((short) (posting.getPosition() - oldPos));

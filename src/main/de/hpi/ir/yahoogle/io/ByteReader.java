@@ -2,7 +2,7 @@ package de.hpi.ir.yahoogle.io;
 
 import java.nio.ByteBuffer;
 
-public class ByteReader {
+public class ByteReader extends AbstractReader {
 	
 	private ByteBuffer in;
 	
@@ -10,12 +10,19 @@ public class ByteReader {
 		in = ByteBuffer.wrap(bytes, offset, length);
 	}
 	
+	@Override
 	public short readShort() {
 		return in.getShort();
 	}
 	
+	@Override
 	public int readInt() {
 		return in.getInt();
+	}
+
+	@Override
+	public boolean hasLeft() {
+		return in.hasRemaining();
 	}
 
 }
