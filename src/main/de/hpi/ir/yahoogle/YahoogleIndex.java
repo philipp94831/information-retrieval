@@ -13,6 +13,8 @@ import java.util.Map.Entry;
 
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.io.ObjectReader;
+import de.hpi.ir.yahoogle.io.ObjectWriter;
 
 public class YahoogleIndex {
 
@@ -144,15 +146,14 @@ public class YahoogleIndex {
 	 * 
 	 * @return success value
 	 */
-	@SuppressWarnings("unchecked")
 	public boolean load() {
 		try {
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
 		} catch (FileNotFoundException e) {
 			return false;
 		}
-		tokenOffsets = (Map<String, Long>) YahoogleUtils.loadObject(OFFSETS_FILE);
-		patents = (Map<Integer, PatentResume>) YahoogleUtils.loadObject(PATENTS_FILE);
+		tokenOffsets = ObjectReader.readObject(tokenOffsets, OFFSETS_FILE);
+		patents = ObjectReader.readObject(patents, PATENTS_FILE);
 		return (index != null) && (tokenOffsets != null) && (patents != null);
 	}
 
@@ -207,7 +208,7 @@ public class YahoogleIndex {
 	}
 
 	public boolean write() {
-		return YahoogleUtils.writeObject(tokenOffsets, OFFSETS_FILE) && YahoogleUtils.writeObject(patents, PATENTS_FILE);
+		return ObjectWriter.writeObject(tokenOffsets, OFFSETS_FILE) && ObjectWriter.writeObject(patents, PATENTS_FILE);
 	}
 
 }
