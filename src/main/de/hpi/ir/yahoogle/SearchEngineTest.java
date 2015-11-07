@@ -20,8 +20,8 @@ public class SearchEngineTest {
 
 	public static void main(String args[]) throws Exception {
 
-		initialize(false);
-		printResults(search("and resources and plurality"));
+		initialize(true);
+		printResults(search("not resources and plurality"));
 
 		// long start = System.currentTimeMillis();
 

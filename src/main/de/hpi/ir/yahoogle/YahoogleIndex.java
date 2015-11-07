@@ -57,6 +57,10 @@ public class YahoogleIndex {
 			flush();
 		}
 	}
+	
+	public Set<Integer> getAllDocNumbers() {
+		return new HashSet<Integer>(patents.keySet());
+	}
 
 	public void buffer(String token, int docNumber, YahoogleIndexPosting posting) {
 		if (tokenMap.get(token) == null) {

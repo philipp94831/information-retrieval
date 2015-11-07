@@ -103,23 +103,45 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
-		Set<Integer> docNumbers = null;
-		while (docNumbers == null) {
-			if (tokenizer.hasMoreTokens()) {
-				String token = tokenizer.nextToken();
-				if (!YahoogleUtils.isStopword(token)) {
-					docNumbers = index.find(token);
-				}
-			} else {
-				return new ArrayList<String>();
-			}
-		}
+		Set<Integer> docNumbers = index.getAllDocNumbers();
+		boolean allStopwords = true, and = true, or = false, not = false;
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
-			if (!YahoogleUtils.isStopword(token)) {
-				docNumbers.retainAll(index.find(token));
-				// docNumbers.addAll(index.find(token));
+			switch(token.toLowerCase()) {
+			case "and":
+				and = true;
+				or = not = false;
+				break;
+			case "or":
+				or = true;
+				and = not = false;
+				break;
+			case "not":
+				not = true;
+				and = or = false;
+				break;
+			default:
+				if (!YahoogleUtils.isStopword(token)) {
+					allStopwords = false;
+					Set<Integer> result = index.find(token);
+					if(and) {
+						and = false;
+						docNumbers.retainAll(result);
+					}
+					if(or) {
+						or = false;
+						docNumbers.addAll(result);
+					}
+					if(not) {
+						not = false;
+						docNumbers.removeAll(result);
+					}
+				}
+				break;
 			}
+		}
+		if(allStopwords) {
+			return new ArrayList<String>();
 		}
 		return index.matchInventionTitles(docNumbers);
 	}
