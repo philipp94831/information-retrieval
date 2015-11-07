@@ -10,6 +10,10 @@ public class EliasDeltaReader extends AbstractReader {
 		in = new BitReader(bytes);
 	}
 	
+	public EliasDeltaReader(byte[] b, int i, short bsize) {
+		in = new BitReader(b, i, bsize);
+	}
+
 	@Override
 	public boolean hasLeft() {
 		return in.hasLeft();

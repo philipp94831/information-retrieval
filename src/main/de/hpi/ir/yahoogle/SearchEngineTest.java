@@ -21,7 +21,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		initialize(true);
-		printResults(search("not resources and plurality"));
+		printResults(search("data OR method"));
 
 		// long start = System.currentTimeMillis();
 

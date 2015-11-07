@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -105,9 +106,33 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		Set<Integer> docNumbers = index.getAllDocNumbers();
 		boolean allStopwords = true, and = true, or = false, not = false;
+		List<String> q = new ArrayList<String>();
+		StringBuffer phrase = new StringBuffer();
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
 			switch(token.toLowerCase()) {
+			case "and":
+			case "or":
+			case "not":
+				if(phrase.length() > 0) {
+					q.add(phrase.toString());
+				}
+				phrase = new StringBuffer();
+				q.add(token);
+				break;
+			default:
+				if (!YahoogleUtils.isStopword(token)) {
+					allStopwords = false;
+					phrase.append(" " + token);
+				}
+				break;
+			}
+		}
+		if(phrase.length() > 0) {
+			q.add(phrase.toString());
+		}
+		for (String p : q) {
+			switch(p.toLowerCase()) {
 			case "and":
 				and = true;
 				or = not = false;
@@ -121,21 +146,18 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				and = or = false;
 				break;
 			default:
-				if (!YahoogleUtils.isStopword(token)) {
-					allStopwords = false;
-					Set<Integer> result = index.find(token);
-					if(and) {
-						and = false;
-						docNumbers.retainAll(result);
-					}
-					if(or) {
-						or = false;
-						docNumbers.addAll(result);
-					}
-					if(not) {
-						not = false;
-						docNumbers.removeAll(result);
-					}
+				Set<Integer> result = index.find(p);
+				if (and) {
+					and = false;
+					docNumbers.retainAll(result);
+				}
+				if (or) {
+					or = false;
+					docNumbers.addAll(result);
+				}
+				if (not) {
+					not = false;
+					docNumbers.removeAll(result);
 				}
 				break;
 			}

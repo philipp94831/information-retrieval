@@ -36,7 +36,8 @@ public class YahoogleTokenMap {
 			AbstractWriter out = new EliasDeltaWriter();
 			short oldPos = 0;
 			for (YahoogleIndexPosting posting : entry.getValue()) {
-				out.writeShort((short) (posting.getPosition() - oldPos));
+				short dp = (short) (posting.getPosition() - oldPos);
+				out.writeShort(dp);
 				oldPos = posting.getPosition();
 			}
 			byte[] encoded = out.toByteArray();
