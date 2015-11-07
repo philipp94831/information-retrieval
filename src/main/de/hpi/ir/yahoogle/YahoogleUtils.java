@@ -1,7 +1,7 @@
 package de.hpi.ir.yahoogle;
 
 import java.io.File;
-import org.lemurproject.kstem.KrovetzStemmer;
+import org.tartarus.snowball.ext.englishStemmer;
 
 public class YahoogleUtils {
 
@@ -18,8 +18,10 @@ public class YahoogleUtils {
 	}
 
 	public static String sanitize(String word) {
-		KrovetzStemmer stemmer = new KrovetzStemmer();
-		return stemmer.stem(word.toLowerCase().replaceAll("\\W", ""));
+		englishStemmer stemmer = new englishStemmer();
+		stemmer.setCurrent(word.toLowerCase().replaceAll("\\W", ""));
+		stemmer.stem();
+		return stemmer.getCurrent();
 	}
 
 }
