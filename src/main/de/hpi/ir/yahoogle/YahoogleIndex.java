@@ -157,16 +157,11 @@ public class YahoogleIndex {
 					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
 					int docNumber = in.readInt();
 					short bsize = in.readShort();
-					EliasDeltaReader edr = null;
-					if(token.equals("mobil") && docNumber == 8353048) {
-						edr = new EliasDeltaReader(b, i + Integer.BYTES + Short.BYTES, bsize);
-					} else {
-						edr = new EliasDeltaReader(b, i + Integer.BYTES + Short.BYTES, bsize);
-					}
+					in = new EliasDeltaReader(b, i + Integer.BYTES + Short.BYTES, bsize);
 					Set<Integer> pos = new HashSet<Integer>();
 					int oldPos = 0;
-					while(edr.hasLeft()) {
-						short p = edr.readShort();
+					while(in.hasLeft()) {
+						short p = in.readShort();
 						pos.add(oldPos + p);
 						oldPos += p;
 					}
