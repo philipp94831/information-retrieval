@@ -2,7 +2,7 @@ package de.hpi.ir.yahoogle.io;
 
 import java.io.IOException;
 
-public class EliasDeltaWriter extends AbstractWriter {
+public class EliasDeltaWriter implements AbstractWriter {
 	
 	private BitWriter out = new BitWriter();
 	

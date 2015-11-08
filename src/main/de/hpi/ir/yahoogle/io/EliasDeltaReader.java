@@ -2,12 +2,11 @@ package de.hpi.ir.yahoogle.io;
 
 import java.io.IOException;
 
-public class EliasDeltaReader extends AbstractReader {
+public class EliasDeltaReader implements AbstractReader {
 	
 	private BitReader in;
 	
 	public EliasDeltaReader(byte[] bytes, int offset, int length) {
-		super(bytes, offset, length);
 		in = new BitReader(bytes, offset, length);
 	}
 

@@ -2,12 +2,11 @@ package de.hpi.ir.yahoogle.io;
 
 import java.nio.ByteBuffer;
 
-public class ByteReader extends AbstractReader {
+public class ByteReader implements AbstractReader {
 	
 	private ByteBuffer in;
 	
 	public ByteReader(byte[] bytes, int offset, int length) {
-		super(bytes, offset, length);
 		in = ByteBuffer.wrap(bytes, offset, length);
 	}
 	

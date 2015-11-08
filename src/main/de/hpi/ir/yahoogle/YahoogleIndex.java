@@ -6,7 +6,6 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -29,13 +28,11 @@ public class YahoogleIndex {
 	private static final String POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/postings.yahoogle";
 	private static final String TMP_POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/tmp.postings.yahoogle";
 
-	private Map<String, Long> lastBlockOffsets = new HashMap<String, Long>();
-	private Map<Integer, PatentResume> patents = new HashMap<Integer, PatentResume>();
+	private OffsetsIndex lastBlockOffsets;
 	private RandomAccessFile tmp_index, index;
-	private Map<String, Long> tmp_tokenOffsets = new HashMap<String, Long>();
-	private Map<String, YahoogleTokenMap> tokenMap = new HashMap<String, YahoogleTokenMap>();
-
-	private Map<String, Long> tokenOffsets = new HashMap<String, Long>();
+	private PatentIndex patents;
+	private OffsetsIndex tmp_tokenOffsets, tokenOffsets;
+	private Map<String, YahoogleTokenMap> tokenMap;
 
 	/**
 	 * processes the patent and adds its tokens to the indexBuffer
@@ -77,6 +74,11 @@ public class YahoogleIndex {
 		} catch (FileNotFoundException e) {
 			return false;
 		}
+		tokenMap = new HashMap<String, YahoogleTokenMap>();
+		lastBlockOffsets = new OffsetsIndex();
+		tmp_tokenOffsets = new OffsetsIndex();
+		tokenOffsets = new OffsetsIndex();
+		patents = new PatentIndex();
 		return status && (tmp_index != null) && (index != null);
 	}
 
@@ -114,7 +116,7 @@ public class YahoogleIndex {
 		if (prefix) {
 			String pre = token.substring(0, token.length() - 1);
 			Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
-			for (String t : getTokensForPrefix(pre)) {
+			for (String t : tokenOffsets.getTokensForPrefix(pre)) {
 				merge(result, primitiveFind(t));
 			}
 			return result;
@@ -150,27 +152,16 @@ public class YahoogleIndex {
 	}
 
 	public Set<Integer> getAllDocNumbers() {
-		return new HashSet<Integer>(patents.keySet());
-	}
-
-	private String getInventionTitle(Integer docNumber) {
-		return patents.get(docNumber).getInventionTitle();
+		return patents.getAllDocNumbers();
 	}
 
 	private Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
 		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
 	}
 
-	private List<String> getTokensForPrefix(String pre) {
-		List<String> tokens;
-		tokens = tokenOffsets.keySet().stream().filter(s -> s.startsWith(pre)).collect(Collectors.toList());
-		;
-		return tokens;
-	}
-
 	private void index(Patent patent) {
 		PatentResume resume = new PatentResume(patent);
-		patents.put(patent.getDocNumber(), resume);
+		patents.add(patent.getDocNumber(), resume);
 	}
 
 	/**
@@ -184,8 +175,8 @@ public class YahoogleIndex {
 		} catch (FileNotFoundException e) {
 			return false;
 		}
-		tokenOffsets = ObjectReader.readObject(tokenOffsets, OFFSETS_FILE);
-		patents = ObjectReader.readObject(patents, PATENTS_FILE);
+		tokenOffsets = (OffsetsIndex) ObjectReader.readObject(OFFSETS_FILE);
+		patents = (PatentIndex) ObjectReader.readObject(PATENTS_FILE);
 		return (index != null) && (tokenOffsets != null) && (patents != null);
 	}
 
@@ -199,7 +190,7 @@ public class YahoogleIndex {
 	public ArrayList<String> matchInventionTitles(Set<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
-			results.add(getInventionTitle(docNumber));
+			results.add(patents.get(docNumber).getInventionTitle());
 		}
 		return results;
 	}
@@ -228,9 +219,10 @@ public class YahoogleIndex {
 				int i = 0;
 				while (i < b.length) {
 					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
+					i += Integer.BYTES + Short.BYTES;
 					int docNumber = in.readInt();
 					short bsize = in.readShort();
-					in = new EliasDeltaReader(b, i + Integer.BYTES + Short.BYTES, bsize);
+					in = new EliasDeltaReader(b, i, bsize);
 					Set<Integer> pos = new HashSet<Integer>();
 					int oldPos = 0;
 					while (in.hasLeft()) {
@@ -239,7 +231,7 @@ public class YahoogleIndex {
 						oldPos += p;
 					}
 					docNumbers.put(docNumber, pos);
-					i += Integer.BYTES + Short.BYTES + bsize;
+					i += bsize;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

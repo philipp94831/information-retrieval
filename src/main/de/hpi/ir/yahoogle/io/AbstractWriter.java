@@ -2,7 +2,7 @@ package de.hpi.ir.yahoogle.io;
 
 import java.io.IOException;
 
-public abstract class AbstractWriter {
+public interface AbstractWriter {
 	
 	public abstract void writeShort(short s) throws IOException;
 	public abstract void writeInt(int i) throws IOException;

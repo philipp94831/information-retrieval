@@ -14,14 +14,14 @@ public class ObjectReader {
 	 *            the file where object is stored on disk
 	 * @return deserialized object
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T readObject(T o, String fileName) {
+	public static Object readObject(String fileName) {
 		try {
 			FileInputStream fin = new FileInputStream(fileName);
 			ObjectInputStream oin = new ObjectInputStream(fin);
-			o = (T) oin.readObject();
+			Object o = oin.readObject();
 			oin.close();
 			fin.close();
+			return o;
 		} catch (FileNotFoundException e) {
 			return null;
 		} catch (ClassNotFoundException e) {
@@ -29,7 +29,6 @@ public class ObjectReader {
 		} catch (IOException e) {
 			return null;
 		}
-		return o;
 	}
 
 }

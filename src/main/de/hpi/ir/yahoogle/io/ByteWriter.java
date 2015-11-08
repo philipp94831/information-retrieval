@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class ByteWriter extends AbstractWriter {
+public class ByteWriter implements AbstractWriter {
 	
 	private ByteArrayOutputStream out;
 	
