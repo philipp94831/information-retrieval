@@ -15,25 +15,22 @@ import de.hpi.ir.yahoogle.io.EliasDeltaReader;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
 
-public class RandomAccessIndex {
-	
+public class OrganizedRandomAccessIndex extends AbstractRandomAccessIndex {
+
 	private static final String OFFSETS_FILE = SearchEngineYahoogle.teamDirectory + "/offsets.yahoogle";
 	private static final String POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/postings.yahoogle";
-	
-	protected RandomAccessFile index;
-	protected OffsetsIndex offsets;
-	
-	public static RandomAccessIndex load() throws FileNotFoundException {	
-		return new RandomAccessIndex((OffsetsIndex) ObjectReader.readObject(OFFSETS_FILE));
-	}
-	
-	public static RandomAccessIndex create() {
+
+	public static OrganizedRandomAccessIndex create() {
 		YahoogleUtils.deleteIfExists(OFFSETS_FILE);
 		YahoogleUtils.deleteIfExists(POSTINGS_FILE);
-		return new RandomAccessIndex(new OffsetsIndex());
+		return new OrganizedRandomAccessIndex(new OffsetsIndex());
 	}
 
-	public RandomAccessIndex() {
+	public static OrganizedRandomAccessIndex load() throws FileNotFoundException {
+		return new OrganizedRandomAccessIndex((OffsetsIndex) ObjectReader.readObject(OFFSETS_FILE));
+	}
+
+	public OrganizedRandomAccessIndex() {
 		try {
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
 		} catch (FileNotFoundException e) {
@@ -42,13 +39,17 @@ public class RandomAccessIndex {
 		}
 	}
 
-	public RandomAccessIndex(OffsetsIndex offsets) {
+	public OrganizedRandomAccessIndex(OffsetsIndex offsets) {
 		this();
 		this.offsets = offsets;
 	}
 
-	public List<String> getTokensForPrefix(String prefix) {
-		return offsets.getTokensForPrefix(prefix);
+	public void add(String token, byte[] byteArray) throws IOException {
+		long start = index.length();
+		offsets.put(token, start);
+		index.seek(start);
+		index.writeInt(byteArray.length);
+		index.write(byteArray);
 	}
 
 	public Map<Integer, Set<Integer>> find(String token) {
@@ -85,16 +86,12 @@ public class RandomAccessIndex {
 		return docNumbers;
 	}
 
-	public boolean saveToDisk() {
-		return ObjectWriter.writeObject(offsets, OFFSETS_FILE);
+	public List<String> getTokensForPrefix(String prefix) {
+		return offsets.getTokensForPrefix(prefix);
 	}
 
-	public void add(String token, byte[] byteArray) throws IOException {
-		long start = index.length();
-		offsets.put(token, start);
-		index.seek(start);
-		index.writeInt(byteArray.length);
-		index.write(byteArray);
+	public boolean saveToDisk() {
+		return ObjectWriter.writeObject(offsets, OFFSETS_FILE);
 	}
 
 }

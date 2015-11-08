@@ -7,17 +7,17 @@ import java.util.Map.Entry;
 
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class LinkedRandomAccessIndex extends RandomAccessIndex {
-	
+public class LinkedRandomAccessIndex extends AbstractRandomAccessIndex {
+
 	private static final long NO_NEXT_POSTING = -1;
 	private static final String POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/tmp.postings.yahoogle";
-	
-	private OffsetsIndex lastOffsets = new OffsetsIndex();
-	
+
 	public static LinkedRandomAccessIndex create() {
 		YahoogleUtils.deleteIfExists(POSTINGS_FILE);
 		return new LinkedRandomAccessIndex();
 	}
+
+	private OffsetsIndex lastOffsets = new OffsetsIndex();
 
 	public LinkedRandomAccessIndex() {
 		try {
@@ -49,22 +49,22 @@ public class LinkedRandomAccessIndex extends RandomAccessIndex {
 		index.write(bout.toByteArray());
 	}
 
-	public RandomAccessIndex reorganize() {
-		RandomAccessIndex newIndex = RandomAccessIndex.create();
+	public OrganizedRandomAccessIndex reorganize() {
+		OrganizedRandomAccessIndex newIndex = OrganizedRandomAccessIndex.create();
 		try {
 			for (Entry<String, Long> entry : offsets.entrySet()) {
 				long offset = entry.getValue();
-					long next = offset;
-					ByteWriter bout = new ByteWriter();
-					while (next != NO_NEXT_POSTING) {
-						index.seek(offset);
-						next = index.readLong();
-						int size = index.readInt();
-						byte[] b = new byte[size];
-						index.readFully(b);
-						bout.write(b);
-					}
-					newIndex.add(entry.getKey(), bout.toByteArray());
+				long next = offset;
+				ByteWriter bout = new ByteWriter();
+				while (next != NO_NEXT_POSTING) {
+					index.seek(offset);
+					next = index.readLong();
+					int size = index.readInt();
+					byte[] b = new byte[size];
+					index.readFully(b);
+					bout.write(b);
+				}
+				newIndex.add(entry.getKey(), bout.toByteArray());
 			}
 			index.close();
 		} catch (IOException e) {

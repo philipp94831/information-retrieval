@@ -20,7 +20,7 @@ public class SearchEngineTest {
 
 	public static void main(String args[]) throws Exception {
 
-		initialize(false);
+		initialize(true);
 		printResults(search("plurality OR resources"));
 
 		// long start = System.currentTimeMillis();
@@ -42,15 +42,18 @@ public class SearchEngineTest {
 	}
 
 	private static void printResults(ArrayList<String> results) {
+		System.out.println("==============================");
 		if (results.size() == 0) {
 			System.out.println("No matches found");
 		}
 		for (String result : results) {
 			System.out.println(result);
 		}
+		System.out.println(results.size() + " Results returned");
 	}
 
 	private static ArrayList<String> search(String query) {
+		System.out.println("Searching...");
 		long startTime = System.nanoTime();
 		ArrayList<String> results = myEngine.search(query, 0, 0);
 		long time = (System.nanoTime() - startTime) / 1000000;
@@ -61,8 +64,10 @@ public class SearchEngineTest {
 	private static void initialize(boolean create) {
 		long startTime = System.nanoTime();
 		if (create) {
+			System.out.println("Indexing...");
 			myEngine.index("patents.zip");
 		} else {
+			System.out.println("Loading index...");
 			myEngine.loadIndex("");
 		}
 		long time = (System.nanoTime() - startTime) / 1000000;

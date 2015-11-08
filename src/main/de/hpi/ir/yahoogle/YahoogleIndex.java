@@ -1,7 +1,6 @@
 package de.hpi.ir.yahoogle;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +17,10 @@ public class YahoogleIndex {
 	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
 	private static final String PATENTS_FILE = SearchEngineYahoogle.teamDirectory + "/patents.yahoogle";
 
-	private LinkedRandomAccessIndex tmp_index;
-	private RandomAccessIndex index;
+	private LinkedRandomAccessIndex linkedIndex;
+	private OrganizedRandomAccessIndex organizedIndex;
 	private PatentIndex patents;
-	private Map<String, YahoogleTokenMap> tokenMap;
+	private InMemoryIndex tokenMap;
 
 	/**
 	 * processes the patent and adds its tokens to the indexBuffer
@@ -40,7 +39,7 @@ public class YahoogleIndex {
 			i++;
 			YahoogleIndexPosting posting = new YahoogleIndexPosting();
 			posting.setPosition(i);
-			buffer(token, patent.getDocNumber(), posting);
+			tokenMap.buffer(token, patent.getDocNumber(), posting);
 		}
 
 		if (Runtime.getRuntime().freeMemory() < FLUSH_MEM_THRESHOLD) {
@@ -48,19 +47,12 @@ public class YahoogleIndex {
 		}
 	}
 
-	public void buffer(String token, int docNumber, YahoogleIndexPosting posting) {
-		if (tokenMap.get(token) == null) {
-			tokenMap.put(token, new YahoogleTokenMap());
-		}
-		tokenMap.get(token).add(docNumber, posting);
-	}
-
 	public boolean create() {
 		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE);
-		tmp_index = LinkedRandomAccessIndex.create();
-		tokenMap = new HashMap<String, YahoogleTokenMap>();
+		linkedIndex = LinkedRandomAccessIndex.create();
+		tokenMap = new InMemoryIndex(linkedIndex);
 		patents = new PatentIndex();
-		return status && (tmp_index != null);
+		return status && (linkedIndex != null);
 	}
 
 	/**
@@ -97,12 +89,12 @@ public class YahoogleIndex {
 		if (prefix) {
 			String pre = token.substring(0, token.length() - 1);
 			Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
-			for (String t : index.getTokensForPrefix(pre)) {
-				merge(result, primitiveFind(t));
+			for (String t : organizedIndex.getTokensForPrefix(pre)) {
+				merge(result, organizedIndex.find(t));
 			}
 			return result;
 		} else {
-			return primitiveFind(YahoogleUtils.sanitize(token));
+			return organizedIndex.find(YahoogleUtils.sanitize(token));
 		}
 	}
 
@@ -111,19 +103,11 @@ public class YahoogleIndex {
 	 */
 	public void finish() {
 		flush();
-		index = tmp_index.reorganize();
+		organizedIndex = linkedIndex.reorganize();
 	}
 
 	public void flush() {
-		try {
-			for (Entry<String, YahoogleTokenMap> entry : tokenMap.entrySet()) {
-				tmp_index.add(entry.getKey(), entry.getValue());
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		tokenMap.clear();
+		tokenMap.flush();
 	}
 
 	public Set<Integer> getAllDocNumbers() {
@@ -146,12 +130,12 @@ public class YahoogleIndex {
 	 */
 	public boolean load() {
 		try {
-			index = RandomAccessIndex.load();
+			organizedIndex = OrganizedRandomAccessIndex.load();
 			patents = (PatentIndex) ObjectReader.readObject(PATENTS_FILE);
 		} catch (FileNotFoundException e) {
 			return false;
 		}
-		return (index != null) && (patents != null);
+		return (organizedIndex != null) && (patents != null);
 	}
 
 	/**
@@ -181,12 +165,8 @@ public class YahoogleIndex {
 		;
 	}
 
-	private Map<Integer, Set<Integer>> primitiveFind(String token) {
-		return index.find(token);
-	}
-
 	public boolean write() {
-		return index.saveToDisk() && ObjectWriter.writeObject(patents, PATENTS_FILE);
+		return organizedIndex.saveToDisk() && ObjectWriter.writeObject(patents, PATENTS_FILE);
 	}
 
 }
