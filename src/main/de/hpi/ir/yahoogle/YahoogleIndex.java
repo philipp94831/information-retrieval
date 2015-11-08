@@ -49,7 +49,7 @@ public class YahoogleIndex {
 		StringTokenizer tokenizer = new StringTokenizer(text);
 		for (short i = 1; tokenizer.hasMoreTokens();) {
 			String token = YahoogleUtils.sanitize(tokenizer.nextToken());
-			if (YahoogleUtils.isStopword(token)) {
+			if (StopWordList.isStopword(token)) {
 				continue;
 			}
 			i++;
@@ -75,7 +75,10 @@ public class YahoogleIndex {
 	}
 
 	public boolean create() {
-		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE) && YahoogleUtils.deleteIfExists(TMP_POSTINGS_FILE) && YahoogleUtils.deleteIfExists(POSTINGS_FILE) && YahoogleUtils.deleteIfExists(OFFSETS_FILE);
+		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE)
+				&& YahoogleUtils.deleteIfExists(TMP_POSTINGS_FILE)
+				&& YahoogleUtils.deleteIfExists(POSTINGS_FILE)
+				&& YahoogleUtils.deleteIfExists(OFFSETS_FILE);
 		try {
 			tmp_index = new RandomAccessFile(TMP_POSTINGS_FILE, "rw");
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");

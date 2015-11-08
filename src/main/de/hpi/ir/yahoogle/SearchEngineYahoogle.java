@@ -103,50 +103,34 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
-		StringTokenizer tokenizer = new StringTokenizer(query);
 		Set<Integer> docNumbers = index.getAllDocNumbers();
 		boolean allStopwords = true, and = true, or = false, not = false;
-		List<String> q = new ArrayList<String>();
-		StringBuffer phrase = new StringBuffer();
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			switch(token.toLowerCase()) {
-			case "and":
-			case "or":
-			case "not":
-				if(phrase.length() > 0) {
-					q.add(phrase.toString());
-				}
-				phrase = new StringBuffer();
-				q.add(token);
-				break;
-			default:
-				if (!YahoogleUtils.isStopword(token)) {
-					allStopwords = false;
-					phrase.append(" " + token);
-				}
-				break;
-			}
-		}
-		if(phrase.length() > 0) {
-			q.add(phrase.toString());
-		}
-		for (String p : q) {
-			switch(p.toLowerCase()) {
+		List<String> queryPlan = processQuery(query);
+		for (String phrase : queryPlan) {
+			switch(phrase.toLowerCase()) {
 			case "and":
 				and = true;
 				or = not = false;
 				break;
 			case "or":
-				or = true;
-				and = not = false;
+				if (allStopwords) {
+					and = true;
+					or = not = false;
+				} else {
+					or = true;
+					and = not = false;
+				}
 				break;
 			case "not":
 				not = true;
 				and = or = false;
 				break;
 			default:
-				Set<Integer> result = index.find(p);
+				if (StopWordList.allStopwords(phrase)) {
+					continue;
+				}
+				allStopwords = false;
+				Set<Integer> result = index.find(phrase);
 				if (and) {
 					and = false;
 					docNumbers.retainAll(result);
@@ -166,6 +150,33 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			return new ArrayList<String>();
 		}
 		return index.matchInventionTitles(docNumbers);
+	}
+
+	private List<String> processQuery(String query) {
+		StringTokenizer tokenizer = new StringTokenizer(query);
+		List<String> queryPlan = new ArrayList<String>();
+		StringBuffer phrase = new StringBuffer();
+		while (tokenizer.hasMoreTokens()) {
+			String token = tokenizer.nextToken();
+			switch(token.toLowerCase()) {
+			case "and":
+			case "or":
+			case "not":
+				if(phrase.length() > 0) {
+					queryPlan.add(phrase.toString());
+				}
+				phrase = new StringBuffer();
+				queryPlan.add(token);
+				break;
+			default:
+				phrase.append(" " + token);
+				break;
+			}
+		}
+		if(phrase.length() > 0) {
+			queryPlan.add(phrase.toString());
+		}
+		return queryPlan;
 	}
 
 }

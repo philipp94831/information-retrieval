@@ -6,19 +6,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 public class StopWordList {
 
-	private Set<String> stopwords = new HashSet<String>();;
+	private static final String STOPWORDS_FILE = "res/stopwords.txt";
+	private static Set<String> stopwords = new HashSet<String>();;
 
-	public StopWordList(String fileName) {
+	static {
 		FileReader fr;
 		try {
-			fr = new FileReader(fileName);
+			fr = new FileReader(STOPWORDS_FILE);
 			BufferedReader br = new BufferedReader(fr);
 			String stopword;
 			while ((stopword = br.readLine()) != null) {
-				stopwords.add(stopword);
+				stopwords.add(YahoogleUtils.sanitize(stopword));
 			}
 			br.close();
 			fr.close();
@@ -31,8 +33,17 @@ public class StopWordList {
 		}
 	}
 
-	public boolean contains(String word) {
-		return stopwords.contains(word);
+	public static boolean isStopword(String word) {
+		return stopwords.contains(YahoogleUtils.sanitize(word));
+	}
+
+	public static boolean allStopwords(String phrase) {
+		boolean result = true;
+		StringTokenizer tokenizer = new StringTokenizer(phrase);
+		while(tokenizer.hasMoreTokens()) {
+			result &= isStopword(tokenizer.nextToken());
+		}
+		return result;
 	}
 
 }
