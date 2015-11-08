@@ -1,6 +1,6 @@
 package de.hpi.ir.yahoogle;
 
-import java.io.File;
+
 
 /**
  *
@@ -21,12 +21,15 @@ import java.io.File;
  */
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -58,14 +61,17 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			xr.setContentHandler(handler);
 			xr.setErrorHandler(handler);
 			xr.setEntityResolver(handler);
+			
+			ZipFile zipFile = new ZipFile(directory);
+		    Enumeration<? extends ZipEntry> entries = zipFile.entries();
 
-			File patents = new File(directory);
-			for (File file : patents.listFiles()) {
-				if (isPatentFile(file)) {
-					FileReader fr = new FileReader(directory + file.getName());
-					xr.parse(new InputSource(fr));
-				}
-			}
+		    while(entries.hasMoreElements()){
+		        ZipEntry entry = entries.nextElement();
+		        InputStream stream = zipFile.getInputStream(entry);
+		        xr.parse(new InputSource(stream));
+		    }
+		    
+		    zipFile.close();
 
 			index.finish();
 			index.write();
@@ -80,10 +86,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	private boolean isPatentFile(File file) {
-		return !file.isDirectory() && file.getName().endsWith(".xml");
 	}
 
 	@Override

@@ -61,7 +61,7 @@ public class SearchEngineTest {
 	private static void initialize(boolean create) {
 		long startTime = System.nanoTime();
 		if (create) {
-			myEngine.index("patents/");
+			myEngine.index("patents.zip");
 		} else {
 			myEngine.loadIndex("");
 		}
