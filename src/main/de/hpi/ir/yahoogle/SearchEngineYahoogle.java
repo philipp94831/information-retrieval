@@ -33,13 +33,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
-															// with your search
-															// engine's name,
-															// i.e.
-															// SearchEngineMyTeamName
+public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
 
-	private static final String PATENT_LOCATION = "res/patents/";
 	private YahoogleIndex index = new YahoogleIndex();
 
 	public SearchEngineYahoogle() {
@@ -64,10 +59,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			xr.setErrorHandler(handler);
 			xr.setEntityResolver(handler);
 
-			File patents = new File(PATENT_LOCATION);
+			File patents = new File(directory);
 			for (File file : patents.listFiles()) {
 				if (isPatentFile(file)) {
-					FileReader fr = new FileReader(PATENT_LOCATION + file.getName());
+					FileReader fr = new FileReader(directory + file.getName());
 					xr.parse(new InputSource(fr));
 				}
 			}

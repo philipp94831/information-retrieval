@@ -24,11 +24,10 @@ public class YahoogleIndex {
 
 	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
 	protected static final long NO_NEXT_POSTING = -1;
-	private static final String OFFSETS_FILE = "offsets.yahoogle";
-	private static final String PATENTS_FILE = "patents.yahoogle";
-	protected static final int POST_SIZE = Short.BYTES;
-	private static final String POSTINGS_FILE = "postings.yahoogle";
-	private static final String TMP_POSTINGS_FILE = "tmp.postings.yahoogle";
+	private static final String OFFSETS_FILE = SearchEngineYahoogle.teamDirectory + "/offsets.yahoogle";
+	private static final String PATENTS_FILE = SearchEngineYahoogle.teamDirectory + "/patents.yahoogle";
+	private static final String POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/postings.yahoogle";
+	private static final String TMP_POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/tmp.postings.yahoogle";
 
 	private Map<String, Long> lastBlockOffsets = new HashMap<String, Long>();
 	private Map<Integer, PatentResume> patents = new HashMap<Integer, PatentResume>();

@@ -6,11 +6,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 public class StopWordList {
 
-	private static final String STOPWORDS_FILE = "res/stopwords.txt";
+	private static final String STOPWORDS_FILE = SearchEngineYahoogle.teamDirectory + "/stopwords.txt";
 	private static Set<String> stopwords = new HashSet<String>();;
 
 	static {
@@ -35,15 +34,6 @@ public class StopWordList {
 
 	public static boolean isStopword(String word) {
 		return stopwords.contains(YahoogleUtils.sanitize(word));
-	}
-
-	public static boolean allStopwords(String phrase) {
-		boolean result = true;
-		StringTokenizer tokenizer = new StringTokenizer(phrase);
-		while(tokenizer.hasMoreTokens()) {
-			result &= isStopword(tokenizer.nextToken());
-		}
-		return result;
 	}
 
 }
