@@ -36,9 +36,11 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import de.hpi.ir.yahoogle.index.Index;
+
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
 
-	private YahoogleIndex index = new YahoogleIndex();
+	private Index index = new Index();
 
 	public SearchEngineYahoogle() {
 		// This should stay as is! Don't add anything here!
@@ -48,6 +50,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 	@Override
 	void compressIndex(String directory) {
 		index(directory);
+	}
+	
+	public static String getTeamDirectory() {
+		return teamDirectory;
 	}
 
 	@Override

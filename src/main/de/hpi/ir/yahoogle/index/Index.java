@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -9,18 +9,22 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
+import de.hpi.ir.yahoogle.Patent;
+import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import de.hpi.ir.yahoogle.StopWordList;
+import de.hpi.ir.yahoogle.YahoogleUtils;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
 
-public class YahoogleIndex {
+public class Index {
 
 	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
-	private static final String PATENTS_FILE = SearchEngineYahoogle.teamDirectory + "/patents.yahoogle";
+	private static final String PATENTS_FILE = SearchEngineYahoogle.getTeamDirectory() + "/patents.yahoogle";
 
 	private LinkedRandomAccessIndex linkedIndex;
 	private OrganizedRandomAccessIndex organizedIndex;
 	private PatentIndex patents;
-	private InMemoryIndex tokenMap;
+	private IndexBuffer indexBuffer;
 
 	/**
 	 * processes the patent and adds its tokens to the indexBuffer
@@ -37,9 +41,9 @@ public class YahoogleIndex {
 				continue;
 			}
 			i++;
-			YahoogleIndexPosting posting = new YahoogleIndexPosting();
+			IndexPosting posting = new IndexPosting();
 			posting.setPosition(i);
-			tokenMap.buffer(token, patent.getDocNumber(), posting);
+			indexBuffer.buffer(token, patent.getDocNumber(), posting);
 		}
 
 		if (Runtime.getRuntime().freeMemory() < FLUSH_MEM_THRESHOLD) {
@@ -50,7 +54,7 @@ public class YahoogleIndex {
 	public boolean create() {
 		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE);
 		linkedIndex = LinkedRandomAccessIndex.create();
-		tokenMap = new InMemoryIndex(linkedIndex);
+		indexBuffer = new IndexBuffer(linkedIndex);
 		patents = new PatentIndex();
 		return status && (linkedIndex != null);
 	}
@@ -107,7 +111,7 @@ public class YahoogleIndex {
 	}
 
 	public void flush() {
-		tokenMap.flush();
+		indexBuffer.flush();
 	}
 
 	public Set<Integer> getAllDocNumbers() {

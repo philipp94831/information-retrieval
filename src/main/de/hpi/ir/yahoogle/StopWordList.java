@@ -33,7 +33,7 @@ public class StopWordList {
 	}
 
 	public static boolean isStopword(String word) {
-		return stopwords.contains(YahoogleUtils.sanitize(word));
+		return !word.endsWith("*") && stopwords.contains(YahoogleUtils.sanitize(word));
 	}
 
 }

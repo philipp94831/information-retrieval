@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,23 +11,23 @@ import de.hpi.ir.yahoogle.io.AbstractWriter;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.EliasDeltaWriter;
 
-public class YahoogleTokenMap {
+public class TokenIndexBuffer {
 
-	private Map<Integer, List<YahoogleIndexPosting>> documentMap = new HashMap<Integer, List<YahoogleIndexPosting>>();
+	private Map<Integer, List<IndexPosting>> documentMap = new HashMap<Integer, List<IndexPosting>>();
 
-	public void add(int docNumber, YahoogleIndexPosting posting) {
+	public void add(int docNumber, IndexPosting posting) {
 		if (documentMap.get(docNumber) == null) {
-			documentMap.put(docNumber, new ArrayList<YahoogleIndexPosting>());
+			documentMap.put(docNumber, new ArrayList<IndexPosting>());
 		}
 		documentMap.get(docNumber).add(posting);
 	}
 
 	public byte[] toByteArray() throws IOException {
 		ByteWriter block = new ByteWriter();
-		for (Entry<Integer, List<YahoogleIndexPosting>> entry : documentMap.entrySet()) {
+		for (Entry<Integer, List<IndexPosting>> entry : documentMap.entrySet()) {
 			AbstractWriter positions = new EliasDeltaWriter();
 			int oldPos = 0;
-			for (YahoogleIndexPosting posting : entry.getValue()) {
+			for (IndexPosting posting : entry.getValue()) {
 				short dp = (short) (posting.getPosition() - oldPos);
 				positions.writeShort(dp);
 				oldPos = posting.getPosition();

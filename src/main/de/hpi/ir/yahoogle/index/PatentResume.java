@@ -1,6 +1,8 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.Serializable;
+
+import de.hpi.ir.yahoogle.Patent;
 
 public class PatentResume implements Serializable {
 	

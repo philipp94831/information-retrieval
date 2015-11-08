@@ -1,6 +1,6 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.index;
 
-public class YahoogleIndexPosting {
+public class IndexPosting {
 
 	private int position;
 

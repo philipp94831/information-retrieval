@@ -1,16 +1,18 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map.Entry;
 
+import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import de.hpi.ir.yahoogle.YahoogleUtils;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class LinkedRandomAccessIndex extends AbstractRandomAccessIndex {
 
 	private static final long NO_NEXT_POSTING = -1;
-	private static final String POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/tmp.postings.yahoogle";
+	private static final String POSTINGS_FILE = SearchEngineYahoogle.getTeamDirectory() + "/tmp.postings.yahoogle";
 
 	public static LinkedRandomAccessIndex create() {
 		YahoogleUtils.deleteIfExists(POSTINGS_FILE);
@@ -29,7 +31,7 @@ public class LinkedRandomAccessIndex extends AbstractRandomAccessIndex {
 		offsets = new OffsetsIndex();
 	}
 
-	public void add(String token, YahoogleTokenMap value) throws IOException {
+	public void add(String token, TokenIndexBuffer value) throws IOException {
 		long fileLength = index.length();
 		if (offsets.get(token) == null) {
 			offsets.put(token, fileLength);

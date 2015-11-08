@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import de.hpi.ir.yahoogle.YahoogleUtils;
 import de.hpi.ir.yahoogle.io.AbstractReader;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.EliasDeltaReader;
@@ -17,8 +19,8 @@ import de.hpi.ir.yahoogle.io.ObjectWriter;
 
 public class OrganizedRandomAccessIndex extends AbstractRandomAccessIndex {
 
-	private static final String OFFSETS_FILE = SearchEngineYahoogle.teamDirectory + "/offsets.yahoogle";
-	private static final String POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/postings.yahoogle";
+	private static final String OFFSETS_FILE = SearchEngineYahoogle.getTeamDirectory() + "/offsets.yahoogle";
+	private static final String POSTINGS_FILE = SearchEngineYahoogle.getTeamDirectory() + "/postings.yahoogle";
 
 	public static OrganizedRandomAccessIndex create() {
 		YahoogleUtils.deleteIfExists(OFFSETS_FILE);
