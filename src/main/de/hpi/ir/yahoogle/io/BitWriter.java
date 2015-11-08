@@ -12,12 +12,12 @@ public class BitWriter {
 		pos++;
 	}
 	
-	public void write(int bit) {
-		write(bit != 0);
-	}
-	
 	public byte[] toByteArray() {
 		return out.toByteArray();
+	}
+
+	public void write(long bit) {
+		write(bit != 0);
 	}
 	
 }

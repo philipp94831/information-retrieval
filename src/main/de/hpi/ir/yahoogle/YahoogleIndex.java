@@ -2,36 +2,25 @@ package de.hpi.ir.yahoogle;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
-import de.hpi.ir.yahoogle.io.AbstractReader;
-import de.hpi.ir.yahoogle.io.ByteReader;
-import de.hpi.ir.yahoogle.io.ByteWriter;
-import de.hpi.ir.yahoogle.io.EliasDeltaReader;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
 
 public class YahoogleIndex {
 
 	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
-	protected static final long NO_NEXT_POSTING = -1;
-	private static final String OFFSETS_FILE = SearchEngineYahoogle.teamDirectory + "/offsets.yahoogle";
 	private static final String PATENTS_FILE = SearchEngineYahoogle.teamDirectory + "/patents.yahoogle";
-	private static final String POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/postings.yahoogle";
-	private static final String TMP_POSTINGS_FILE = SearchEngineYahoogle.teamDirectory + "/tmp.postings.yahoogle";
 
-	private OffsetsIndex lastBlockOffsets;
-	private RandomAccessFile tmp_index, index;
+	private LinkedRandomAccessIndex tmp_index;
+	private RandomAccessIndex index;
 	private PatentIndex patents;
-	private OffsetsIndex tmp_tokenOffsets, tokenOffsets;
 	private Map<String, YahoogleTokenMap> tokenMap;
 
 	/**
@@ -67,19 +56,11 @@ public class YahoogleIndex {
 	}
 
 	public boolean create() {
-		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE) && YahoogleUtils.deleteIfExists(TMP_POSTINGS_FILE) && YahoogleUtils.deleteIfExists(POSTINGS_FILE) && YahoogleUtils.deleteIfExists(OFFSETS_FILE);
-		try {
-			tmp_index = new RandomAccessFile(TMP_POSTINGS_FILE, "rw");
-			index = new RandomAccessFile(POSTINGS_FILE, "rw");
-		} catch (FileNotFoundException e) {
-			return false;
-		}
+		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE);
+		tmp_index = LinkedRandomAccessIndex.create();
 		tokenMap = new HashMap<String, YahoogleTokenMap>();
-		lastBlockOffsets = new OffsetsIndex();
-		tmp_tokenOffsets = new OffsetsIndex();
-		tokenOffsets = new OffsetsIndex();
 		patents = new PatentIndex();
-		return status && (tmp_index != null) && (index != null);
+		return status && (tmp_index != null);
 	}
 
 	/**
@@ -116,7 +97,7 @@ public class YahoogleIndex {
 		if (prefix) {
 			String pre = token.substring(0, token.length() - 1);
 			Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
-			for (String t : tokenOffsets.getTokensForPrefix(pre)) {
+			for (String t : index.getTokensForPrefix(pre)) {
 				merge(result, primitiveFind(t));
 			}
 			return result;
@@ -130,19 +111,13 @@ public class YahoogleIndex {
 	 */
 	public void finish() {
 		flush();
-		reorganize();
+		index = tmp_index.reorganize();
 	}
 
 	public void flush() {
 		try {
 			for (Entry<String, YahoogleTokenMap> entry : tokenMap.entrySet()) {
-				long fileLength = tmp_index.length();
-				if (tmp_tokenOffsets.get(entry.getKey()) == null) {
-					tmp_tokenOffsets.put(entry.getKey(), fileLength);
-				}
-				Long offset = lastBlockOffsets.get(entry.getKey());
-				lastBlockOffsets.put(entry.getKey(), fileLength);
-				entry.getValue().write(entry.getKey(), offset, tmp_index);
+				tmp_index.add(entry.getKey(), entry.getValue());
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -171,13 +146,12 @@ public class YahoogleIndex {
 	 */
 	public boolean load() {
 		try {
-			index = new RandomAccessFile(POSTINGS_FILE, "rw");
+			index = RandomAccessIndex.load();
+			patents = (PatentIndex) ObjectReader.readObject(PATENTS_FILE);
 		} catch (FileNotFoundException e) {
 			return false;
 		}
-		tokenOffsets = (OffsetsIndex) ObjectReader.readObject(OFFSETS_FILE);
-		patents = (PatentIndex) ObjectReader.readObject(PATENTS_FILE);
-		return (index != null) && (tokenOffsets != null) && (patents != null);
+		return (index != null) && (patents != null);
 	}
 
 	/**
@@ -208,76 +182,11 @@ public class YahoogleIndex {
 	}
 
 	private Map<Integer, Set<Integer>> primitiveFind(String token) {
-		Map<Integer, Set<Integer>> docNumbers = new HashMap<Integer, Set<Integer>>();
-		Long offset = tokenOffsets.get(token);
-		if (offset != null) {
-			try {
-				index.seek(offset);
-				int size = index.readInt();
-				byte[] b = new byte[size];
-				index.readFully(b);
-				int i = 0;
-				while (i < b.length) {
-					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
-					i += Integer.BYTES + Short.BYTES;
-					int docNumber = in.readInt();
-					short bsize = in.readShort();
-					in = new EliasDeltaReader(b, i, bsize);
-					Set<Integer> pos = new HashSet<Integer>();
-					int oldPos = 0;
-					while (in.hasLeft()) {
-						short p = in.readShort();
-						pos.add(oldPos + p);
-						oldPos += p;
-					}
-					docNumbers.put(docNumber, pos);
-					i += bsize;
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return docNumbers;
-	}
-
-	public void reorganize() {
-		try {
-			for (Entry<String, Long> entry : tmp_tokenOffsets.entrySet()) {
-				long start = index.length();
-				tokenOffsets.put(entry.getKey(), start);
-				try {
-					int total_size = 0;
-					long offset = entry.getValue();
-					long next = offset;
-					ByteWriter bout = new ByteWriter();
-					while (next != NO_NEXT_POSTING) {
-						tmp_index.seek(offset);
-						next = tmp_index.readLong();
-						int size = tmp_index.readInt();
-						total_size += size;
-						byte[] b = new byte[size];
-						tmp_index.readFully(b);
-						bout.write(b);
-					}
-					index.seek(start);
-					index.writeInt(total_size);
-					index.write(bout.toByteArray());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			tmp_index.close();
-			YahoogleUtils.deleteIfExists(TMP_POSTINGS_FILE);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return index.find(token);
 	}
 
 	public boolean write() {
-		return ObjectWriter.writeObject(tokenOffsets, OFFSETS_FILE) && ObjectWriter.writeObject(patents, PATENTS_FILE);
+		return index.saveToDisk() && ObjectWriter.writeObject(patents, PATENTS_FILE);
 	}
 
 }

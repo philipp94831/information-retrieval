@@ -8,14 +8,14 @@ public class EliasDeltaWriter implements AbstractWriter {
 	
 	@Override
 	public void writeShort(short s) throws IOException {
-		writeInt((int) s);
+		writeLong((long) s);
 	}
 	
 	@Override
-	public void writeInt(int i) throws IOException {
+	public void writeLong(long l) throws IOException {
 		int len = 0;
 		int lengthOfLen = 0;
-		for (int temp = i; temp > 0; temp >>= 1) { // calculate 1+floor(log2(num))
+		for (long temp = l; temp > 0; temp >>= 1) { // calculate 1+floor(log2(num))
 			len++;
 		}
 		for (int temp = len; temp > 1; temp >>= 1) { // calculate floor(log2(len))
@@ -28,13 +28,18 @@ public class EliasDeltaWriter implements AbstractWriter {
 			out.write((len >> j) & 1);
 		}
 		for (int j = len - 2; j >= 0; j--) {
-			out.write((i >> j) & 1);
+			out.write((l >> j) & 1);
 		}
 	}
 	
 	@Override
 	public byte[] toByteArray() {
 		return out.toByteArray();
+	}
+
+	@Override
+	public void writeInt(int i) throws IOException {
+		writeLong((long) i);
 	}
 
 }

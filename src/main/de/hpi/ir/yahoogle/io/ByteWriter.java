@@ -35,4 +35,9 @@ public class ByteWriter implements AbstractWriter {
 		return out.toByteArray();
 	}
 
+	@Override
+	public void writeLong(long l) throws IOException {
+		out.write(ByteBuffer.allocate(Long.BYTES).putLong(l).array());
+	}
+
 }

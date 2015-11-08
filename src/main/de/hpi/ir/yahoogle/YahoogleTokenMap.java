@@ -1,7 +1,6 @@
 package de.hpi.ir.yahoogle;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,33 +22,22 @@ public class YahoogleTokenMap {
 		documentMap.get(docNumber).add(posting);
 	}
 
-	public void write(String token, Long offset, RandomAccessFile tmp_index) throws IOException {
-		long fileLength = tmp_index.length();
-		if (offset != null) {
-			tmp_index.seek(offset);
-			tmp_index.writeLong(fileLength);
-		}
-		tmp_index.seek(fileLength);
-		tmp_index.writeLong(YahoogleIndex.NO_NEXT_POSTING);
-		ByteWriter temp = new ByteWriter();
+	public byte[] toByteArray() throws IOException {
+		ByteWriter block = new ByteWriter();
 		for (Entry<Integer, List<YahoogleIndexPosting>> entry : documentMap.entrySet()) {
-			AbstractWriter out = new EliasDeltaWriter();
+			AbstractWriter positions = new EliasDeltaWriter();
 			int oldPos = 0;
 			for (YahoogleIndexPosting posting : entry.getValue()) {
 				short dp = (short) (posting.getPosition() - oldPos);
-				out.writeShort(dp);
+				positions.writeShort(dp);
 				oldPos = posting.getPosition();
 			}
-			byte[] encoded = out.toByteArray();
-			temp.writeInt(entry.getKey()); // docNumber
-			temp.writeShort((short) encoded.length); // size of block
-			temp.write(encoded);
+			byte[] encoded = positions.toByteArray();
+			block.writeInt(entry.getKey()); // docNumber
+			block.writeShort((short) encoded.length); // size of block
+			block.write(encoded);
 		}
-		byte[] block = temp.toByteArray();
-		ByteWriter bout = new ByteWriter(Integer.BYTES + block.length);
-		bout.writeInt(block.length);
-		bout.write(temp.toByteArray());
-		tmp_index.write(bout.toByteArray());
+		return block.toByteArray();
 	}
 
 }

@@ -14,7 +14,7 @@ public class ObjectReader {
 	 *            the file where object is stored on disk
 	 * @return deserialized object
 	 */
-	public static Object readObject(String fileName) {
+	public static Object readObject(String fileName) throws FileNotFoundException {
 		try {
 			FileInputStream fin = new FileInputStream(fileName);
 			ObjectInputStream oin = new ObjectInputStream(fin);
@@ -22,8 +22,6 @@ public class ObjectReader {
 			oin.close();
 			fin.close();
 			return o;
-		} catch (FileNotFoundException e) {
-			return null;
 		} catch (ClassNotFoundException e) {
 			return null;
 		} catch (IOException e) {
