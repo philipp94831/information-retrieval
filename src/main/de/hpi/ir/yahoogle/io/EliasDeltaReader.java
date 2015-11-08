@@ -5,13 +5,10 @@ import java.io.IOException;
 public class EliasDeltaReader extends AbstractReader {
 	
 	private BitReader in;
-
-	public EliasDeltaReader(byte[] bytes) {
-		in = new BitReader(bytes);
-	}
 	
-	public EliasDeltaReader(byte[] b, int i, short bsize) {
-		in = new BitReader(b, i, bsize);
+	public EliasDeltaReader(byte[] bytes, int offset, int length) {
+		super(bytes, offset, length);
+		in = new BitReader(bytes, offset, length);
 	}
 
 	@Override

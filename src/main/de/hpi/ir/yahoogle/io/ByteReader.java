@@ -7,6 +7,7 @@ public class ByteReader extends AbstractReader {
 	private ByteBuffer in;
 	
 	public ByteReader(byte[] bytes, int offset, int length) {
+		super(bytes, offset, length);
 		in = ByteBuffer.wrap(bytes, offset, length);
 	}
 	

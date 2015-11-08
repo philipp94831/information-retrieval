@@ -2,13 +2,13 @@ package de.hpi.ir.yahoogle;
 
 public class YahoogleIndexPosting {
 
-	private short position;
+	private int position;
 
-	public short getPosition() {
+	public int getPosition() {
 		return position;
 	}
 
-	public void setPosition(short position) {
+	public void setPosition(int position) {
 		this.position = position;
 	}
 

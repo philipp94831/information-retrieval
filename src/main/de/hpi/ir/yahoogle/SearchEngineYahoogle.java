@@ -104,50 +104,37 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
 		Set<Integer> docNumbers = index.getAllDocNumbers();
-		boolean allStopwords = true, and = true, or = false, not = false;
+		Operator operator = Operator.AND;
 		List<String> queryPlan = processQuery(query);
+		if(queryPlan.isEmpty()) {
+			return new ArrayList<String>();
+		}
 		for (String phrase : queryPlan) {
 			switch(phrase.toLowerCase()) {
 			case "and":
-				and = true;
-				or = not = false;
+				operator = Operator.AND;
 				break;
 			case "or":
-				if (allStopwords) {
-					and = true;
-					or = not = false;
-				} else {
-					or = true;
-					and = not = false;
-				}
+				operator = Operator.OR;
 				break;
 			case "not":
-				not = true;
-				and = or = false;
+				operator = Operator.NOT;
 				break;
 			default:
-				if (StopWordList.allStopwords(phrase)) {
-					continue;
-				}
-				allStopwords = false;
 				Set<Integer> result = index.find(phrase);
-				if (and) {
-					and = false;
+				switch (operator) {
+				case AND:
 					docNumbers.retainAll(result);
-				}
-				if (or) {
-					or = false;
+					break;
+				case OR:
 					docNumbers.addAll(result);
-				}
-				if (not) {
-					not = false;
+					break;
+				case NOT:
 					docNumbers.removeAll(result);
+					break;
 				}
 				break;
 			}
-		}
-		if(allStopwords) {
-			return new ArrayList<String>();
 		}
 		return index.matchInventionTitles(docNumbers);
 	}
@@ -158,23 +145,37 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		StringBuffer phrase = new StringBuffer();
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
+			boolean checkEmpty = false;
 			switch(token.toLowerCase()) {
 			case "and":
 			case "or":
+				checkEmpty = true;
 			case "not":
 				if(phrase.length() > 0) {
 					queryPlan.add(phrase.toString());
+					phrase = new StringBuffer();
+				} else {
+					if(queryPlan.size() > 0) {
+						queryPlan.remove(queryPlan.size() - 1);
+					}
 				}
-				phrase = new StringBuffer();
-				queryPlan.add(token);
+				if(!(checkEmpty && queryPlan.isEmpty())) {
+					queryPlan.add(token);
+				}
 				break;
 			default:
-				phrase.append(" " + token);
+				if(!StopWordList.isStopword(token)) {
+					phrase.append(" " + token);
+				}
 				break;
 			}
 		}
 		if(phrase.length() > 0) {
 			queryPlan.add(phrase.toString());
+		} else {
+			if(queryPlan.size() > 0) {
+				queryPlan.remove(queryPlan.size() - 1);
+			}
 		}
 		return queryPlan;
 	}

@@ -12,8 +12,8 @@ public class BitReader {
 		in = BitSet.valueOf(bytes);
 	}
 
-	public BitReader(byte[] b, int i, short bsize) {
-		in = BitSet.valueOf(ByteBuffer.wrap(b, i, bsize));
+	public BitReader(byte[] b, int offset, int length) {
+		in = BitSet.valueOf(ByteBuffer.wrap(b, offset, length));
 	}
 
 	public boolean read() {

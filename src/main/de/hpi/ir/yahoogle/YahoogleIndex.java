@@ -62,10 +62,6 @@ public class YahoogleIndex {
 			flush();
 		}
 	}
-	
-	public Set<Integer> getAllDocNumbers() {
-		return new HashSet<Integer>(patents.keySet());
-	}
 
 	public void buffer(String token, int docNumber, YahoogleIndexPosting posting) {
 		if (tokenMap.get(token) == null) {
@@ -75,10 +71,7 @@ public class YahoogleIndex {
 	}
 
 	public boolean create() {
-		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE)
-				&& YahoogleUtils.deleteIfExists(TMP_POSTINGS_FILE)
-				&& YahoogleUtils.deleteIfExists(POSTINGS_FILE)
-				&& YahoogleUtils.deleteIfExists(OFFSETS_FILE);
+		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE) && YahoogleUtils.deleteIfExists(TMP_POSTINGS_FILE) && YahoogleUtils.deleteIfExists(POSTINGS_FILE) && YahoogleUtils.deleteIfExists(OFFSETS_FILE);
 		try {
 			tmp_index = new RandomAccessFile(TMP_POSTINGS_FILE, "rw");
 			index = new RandomAccessFile(POSTINGS_FILE, "rw");
@@ -95,88 +88,40 @@ public class YahoogleIndex {
 	public Set<Integer> find(String phrase) {
 		StringTokenizer tokenizer = new StringTokenizer(phrase);
 		Map<Integer, Set<Integer>> result = null;
-		if(tokenizer.hasMoreTokens()) {
+		if (tokenizer.hasMoreTokens()) {
 			result = findAll(tokenizer.nextToken());
 		}
 		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			Map<Integer, Set<Integer>> nextResult = findAll(token);
-			for(Entry<Integer, Set<Integer>> entry : result.entrySet()) {
-				Set<Integer> newPos = nextResult.get(entry.getKey());
-				if(newPos != null) {
-					Set<Integer> possibilities = entry.getValue().stream()
-							.map(p -> p + 1)
-							.collect(Collectors.toSet());
-					possibilities.retainAll(newPos);
-					result.put(entry.getKey(), possibilities);
-				} else {
-					result.get(entry.getKey()).clear();
-				}
+			matchNextPhraseToken(result, findAll(tokenizer.nextToken()));
+		}
+		return getNotEmptyKeys(result);
+	}
+
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult) {
+		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
+			Set<Integer> newPos = nextResult.get(entry.getKey());
+			if (newPos != null) {
+				Set<Integer> possibilities = entry.getValue().stream().map(p -> p + 1).collect(Collectors.toSet());
+				possibilities.retainAll(newPos);
+				result.put(entry.getKey(), possibilities);
+			} else {
+				result.get(entry.getKey()).clear();
 			}
 		}
-		return result.entrySet().stream()
-				.filter(e -> e.getValue().size() > 0)
-				.map(e -> e.getKey())
-				.collect(Collectors.toSet());
 	}
 
 	private Map<Integer, Set<Integer>> findAll(String token) {
 		boolean prefix = token.endsWith("*");
-		List<String> tokens;
 		if (prefix) {
 			String pre = token.substring(0, token.length() - 1);
-			tokens = tokenOffsets.keySet().stream()
-					.filter(s -> s.startsWith(pre))
-					.collect(Collectors.toList());;
-		} else {
-			tokens = new ArrayList<String>();
-			tokens.add(YahoogleUtils.sanitize(token));
-		}
-		Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
-		for(String t : tokens) {
-			for(Entry<Integer, Set<Integer>> entry : primitiveFind(t).entrySet()) {
-				Set<Integer> l = result.get(entry.getKey());
-				if(l != null) {
-					l.addAll(entry.getValue());
-				} else {
-					result.put(entry.getKey(), entry.getValue());
-				}
-			};
-		}
-		return result;
-	}
-
-	private Map<Integer, Set<Integer>> primitiveFind(String token) {
-		Map<Integer, Set<Integer>> docNumbers = new HashMap<Integer, Set<Integer>>();
-		Long offset = tokenOffsets.get(token);
-		if (offset != null) {
-			try {
-				index.seek(offset);
-				int size = index.readInt();
-				byte[] b = new byte[size];
-				index.readFully(b);
-				int i = 0;
-				while (i < b.length) {
-					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
-					int docNumber = in.readInt();
-					short bsize = in.readShort();
-					in = new EliasDeltaReader(b, i + Integer.BYTES + Short.BYTES, bsize);
-					Set<Integer> pos = new HashSet<Integer>();
-					int oldPos = 0;
-					while(in.hasLeft()) {
-						short p = in.readShort();
-						pos.add(oldPos + p);
-						oldPos += p;
-					}
-					docNumbers.put(docNumber, pos);
-					i += Integer.BYTES + Short.BYTES + bsize;
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
+			for (String t : getTokensForPrefix(pre)) {
+				merge(result, primitiveFind(t));
 			}
+			return result;
+		} else {
+			return primitiveFind(YahoogleUtils.sanitize(token));
 		}
-		return docNumbers;
 	}
 
 	/**
@@ -205,8 +150,23 @@ public class YahoogleIndex {
 		tokenMap.clear();
 	}
 
+	public Set<Integer> getAllDocNumbers() {
+		return new HashSet<Integer>(patents.keySet());
+	}
+
 	private String getInventionTitle(Integer docNumber) {
 		return patents.get(docNumber).getInventionTitle();
+	}
+
+	private Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
+	}
+
+	private List<String> getTokensForPrefix(String pre) {
+		List<String> tokens;
+		tokens = tokenOffsets.keySet().stream().filter(s -> s.startsWith(pre)).collect(Collectors.toList());
+		;
+		return tokens;
 	}
 
 	private void index(Patent patent) {
@@ -243,6 +203,51 @@ public class YahoogleIndex {
 			results.add(getInventionTitle(docNumber));
 		}
 		return results;
+	}
+
+	private void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
+		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
+			Set<Integer> l = result.get(entry.getKey());
+			if (l != null) {
+				l.addAll(entry.getValue());
+			} else {
+				result.put(entry.getKey(), entry.getValue());
+			}
+		}
+		;
+	}
+
+	private Map<Integer, Set<Integer>> primitiveFind(String token) {
+		Map<Integer, Set<Integer>> docNumbers = new HashMap<Integer, Set<Integer>>();
+		Long offset = tokenOffsets.get(token);
+		if (offset != null) {
+			try {
+				index.seek(offset);
+				int size = index.readInt();
+				byte[] b = new byte[size];
+				index.readFully(b);
+				int i = 0;
+				while (i < b.length) {
+					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
+					int docNumber = in.readInt();
+					short bsize = in.readShort();
+					in = new EliasDeltaReader(b, i + Integer.BYTES + Short.BYTES, bsize);
+					Set<Integer> pos = new HashSet<Integer>();
+					int oldPos = 0;
+					while (in.hasLeft()) {
+						short p = in.readShort();
+						pos.add(oldPos + p);
+						oldPos += p;
+					}
+					docNumbers.put(docNumber, pos);
+					i += Integer.BYTES + Short.BYTES + bsize;
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return docNumbers;
 	}
 
 	public void reorganize() {

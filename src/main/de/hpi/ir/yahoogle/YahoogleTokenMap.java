@@ -34,7 +34,7 @@ public class YahoogleTokenMap {
 		ByteWriter temp = new ByteWriter();
 		for (Entry<Integer, List<YahoogleIndexPosting>> entry : documentMap.entrySet()) {
 			AbstractWriter out = new EliasDeltaWriter();
-			short oldPos = 0;
+			int oldPos = 0;
 			for (YahoogleIndexPosting posting : entry.getValue()) {
 				short dp = (short) (posting.getPosition() - oldPos);
 				out.writeShort(dp);
