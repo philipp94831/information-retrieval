@@ -1,6 +1,8 @@
 package de.hpi.ir.yahoogle.index;
 
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -108,6 +110,23 @@ public class Index {
 	public void finish() {
 		flush();
 		organizedIndex = linkedIndex.reorganize();
+//		printDictionary();
+	}
+
+	private void printDictionary() {
+		try {
+			PrintWriter writer = new PrintWriter("dictionary.txt", "UTF-8");
+			for(String token : organizedIndex.getTokens()) {
+				writer.println(token);
+			}
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void flush() {
@@ -152,7 +171,7 @@ public class Index {
 	public ArrayList<String> matchInventionTitles(Set<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
-			results.add(patents.get(docNumber).getInventionTitle());
+			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getInventionTitle());
 		}
 		return results;
 	}

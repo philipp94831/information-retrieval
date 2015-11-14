@@ -21,7 +21,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		initialize(true);
-		printResults(search("plurality OR resources"));
+		printResults(search("pr*"));
 
 		// long start = System.currentTimeMillis();
 

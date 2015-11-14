@@ -73,7 +73,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 
 		    while(entries.hasMoreElements()){
 		        ZipEntry entry = entries.nextElement();
-//		        System.out.println(entry.getName());
+		        System.out.println(entry.getName());
 		        InputStream stream = zipFile.getInputStream(entry);
 		        xr.parse(new InputSource(stream));
 		    }

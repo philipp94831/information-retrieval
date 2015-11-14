@@ -29,4 +29,8 @@ public class OffsetsIndex implements Serializable {
 		return offsets.entrySet();
 	}
 
+	public Set<String> keys() {
+		return offsets.keySet();
+	}
+
 }

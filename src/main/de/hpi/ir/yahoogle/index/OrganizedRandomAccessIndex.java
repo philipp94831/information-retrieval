@@ -91,6 +91,10 @@ public class OrganizedRandomAccessIndex extends AbstractRandomAccessIndex {
 	public List<String> getTokensForPrefix(String prefix) {
 		return offsets.getTokensForPrefix(prefix);
 	}
+	
+	public Set<String> getTokens() {
+		return offsets.keys();
+	}
 
 	public boolean saveToDisk() {
 		return ObjectWriter.writeObject(offsets, OFFSETS_FILE);
