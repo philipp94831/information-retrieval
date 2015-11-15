@@ -107,12 +107,15 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
-		Set<Integer> docNumbers = index.getAllDocNumbers();
-		Operator operator = Operator.AND;
 		List<String> queryPlan = processQuery(query);
 		if(queryPlan.isEmpty()) {
 			return new ArrayList<String>();
 		}
+		if(queryPlan.size() == 1 && !queryPlan.get(0).contains("*")) {
+			return index.matchInventionTitles(index.findRelevant(queryPlan.get(0), topK));			
+		}
+		Set<Integer> docNumbers = index.getAllDocNumbers();
+		Operator operator = Operator.AND;
 		for (String phrase : queryPlan) {
 			switch(phrase.toLowerCase()) {
 			case "and":

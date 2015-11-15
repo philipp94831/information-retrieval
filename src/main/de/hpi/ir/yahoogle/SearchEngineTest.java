@@ -21,7 +21,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		initialize(true);
-		printResults(search("pr*"));
+		printResults(search("mobile device"));
 
 		// long start = System.currentTimeMillis();
 
@@ -55,7 +55,7 @@ public class SearchEngineTest {
 	private static ArrayList<String> search(String query) {
 		System.out.println("Searching...");
 		long startTime = System.nanoTime();
-		ArrayList<String> results = myEngine.search(query, 0, 0);
+		ArrayList<String> results = myEngine.search(query, 10, 0);
 		long time = (System.nanoTime() - startTime) / 1000000;
 		System.out.println("Time for search: " + time + "ms");
 		return results;

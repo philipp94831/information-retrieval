@@ -4,19 +4,26 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.StopWordList;
+import de.hpi.ir.yahoogle.ValueComparator;
 import de.hpi.ir.yahoogle.YahoogleUtils;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
+import de.hpi.ir.yahoogle.rm.Model;
+import de.hpi.ir.yahoogle.rm.QLModel;
 
 public class Index {
 
@@ -34,10 +41,10 @@ public class Index {
 	 * @param patent
 	 */
 	public void add(Patent patent) {
-		index(patent);
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
-		for (short i = 1; tokenizer.hasMoreTokens();) {
+		int i = 1;
+		while(tokenizer.hasMoreTokens()) {
 			String token = YahoogleUtils.sanitize(tokenizer.nextToken());
 			if (StopWordList.isStopword(token)) {
 				continue;
@@ -47,7 +54,7 @@ public class Index {
 			posting.setPosition(i);
 			indexBuffer.buffer(token, patent.getDocNumber(), posting);
 		}
-
+		index(patent, i - 1);
 		if (Runtime.getRuntime().freeMemory() < FLUSH_MEM_THRESHOLD) {
 			flush();
 		}
@@ -113,6 +120,7 @@ public class Index {
 //		printDictionary();
 	}
 
+	@SuppressWarnings("unused")
 	private void printDictionary() {
 		try {
 			PrintWriter writer = new PrintWriter("dictionary.txt", "UTF-8");
@@ -141,9 +149,9 @@ public class Index {
 		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
 	}
 
-	private void index(Patent patent) {
+	private void index(Patent patent, int wordCount) {
 		PatentResume resume = new PatentResume(patent);
-		patents.add(patent.getDocNumber(), resume);
+		patents.add(patent.getDocNumber(), resume, wordCount);
 	}
 
 	/**
@@ -168,7 +176,7 @@ public class Index {
 	 *            a set of docNumbers
 	 * @return list of invention titles
 	 */
-	public ArrayList<String> matchInventionTitles(Set<Integer> docNumbers) {
+	public ArrayList<String> matchInventionTitles(Iterable<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
 			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getInventionTitle());
@@ -185,11 +193,43 @@ public class Index {
 				result.put(entry.getKey(), entry.getValue());
 			}
 		}
-		;
 	}
 
 	public boolean write() {
 		return organizedIndex.saveToDisk() && ObjectWriter.writeObject(patents, PATENTS_FILE);
+	}
+
+	public List<Integer> findRelevant(String phrase, int topK) {
+		Model model = new QLModel(this);
+		Map<Integer, Double> results = model.compute(phrase);
+		ValueComparator<Integer, Double> comp = new ValueComparator<Integer, Double>(results);
+		TreeMap<Integer, Double> sortedResults =  new TreeMap<Integer, Double>(comp);
+		sortedResults.putAll(results);
+		List<Integer> result = new ArrayList<Integer>(sortedResults.keySet());
+		Collections.reverse(result);
+		return result.subList(0, topK);
+	}
+
+	public int wordCount() {
+		return patents.getTotalWordCount();
+	}
+
+	public int wordCount(Integer docNumber) {
+		return patents.wordCount(docNumber);
+	}
+
+	public int wordCount(Integer docNumber, String queryTerm) {
+		Map<Integer, Set<Integer>> result = organizedIndex.find(YahoogleUtils.sanitize(queryTerm));
+		Set<Integer> list = result.get(docNumber);
+		if (list == null) {
+			return 0;
+		}
+		return list.size();
+	}
+
+	public int wordCount(String queryTerm) {
+		Map<Integer, Set<Integer>> result = organizedIndex.find(YahoogleUtils.sanitize(queryTerm));
+		return result.entrySet().stream().mapToInt(e -> e.getValue().size()).sum();
 	}
 
 }
