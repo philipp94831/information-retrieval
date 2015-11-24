@@ -114,9 +114,11 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		if(queryPlan.size() == 1 && !queryPlan.get(0).contains("*")) {
 			List<String> phrases = extractPhrases(queryPlan.get(0));
 			List<Integer> results = index.findRelevant(phrases, topK);
-			List<String> topWords = index.getTopWords(results);
-			phrases.addAll(topWords);
-			results = index.findRelevant(phrases, topK);
+			if(prf > 0) {
+				List<String> topWords = index.getTopWords(results.subList(0, Math.min(prf, results.size())));
+				phrases.addAll(topWords);
+				results = index.findRelevant(phrases, topK);
+			}
 			return index.matchInventionTitles(results);
 		}
 		Set<Integer> docNumbers = index.getAllDocNumbers();
