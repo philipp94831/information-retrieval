@@ -4,9 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,8 +40,10 @@ public class Index {
 	 * @param patent
 	 */
 	public void add(Patent patent) {
+		PatentResume resume = new PatentResume(patent);		
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
+		Map<String, Integer> wordFrequencies = new HashMap<String, Integer>();
 		int i = 1;
 		while(tokenizer.hasMoreTokens()) {
 			String token = YahoogleUtils.sanitize(tokenizer.nextToken());
@@ -50,11 +51,27 @@ public class Index {
 				continue;
 			}
 			i++;
+			Integer freq = wordFrequencies.get(token);
+			if(freq == null) {
+				freq = 0;
+			}
+			freq++;
+			wordFrequencies.put(token, freq);
 			IndexPosting posting = new IndexPosting();
 			posting.setPosition(i);
 			indexBuffer.buffer(token, patent.getDocNumber(), posting);
 		}
-		index(patent, i - 1);
+		int wordCount = i - 1;
+		resume.setWordCount(wordCount);
+		TreeMap<String, Integer> sortedResults = sortByValueDescending(wordFrequencies);
+		HashMap<String, Double> strippedMap = new HashMap<String, Double>();
+		Iterator<Entry<String, Integer>> iterator = sortedResults.entrySet().iterator();
+		for(int j = 0; j < 10 && iterator.hasNext(); j++) {
+			Entry<String, Integer> entry = iterator.next();
+			strippedMap.put(entry.getKey(), (entry.getValue()/(double) wordCount));
+		}
+		resume.setWordFrequencies(strippedMap);
+		index(patent.getDocNumber(), resume);
 		if (Runtime.getRuntime().freeMemory() < FLUSH_MEM_THRESHOLD) {
 			flush();
 		}
@@ -154,9 +171,8 @@ public class Index {
 		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
 	}
 
-	private void index(Patent patent, int wordCount) {
-		PatentResume resume = new PatentResume(patent);
-		patents.add(patent.getDocNumber(), resume, wordCount);
+	private void index(int docNumber, PatentResume resume) {
+		patents.add(docNumber, resume);
 	}
 
 	/**
@@ -207,11 +223,8 @@ public class Index {
 	public List<Integer> findRelevant(List<String> phrases, int topK) {
 		Model model = new QLModel(this);
 		Map<Integer, Double> results = model.compute(phrases);
-		ValueComparator<Integer, Double> comp = new ValueComparator<Integer, Double>(results);
-		TreeMap<Integer, Double> sortedResults =  new TreeMap<Integer, Double>(comp);
-		sortedResults.putAll(results);
+		TreeMap<Integer, Double> sortedResults = sortByValueDescending(results);
 		List<Integer> result = new ArrayList<Integer>(sortedResults.keySet());
-		Collections.reverse(result);
 		return result.subList(0, Math.min(topK, result.size()));
 	}
 
@@ -235,6 +248,31 @@ public class Index {
 	public int wordCount(String queryTerm) {
 		Map<Integer, Set<Integer>> result = findWithPositions(queryTerm);
 		return result.entrySet().stream().mapToInt(e -> e.getValue().size()).sum();
+	}
+
+	public List<String> getTopWords(List<Integer> results) {
+		List<Map<String, Double>> maps = results.stream().map(d -> patents.get(d).getWordFrequencies()).collect(Collectors.toList());
+		Map<String, Double> result = new HashMap<String, Double>();
+		for(Map<String, Double> map : maps) {
+			for(Entry<String, Double> entry : map.entrySet()) {
+				Double count = result.get(entry.getKey());
+				if(count == null) {
+					count = 0.0;
+				}
+				count += entry.getValue();
+				result.put(entry.getKey(), count);
+			}
+		}
+		TreeMap<String, Double> sortedResults = sortByValueDescending(result);
+		List<String> topWords = new ArrayList<String>(sortedResults.keySet());
+		return topWords.subList(0, Math.min(10, topWords.size()));
+	}
+
+	private <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
+		ValueComparator<K, V> comp = new ValueComparator<K, V>(result);
+		TreeMap<K, V> sortedResults =  new TreeMap<K, V>(comp);
+		sortedResults.putAll(result);
+		return sortedResults;
 	}
 
 }
