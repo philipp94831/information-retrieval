@@ -21,7 +21,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		initialize(true);
-		printResults(search("network access"));
+		printResults(search("network access", 10, 2));
 
 		// long start = System.currentTimeMillis();
 
@@ -52,10 +52,10 @@ public class SearchEngineTest {
 		System.out.println(results.size() + " Results returned");
 	}
 
-	private static ArrayList<String> search(String query) {
+	private static ArrayList<String> search(String query, int topK, int prf) {
 		System.out.println("Searching...");
 		long startTime = System.nanoTime();
-		ArrayList<String> results = myEngine.search(query, 10, 2);
+		ArrayList<String> results = myEngine.search(query, topK, prf);
 		long time = (System.nanoTime() - startTime) / 1000000;
 		System.out.println("Time for search: " + time + "ms");
 		return results;

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -135,7 +136,11 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 				operator = Operator.NOT;
 				break;
 			default:
-				Set<Integer> result = index.find(phrase);
+				List<String> phrases = extractPhrases(phrase);
+				Set<Integer> result = new HashSet<Integer>();
+				for (int i = 0; i < phrases.size(); i++) {
+					result.addAll(index.find(phrases.get(i)));
+				}
 				switch (operator) {
 				case AND:
 					docNumbers.retainAll(result);
