@@ -94,7 +94,7 @@ public class Index {
 		return getNotEmptyKeys(result);
 	}
 
-	private Map<Integer, Set<Integer>> findWithPositions(String phrase) {
+	public Map<Integer, Set<Integer>> findWithPositions(String phrase) {
 		StringTokenizer tokenizer = new StringTokenizer(phrase);
 		Map<Integer, Set<Integer>> result = null;
 		if (tokenizer.hasMoreTokens()) {
@@ -236,21 +236,7 @@ public class Index {
 		return patents.wordCount(docNumber);
 	}
 
-	public int wordCount(Integer docNumber, String queryTerm) {
-		Map<Integer, Set<Integer>> result = findWithPositions(queryTerm);
-		Set<Integer> list = result.get(docNumber);
-		if (list == null) {
-			return 0;
-		}
-		return list.size();
-	}
-
-	public int wordCount(String queryTerm) {
-		Map<Integer, Set<Integer>> result = findWithPositions(queryTerm);
-		return result.entrySet().stream().mapToInt(e -> e.getValue().size()).sum();
-	}
-
-	public List<String> getTopWords(List<Integer> results) {
+	public List<String> getTopWords(int topK, List<Integer> results) {
 		List<Map<String, Double>> maps = results.stream().map(d -> patents.get(d).getWordFrequencies()).collect(Collectors.toList());
 		Map<String, Double> result = new HashMap<String, Double>();
 		for(Map<String, Double> map : maps) {
@@ -265,7 +251,7 @@ public class Index {
 		}
 		TreeMap<String, Double> sortedResults = sortByValueDescending(result);
 		List<String> topWords = new ArrayList<String>(sortedResults.keySet());
-		return topWords.subList(0, Math.min(10, topWords.size()));
+		return topWords.subList(0, Math.min(topK, topWords.size()));
 	}
 
 	private <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {

@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import de.hpi.ir.yahoogle.Patent;
-
 public class PatentIndex implements Serializable {
 	
 	private static final long serialVersionUID = 5843638652062695334L;

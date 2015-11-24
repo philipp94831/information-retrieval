@@ -115,7 +115,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			List<String> phrases = extractPhrases(queryPlan.get(0));
 			List<Integer> results = index.findRelevant(phrases, topK);
 			if(prf > 0) {
-				List<String> topWords = index.getTopWords(results.subList(0, Math.min(prf, results.size())));
+				List<String> topWords = index.getTopWords(10, results.subList(0, Math.min(prf, results.size())));
 				phrases.addAll(topWords);
 				results = index.findRelevant(phrases, topK);
 			}
