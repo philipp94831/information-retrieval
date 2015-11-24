@@ -29,15 +29,19 @@ public class QLModel extends Model {
 	@Override
 	public Map<Integer, Double> compute(String query) {
 		Map<Integer, Double> results = new HashMap<Integer, Double>();
-		for (Integer docNumber : index.getAllDocNumbers()) {
+		StringTokenizer t = new StringTokenizer(query);
+		int[] cis = new int[t.countTokens()];
+		for(int i = 0; t.hasMoreTokens(); i++) {
+			cis[i] = index.wordCount(t.nextToken());
+		}
+		for (Integer docNumber : index.find(query)) {
 			StringTokenizer tokenizer = new StringTokenizer(query);
 			double result = 0.0;
-			while (tokenizer.hasMoreTokens()) {
+			int ld = index.wordCount(docNumber);
+			for(int i = 0; tokenizer.hasMoreTokens(); i++) {
 				String queryTerm = tokenizer.nextToken();
-				int ld = index.wordCount(docNumber);
 				int fi = index.wordCount(docNumber, queryTerm);
-				int ci = index.wordCount(queryTerm);
-				result += compute(fi, ld, ci);
+				result += compute(fi, ld, cis[i]);
 			}
 			results.put(docNumber, result);
 		}

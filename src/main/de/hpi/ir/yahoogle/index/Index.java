@@ -207,7 +207,7 @@ public class Index {
 		sortedResults.putAll(results);
 		List<Integer> result = new ArrayList<Integer>(sortedResults.keySet());
 		Collections.reverse(result);
-		return result.subList(0, topK);
+		return result.subList(0, Math.min(topK, result.size()));
 	}
 
 	public int wordCount() {
