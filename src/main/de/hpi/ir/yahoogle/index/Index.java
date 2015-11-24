@@ -73,6 +73,11 @@ public class Index {
 	 * @return docnumbers of patents that contain the token
 	 */
 	public Set<Integer> find(String phrase) {
+		Map<Integer, Set<Integer>> result = findWithPositions(phrase);
+		return getNotEmptyKeys(result);
+	}
+
+	private Map<Integer, Set<Integer>> findWithPositions(String phrase) {
 		StringTokenizer tokenizer = new StringTokenizer(phrase);
 		Map<Integer, Set<Integer>> result = null;
 		if (tokenizer.hasMoreTokens()) {
@@ -81,7 +86,7 @@ public class Index {
 		while (tokenizer.hasMoreTokens()) {
 			matchNextPhraseToken(result, findAll(tokenizer.nextToken()));
 		}
-		return getNotEmptyKeys(result);
+		return result;
 	}
 
 	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult) {
@@ -199,9 +204,9 @@ public class Index {
 		return organizedIndex.saveToDisk() && ObjectWriter.writeObject(patents, PATENTS_FILE);
 	}
 
-	public List<Integer> findRelevant(String phrase, int topK) {
+	public List<Integer> findRelevant(List<String> phrases, int topK) {
 		Model model = new QLModel(this);
-		Map<Integer, Double> results = model.compute(phrase);
+		Map<Integer, Double> results = model.compute(phrases);
 		ValueComparator<Integer, Double> comp = new ValueComparator<Integer, Double>(results);
 		TreeMap<Integer, Double> sortedResults =  new TreeMap<Integer, Double>(comp);
 		sortedResults.putAll(results);
@@ -219,7 +224,7 @@ public class Index {
 	}
 
 	public int wordCount(Integer docNumber, String queryTerm) {
-		Map<Integer, Set<Integer>> result = organizedIndex.find(YahoogleUtils.sanitize(queryTerm));
+		Map<Integer, Set<Integer>> result = findWithPositions(queryTerm);
 		Set<Integer> list = result.get(docNumber);
 		if (list == null) {
 			return 0;
@@ -228,7 +233,7 @@ public class Index {
 	}
 
 	public int wordCount(String queryTerm) {
-		Map<Integer, Set<Integer>> result = organizedIndex.find(YahoogleUtils.sanitize(queryTerm));
+		Map<Integer, Set<Integer>> result = findWithPositions(queryTerm);
 		return result.entrySet().stream().mapToInt(e -> e.getValue().size()).sum();
 	}
 

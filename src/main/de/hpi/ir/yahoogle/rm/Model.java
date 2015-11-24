@@ -1,4 +1,5 @@
 package de.hpi.ir.yahoogle.rm;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -28,6 +29,6 @@ public abstract class Model {
 		this.index = index;
 	}
 
-	public abstract Map<Integer, Double> compute(String query);
+	public abstract Map<Integer, Double> compute(List<String> query);
 
 }

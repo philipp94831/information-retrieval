@@ -1,7 +1,11 @@
 package de.hpi.ir.yahoogle.rm;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.index.Index;
 
@@ -27,20 +31,21 @@ public class QLModel extends Model {
 	}
 
 	@Override
-	public Map<Integer, Double> compute(String query) {
+	public Map<Integer, Double> compute(List<String> query) {
 		Map<Integer, Double> results = new HashMap<Integer, Double>();
-		StringTokenizer t = new StringTokenizer(query);
-		int[] cis = new int[t.countTokens()];
-		for(int i = 0; t.hasMoreTokens(); i++) {
-			cis[i] = index.wordCount(t.nextToken());
+		int[] cis = new int[query.size()];
+		List<Set<Integer>> found = new ArrayList<Set<Integer>>();
+		for(int i = 0; i < query.size(); i++) {
+			String phrase = query.get(i);
+			cis[i] = index.wordCount(phrase);
+			found.add(index.find(phrase));
 		}
-		for (Integer docNumber : index.find(query)) {
-			StringTokenizer tokenizer = new StringTokenizer(query);
+		Set<Integer> all = found.stream().flatMap(Collection::stream).collect(Collectors.toSet());
+		for (Integer docNumber : all) {
 			double result = 0.0;
 			int ld = index.wordCount(docNumber);
-			for(int i = 0; tokenizer.hasMoreTokens(); i++) {
-				String queryTerm = tokenizer.nextToken();
-				int fi = index.wordCount(docNumber, queryTerm);
+			for(int i = 0; i < query.size(); i++) {
+				int fi = index.wordCount(docNumber, query.get(i));
 				result += compute(fi, ld, cis[i]);
 			}
 			results.put(docNumber, result);

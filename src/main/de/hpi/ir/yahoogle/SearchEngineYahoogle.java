@@ -112,7 +112,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			return new ArrayList<String>();
 		}
 		if(queryPlan.size() == 1 && !queryPlan.get(0).contains("*")) {
-			return index.matchInventionTitles(index.findRelevant(queryPlan.get(0), topK));			
+			List<String> phrases = extractPhrases(queryPlan.get(0));
+			List<Integer> results = index.findRelevant(phrases, topK);
+			return index.matchInventionTitles(results);
 		}
 		Set<Integer> docNumbers = index.getAllDocNumbers();
 		Operator operator = Operator.AND;
@@ -146,6 +148,28 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		return index.matchInventionTitles(docNumbers);
 	}
 
+	private List<String> extractPhrases(String partialQuery) {
+		List<String> phrases = new ArrayList<String>();
+		StringTokenizer tokenizer = new StringTokenizer(partialQuery);
+		StringBuffer buffer = new StringBuffer();
+		boolean inPhrase = false;
+		while(tokenizer.hasMoreTokens()) {
+			String token = tokenizer.nextToken();
+			if(token.startsWith("'")) {
+				inPhrase = true;
+			}
+			if(token.endsWith("'")) {
+				inPhrase = false;
+			}
+			buffer.append(" " + token.replaceAll("'", ""));
+			if(!inPhrase) {
+				phrases.add(buffer.toString());
+				buffer = new StringBuffer();
+			}
+		}
+		return phrases;
+	}
+
 	private List<String> processQuery(String query) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		List<String> queryPlan = new ArrayList<String>();
@@ -171,7 +195,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 				}
 				break;
 			default:
-				if(!StopWordList.isStopword(token)) {
+				String cleanedToken = token.replaceAll("'", "");
+				if(!StopWordList.isStopword(cleanedToken)) {
 					phrase.append(" " + token);
 				}
 				break;
