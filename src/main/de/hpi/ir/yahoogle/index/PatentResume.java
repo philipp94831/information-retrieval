@@ -11,10 +11,11 @@ public class PatentResume implements Serializable {
 	
 	private String inventionTitle;
 	private int wordCount;
-	private Map<String, Double> wordFrequencies = new HashMap<String, Double>();
+	private String patentAbstract;
 
 	public PatentResume(Patent patent) {
 		this.inventionTitle = patent.getInventionTitle();
+		this.patentAbstract = patent.getPatentAbstract();
 	}
 
 	public String getInventionTitle() {
@@ -33,12 +34,12 @@ public class PatentResume implements Serializable {
 		this.wordCount = wordCount;
 	}
 
-	public Map<String, Double> getWordFrequencies() {
-		return wordFrequencies;
+	public String getPatentAbstract() {
+		return patentAbstract;
 	}
 
-	public void setWordFrequencies(HashMap<String, Double> strippedMap) {
-		this.wordFrequencies = strippedMap;
+	public void setPatentAbstract(String patentAbstract) {
+		this.patentAbstract = patentAbstract;
 	}
 
 }

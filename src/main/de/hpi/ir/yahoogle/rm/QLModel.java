@@ -1,10 +1,11 @@
 package de.hpi.ir.yahoogle.rm;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.index.Index;
@@ -31,8 +32,8 @@ public class QLModel extends Model {
 	}
 
 	@Override
-	public Map<Integer, Double> compute(List<String> query) {
-		Map<Integer, Double> results = new HashMap<Integer, Double>();
+	public List<ModelResult> compute(List<String> query) {
+		List<ModelResult> results = new ArrayList<ModelResult>();
 		int[] cis = new int[query.size()];
 		List<Map<Integer, Set<Integer>>> found = new ArrayList<Map<Integer, Set<Integer>>>();
 		for(int i = 0; i < query.size(); i++) {
@@ -43,14 +44,17 @@ public class QLModel extends Model {
 		}
 		Set<Integer> all = found.stream().map(m -> m.keySet()).flatMap(Collection::stream).collect(Collectors.toSet());
 		for (Integer docNumber : all) {
-			double result = 0.0;
+			ModelResult result = new ModelResult(docNumber);
+			double score = 0.0;
 			int ld = index.wordCount(docNumber);
 			for(int i = 0; i < query.size(); i++) {
-				Set<Integer> list = found.get(i).get(docNumber);
-				int fi = list == null? 0 : list.size();
-				result += compute(fi, ld, cis[i]);
+				Set<Integer> list = found.get(i).getOrDefault(docNumber, new HashSet<Integer>());
+				result.addPositions(query.get(i), list);
+				int fi = list.size();
+				score += compute(fi, ld, cis[i]);
 			}
-			results.put(docNumber, result);
+			result.setScore(score);
+			results.add(result);
 		}
 		return results;
 	}

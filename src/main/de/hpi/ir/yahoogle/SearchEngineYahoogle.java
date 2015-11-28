@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
@@ -38,6 +39,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import de.hpi.ir.yahoogle.index.Index;
+import de.hpi.ir.yahoogle.rm.ModelResult;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
 
@@ -114,13 +116,17 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		}
 		if(queryPlan.size() == 1 && !queryPlan.get(0).contains("*")) {
 			List<String> phrases = extractPhrases(queryPlan.get(0));
-			List<Integer> results = index.findRelevant(phrases, topK);
+			List<ModelResult> results = index.findRelevant(phrases, topK);
+			Map<Integer, String> snippets = index.generateSnippets(results, phrases);
 			if(prf > 0) {
-				List<String> topWords = index.getTopWords(10, results.subList(0, Math.min(prf, results.size())));
-				phrases.addAll(topWords);
-				results = index.findRelevant(phrases, topK);
+				List<String> topWords = index.getTopWords(10, snippets.values());
+				List<String> newPhrases = new ArrayList<String>();
+				newPhrases.addAll(phrases);
+				newPhrases.addAll(topWords);
+				results = index.findRelevant(newPhrases, topK);
+				snippets = index.generateSnippets(results, phrases);
 			}
-			return index.matchInventionTitles(results);
+			return index.generateOutput(results, snippets);
 		}
 		Set<Integer> docNumbers = index.getAllDocNumbers();
 		Operator operator = Operator.AND;

@@ -4,15 +4,19 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.Map.Entry;
 
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
@@ -22,6 +26,7 @@ import de.hpi.ir.yahoogle.YahoogleUtils;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
 import de.hpi.ir.yahoogle.rm.Model;
+import de.hpi.ir.yahoogle.rm.ModelResult;
 import de.hpi.ir.yahoogle.rm.QLModel;
 
 public class Index {
@@ -43,34 +48,19 @@ public class Index {
 		PatentResume resume = new PatentResume(patent);		
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
-		Map<String, Integer> wordFrequencies = new HashMap<String, Integer>();
 		int i = 1;
 		while(tokenizer.hasMoreTokens()) {
 			String token = YahoogleUtils.sanitize(tokenizer.nextToken());
 			if (StopWordList.isStopword(token)) {
 				continue;
 			}
-			i++;
-			Integer freq = wordFrequencies.get(token);
-			if(freq == null) {
-				freq = 0;
-			}
-			freq++;
-			wordFrequencies.put(token, freq);
 			IndexPosting posting = new IndexPosting();
 			posting.setPosition(i);
 			indexBuffer.buffer(token, patent.getDocNumber(), posting);
+			i++;
 		}
 		int wordCount = i - 1;
 		resume.setWordCount(wordCount);
-		TreeMap<String, Integer> sortedResults = sortByValueDescending(wordFrequencies);
-		HashMap<String, Double> strippedMap = new HashMap<String, Double>();
-		Iterator<Entry<String, Integer>> iterator = sortedResults.entrySet().iterator();
-		for(int j = 0; j < 10 && iterator.hasNext(); j++) {
-			Entry<String, Integer> entry = iterator.next();
-			strippedMap.put(entry.getKey(), (entry.getValue()/(double) wordCount));
-		}
-		resume.setWordFrequencies(strippedMap);
 		index(patent.getDocNumber(), resume);
 		if (Runtime.getRuntime().freeMemory() < FLUSH_MEM_THRESHOLD) {
 			flush();
@@ -100,19 +90,19 @@ public class Index {
 		if (tokenizer.hasMoreTokens()) {
 			result = findAll(tokenizer.nextToken());
 		}
-		while (tokenizer.hasMoreTokens()) {
-			matchNextPhraseToken(result, findAll(tokenizer.nextToken()));
+		for (int i = 1; tokenizer.hasMoreTokens(); i++) {
+			matchNextPhraseToken(result, findAll(tokenizer.nextToken()), i);
 		}
 		return result;
 	}
 
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {
-				Set<Integer> possibilities = entry.getValue().stream().map(p -> p + 1).collect(Collectors.toSet());
-				possibilities.retainAll(newPos);
-				result.put(entry.getKey(), possibilities);
+				Set<Integer> oldPos = entry.getValue();
+				oldPos.retainAll(newPos.stream().map(p -> p - delta).collect(Collectors.toSet()));
+				result.put(entry.getKey(), oldPos);
 			} else {
 				result.get(entry.getKey()).clear();
 			}
@@ -204,6 +194,15 @@ public class Index {
 		}
 		return results;
 	}
+	
+	public ArrayList<String> generateOutput(List<ModelResult> results2, Map<Integer, String> snippets) {
+		ArrayList<String> results = new ArrayList<String>();
+		for (ModelResult result : results2) {
+			int docNumber = result.getDocNumber();
+			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getInventionTitle() + "\n" + snippets.get(docNumber));
+		}
+		return results;
+	}
 
 	private void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
 		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
@@ -220,12 +219,11 @@ public class Index {
 		return organizedIndex.saveToDisk() && ObjectWriter.writeObject(patents, PATENTS_FILE);
 	}
 
-	public List<Integer> findRelevant(List<String> phrases, int topK) {
+	public List<ModelResult> findRelevant(List<String> phrases, int topK) {
 		Model model = new QLModel(this);
-		Map<Integer, Double> results = model.compute(phrases);
-		TreeMap<Integer, Double> sortedResults = sortByValueDescending(results);
-		List<Integer> result = new ArrayList<Integer>(sortedResults.keySet());
-		return result.subList(0, Math.min(topK, result.size()));
+		List<ModelResult> results = model.compute(phrases);
+		Collections.sort(results);
+		return results.subList(0, Math.min(topK, results.size()));
 	}
 
 	public int wordCount() {
@@ -236,21 +234,22 @@ public class Index {
 		return patents.wordCount(docNumber);
 	}
 
-	public List<String> getTopWords(int topK, List<Integer> results) {
-		List<Map<String, Double>> maps = results.stream().map(d -> patents.get(d).getWordFrequencies()).collect(Collectors.toList());
-		Map<String, Double> result = new HashMap<String, Double>();
-		for(Map<String, Double> map : maps) {
-			for(Entry<String, Double> entry : map.entrySet()) {
-				Double count = result.get(entry.getKey());
-				if(count == null) {
-					count = 0.0;
+	public List<String> getTopWords(int topK, Collection<String> collection) {
+		Map<String, Integer> topwords = new HashMap<String, Integer>();
+		for(String snippet : collection) {
+			StringTokenizer tokenizer = new StringTokenizer(snippet);
+			while(tokenizer.hasMoreTokens()) {
+				String token = YahoogleUtils.sanitize(tokenizer.nextToken());
+				if (StopWordList.isStopword(token)) {
+					continue;
 				}
-				count += entry.getValue();
-				result.put(entry.getKey(), count);
+				Integer count = topwords.getOrDefault(token, 0);
+				count++;
+				topwords.put(token, count);
 			}
 		}
-		TreeMap<String, Double> sortedResults = sortByValueDescending(result);
-		List<String> topWords = new ArrayList<String>(sortedResults.keySet());
+		TreeMap<String, Integer> sortedWords = sortByValueDescending(topwords);
+		List<String> topWords = new ArrayList<String>(sortedWords.keySet());
 		return topWords.subList(0, Math.min(topK, topWords.size()));
 	}
 
@@ -259,6 +258,62 @@ public class Index {
 		TreeMap<K, V> sortedResults =  new TreeMap<K, V>(comp);
 		sortedResults.putAll(result);
 		return sortedResults;
+	}
+
+	public Map<Integer, String> generateSnippets(List<ModelResult> results, List<String> phrases) {
+		Map<Integer, String> snippets = new HashMap<Integer, String>();
+		final int maxWindowLength = 10;
+		for(ModelResult result : results) {
+			int docNumber = result.getDocNumber();
+			PatentResume resume = patents.get(docNumber);
+			String patentAbstract = resume.getPatentAbstract();
+			StringTokenizer tokenizer = new StringTokenizer(patentAbstract);
+			int numberOfTokens = 0;
+			while(tokenizer.hasMoreTokens()) {
+				String token = YahoogleUtils.sanitize(tokenizer.nextToken());
+				if (StopWordList.isStopword(token)) {
+					continue;
+				}
+				numberOfTokens++;
+			}
+			int bestWindow = 0;
+			int distinctMatchesInBestWindow = 0;
+			int matchesInBestWindow = 0;
+			for(int i = 1; i < Math.max(1, numberOfTokens - maxWindowLength); i++) {
+				int distinctMatches = 0;
+				int matchesInWindow = 0;
+				for(String phrase : phrases) {
+					TreeSet<Integer> positions = new TreeSet<Integer>(result.getPositions(phrase));
+					int tokensInPhrase = new StringTokenizer(phrase).countTokens();
+					int matches = positions.tailSet(i, true).headSet(i + maxWindowLength - tokensInPhrase + 1).size();
+					if(matches > 0) {
+						distinctMatches++;
+					}
+					matchesInWindow += matches;
+				}
+				if (distinctMatchesInBestWindow < distinctMatches || distinctMatchesInBestWindow == distinctMatches && matchesInBestWindow < matchesInWindow) {
+					bestWindow = i;
+					distinctMatchesInBestWindow = distinctMatches;
+					matchesInBestWindow = matchesInWindow;
+				}
+			}
+			tokenizer = new StringTokenizer(patentAbstract);
+			int currentPosition = 1;
+			StringBuilder snippetBuilder = new StringBuilder();
+			while(tokenizer.hasMoreTokens() && currentPosition < bestWindow + maxWindowLength) {
+				String token = tokenizer.nextToken();
+				if(currentPosition >= bestWindow) {
+					snippetBuilder.append(" " + token);
+				}
+				if (StopWordList.isStopword(token)) {
+					continue;
+				}
+				currentPosition++;
+			}
+			String snippet = snippetBuilder.toString().trim();
+			snippets.put(docNumber, snippet);
+		}
+		return snippets;
 	}
 
 }
