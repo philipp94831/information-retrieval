@@ -1,7 +1,6 @@
 package de.hpi.ir.yahoogle.rm;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import de.hpi.ir.yahoogle.index.Index;
 
