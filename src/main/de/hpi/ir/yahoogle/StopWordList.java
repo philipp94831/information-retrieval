@@ -19,7 +19,7 @@ public class StopWordList {
 			BufferedReader br = new BufferedReader(fr);
 			String stopword;
 			while ((stopword = br.readLine()) != null) {
-				stopwords.add(YahoogleUtils.sanitize(stopword));
+				stopwords.add(Stemmer.stem(stopword));
 			}
 			br.close();
 			fr.close();
@@ -33,7 +33,7 @@ public class StopWordList {
 	}
 
 	public static boolean isStopword(String word) {
-		return !word.endsWith("*") && stopwords.contains(YahoogleUtils.sanitize(word));
+		return !word.endsWith("*") && stopwords.contains(Stemmer.stem(word));
 	}
 
 }

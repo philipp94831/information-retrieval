@@ -13,11 +13,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.StopWordList;
 import de.hpi.ir.yahoogle.ValueComparator;
 import de.hpi.ir.yahoogle.YahoogleUtils;
@@ -48,7 +48,7 @@ public class Index {
 		StringTokenizer tokenizer = new StringTokenizer(text);
 		int i = 1;
 		while(tokenizer.hasMoreTokens()) {
-			String token = YahoogleUtils.sanitize(tokenizer.nextToken());
+			String token = Stemmer.stem(tokenizer.nextToken());
 			if (StopWordList.isStopword(token)) {
 				continue;
 			}
@@ -117,7 +117,7 @@ public class Index {
 			}
 			return result;
 		} else {
-			return organizedIndex.find(YahoogleUtils.sanitize(token));
+			return organizedIndex.find(Stemmer.stem(token));
 		}
 	}
 
@@ -237,7 +237,7 @@ public class Index {
 		for(String snippet : collection) {
 			StringTokenizer tokenizer = new StringTokenizer(snippet);
 			while(tokenizer.hasMoreTokens()) {
-				String token = YahoogleUtils.sanitize(tokenizer.nextToken());
+				String token = Stemmer.stem(tokenizer.nextToken());
 				if (StopWordList.isStopword(token)) {
 					continue;
 				}
@@ -259,56 +259,11 @@ public class Index {
 	}
 
 	public Map<Integer, String> generateSnippets(List<ModelResult> results, List<String> phrases) {
+		SnippetGenerator generator = new SnippetGenerator(phrases);
 		Map<Integer, String> snippets = new HashMap<Integer, String>();
-		final int maxWindowLength = 10;
 		for(ModelResult result : results) {
 			int docNumber = result.getDocNumber();
-			PatentResume resume = patents.get(docNumber);
-			String patentAbstract = resume.getPatentAbstract();
-			StringTokenizer tokenizer = new StringTokenizer(patentAbstract);
-			int numberOfTokens = 0;
-			while(tokenizer.hasMoreTokens()) {
-				String token = YahoogleUtils.sanitize(tokenizer.nextToken());
-				if (StopWordList.isStopword(token)) {
-					continue;
-				}
-				numberOfTokens++;
-			}
-			int bestWindow = 0;
-			int distinctMatchesInBestWindow = 0;
-			int matchesInBestWindow = 0;
-			for(int i = 1; i < Math.max(1, numberOfTokens - maxWindowLength); i++) {
-				int distinctMatches = 0;
-				int matchesInWindow = 0;
-				for(String phrase : phrases) {
-					TreeSet<Integer> positions = new TreeSet<Integer>(result.getPositions(phrase));
-					int tokensInPhrase = new StringTokenizer(phrase).countTokens();
-					int matches = positions.tailSet(i, true).headSet(i + maxWindowLength - tokensInPhrase + 1).size();
-					if(matches > 0) {
-						distinctMatches++;
-					}
-					matchesInWindow += matches;
-				}
-				if (distinctMatchesInBestWindow < distinctMatches || distinctMatchesInBestWindow == distinctMatches && matchesInBestWindow < matchesInWindow) {
-					bestWindow = i;
-					distinctMatchesInBestWindow = distinctMatches;
-					matchesInBestWindow = matchesInWindow;
-				}
-			}
-			tokenizer = new StringTokenizer(patentAbstract);
-			int currentPosition = 1;
-			StringBuilder snippetBuilder = new StringBuilder();
-			while(tokenizer.hasMoreTokens() && currentPosition < bestWindow + maxWindowLength) {
-				String token = tokenizer.nextToken();
-				if(currentPosition >= bestWindow) {
-					snippetBuilder.append(" " + token);
-				}
-				if (StopWordList.isStopword(token)) {
-					continue;
-				}
-				currentPosition++;
-			}
-			String snippet = snippetBuilder.toString().trim();
+			String snippet = generator.generate(result, patents.get(docNumber).getPatentAbstract());
 			snippets.put(docNumber, snippet);
 		}
 		return snippets;
