@@ -1,17 +1,13 @@
 package de.hpi.ir.yahoogle.rm;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import de.hpi.ir.yahoogle.Result;
 
-public class ModelResult implements Comparable<ModelResult> {
+public class ModelResult extends Result implements Comparable<ModelResult> {
 	
 	private double score;
-	private int docNumber;
-	private Map<String, Set<Integer>> positions = new HashMap<String, Set<Integer>>();
 	
 	public ModelResult(int docNumber) {
-		this.docNumber = docNumber;
+		super(docNumber);
 	}
 
 	@Override
@@ -25,18 +21,6 @@ public class ModelResult implements Comparable<ModelResult> {
 
 	public void setScore(double score) {
 		this.score = score;
-	}
-
-	public void addPositions(String phrase, Set<Integer> positionList)	{
-		positions.put(phrase, positionList);
-	}
-	
-	public Set<Integer> getPositions(String phrase) {
-		return positions.get(phrase);
-	}
-
-	public int getDocNumber() {
-		return docNumber;
 	}
 
 }

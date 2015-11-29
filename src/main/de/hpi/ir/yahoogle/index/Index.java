@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,14 +11,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.StopWordList;
-import de.hpi.ir.yahoogle.ValueComparator;
 import de.hpi.ir.yahoogle.YahoogleUtils;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
@@ -232,41 +229,8 @@ public class Index {
 		return patents.wordCount(docNumber);
 	}
 
-	public List<String> getTopWords(int topK, Collection<String> collection) {
-		Map<String, Integer> topwords = new HashMap<String, Integer>();
-		for(String snippet : collection) {
-			StringTokenizer tokenizer = new StringTokenizer(snippet);
-			while(tokenizer.hasMoreTokens()) {
-				String token = Stemmer.stem(tokenizer.nextToken());
-				if (StopWordList.isStopword(token)) {
-					continue;
-				}
-				Integer count = topwords.getOrDefault(token, 0);
-				count++;
-				topwords.put(token, count);
-			}
-		}
-		TreeMap<String, Integer> sortedWords = sortByValueDescending(topwords);
-		List<String> topWords = new ArrayList<String>(sortedWords.keySet());
-		return topWords.subList(0, Math.min(topK, topWords.size()));
-	}
-
-	private <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
-		ValueComparator<K, V> comp = new ValueComparator<K, V>(result);
-		TreeMap<K, V> sortedResults =  new TreeMap<K, V>(comp);
-		sortedResults.putAll(result);
-		return sortedResults;
-	}
-
-	public Map<Integer, String> generateSnippets(List<ModelResult> results, List<String> phrases) {
-		SnippetGenerator generator = new SnippetGenerator(phrases);
-		Map<Integer, String> snippets = new HashMap<Integer, String>();
-		for(ModelResult result : results) {
-			int docNumber = result.getDocNumber();
-			String snippet = generator.generate(result, patents.get(docNumber).getPatentAbstract());
-			snippets.put(docNumber, snippet);
-		}
-		return snippets;
+	public PatentResume getPatent(int docNumber) {
+		return patents.get(docNumber);
 	}
 
 }

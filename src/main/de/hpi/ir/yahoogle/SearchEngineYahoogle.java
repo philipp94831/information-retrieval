@@ -24,12 +24,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -115,21 +118,17 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			return new ArrayList<String>();
 		}
 		if(queryPlan.size() == 1 && !queryPlan.get(0).contains("*")) {
-			List<String> phrases = extractPhrases(queryPlan.get(0));
-			List<ModelResult> results = index.findRelevant(phrases, topK);
-			Map<Integer, String> snippets = index.generateSnippets(results, phrases);
-			if(prf > 0) {
-				List<String> topWords = index.getTopWords(10, snippets.values());
-				List<String> newPhrases = new ArrayList<String>();
-				newPhrases.addAll(phrases);
-				newPhrases.addAll(topWords);
-				results = index.findRelevant(newPhrases, topK);
-				snippets = index.generateSnippets(results, phrases);
-			}
-			return index.generateOutput(results, snippets);
+			return searchRelevant(topK, prf, queryPlan);
 		}
-		Set<Integer> docNumbers = index.getAllDocNumbers();
-		Operator operator = Operator.AND;
+		return searchBoolean(queryPlan);
+	}
+
+	private ArrayList<String> searchBoolean(List<String> queryPlan) {
+		Set<Integer> docNumbers = new HashSet<Integer>();
+		Operator operator = Operator.OR;
+		if(queryPlan.get(0).toLowerCase().equals("not")) {
+			docNumbers = index.getAllDocNumbers();
+		}
 		for (String phrase : queryPlan) {
 			switch(phrase.toLowerCase()) {
 			case "and":
@@ -162,6 +161,21 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			}
 		}
 		return index.matchInventionTitles(docNumbers);
+	}
+
+	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {
+		List<String> phrases = extractPhrases(queryPlan.get(0));
+		List<ModelResult> results = index.findRelevant(phrases, Math.max(topK, prf));
+		Map<Integer, String> snippets = generateSnippets(results, phrases);
+		if(prf > 0) {
+			List<String> topWords = getTopWords(10, snippets.values());
+			List<String> newPhrases = new ArrayList<String>();
+			newPhrases.addAll(phrases);
+			newPhrases.addAll(topWords);
+			results = index.findRelevant(newPhrases, topK);
+			snippets = generateSnippets(results, phrases);
+		}
+		return index.generateOutput(results, snippets);
 	}
 
 	private List<String> extractPhrases(String partialQuery) {
@@ -226,6 +240,43 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			}
 		}
 		return queryPlan;
+	}
+
+	public List<String> getTopWords(int topK, Collection<String> collection) {
+		Map<String, Integer> topwords = new HashMap<String, Integer>();
+		for(String snippet : collection) {
+			StringTokenizer tokenizer = new StringTokenizer(snippet);
+			while(tokenizer.hasMoreTokens()) {
+				String token = Stemmer.stem(tokenizer.nextToken());
+				if (StopWordList.isStopword(token)) {
+					continue;
+				}
+				Integer count = topwords.getOrDefault(token, 0);
+				count++;
+				topwords.put(token, count);
+			}
+		}
+		TreeMap<String, Integer> sortedWords = sortByValueDescending(topwords);
+		List<String> topWords = new ArrayList<String>(sortedWords.keySet());
+		return topWords.subList(0, Math.min(topK, topWords.size()));
+	}
+
+	private <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
+		ValueComparator<K, V> comp = new ValueComparator<K, V>(result);
+		TreeMap<K, V> sortedResults =  new TreeMap<K, V>(comp);
+		sortedResults.putAll(result);
+		return sortedResults;
+	}
+
+	public Map<Integer, String> generateSnippets(List<ModelResult> results, List<String> phrases) {
+		SnippetGenerator generator = new SnippetGenerator(phrases);
+		Map<Integer, String> snippets = new HashMap<Integer, String>();
+		for(ModelResult result : results) {
+			int docNumber = result.getDocNumber();
+			String snippet = generator.generate(result, index.getPatent(docNumber).getPatentAbstract());
+			snippets.put(docNumber, snippet);
+		}
+		return snippets;
 	}
 
 }

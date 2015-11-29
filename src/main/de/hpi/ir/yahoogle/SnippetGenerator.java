@@ -1,12 +1,10 @@
-package de.hpi.ir.yahoogle.index;
+package de.hpi.ir.yahoogle;
 
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
-import de.hpi.ir.yahoogle.Stemmer;
-import de.hpi.ir.yahoogle.StopWordList;
 import de.hpi.ir.yahoogle.rm.ModelResult;
 
 public class SnippetGenerator {
