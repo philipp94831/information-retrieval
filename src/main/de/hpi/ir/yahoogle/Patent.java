@@ -5,6 +5,13 @@ public class Patent {
 	private int docNumber;
 	private String inventionTitle;
 	private String patentAbstract;
+	private String fileName;
+	private long titleOffset;
+	private long abstractOffset;
+
+	public Patent(String fileName) {
+		this.fileName = fileName;
+	}
 
 	public int getDocNumber() {
 		return docNumber;
@@ -28,6 +35,26 @@ public class Patent {
 
 	public void setPatentAbstract(String patentAbstract) {
 		this.patentAbstract = patentAbstract;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public long getTitleOffset() {
+		return titleOffset;
+	}
+
+	public void setTitleOffset(long titleOffset) {
+		this.titleOffset = titleOffset;
+	}
+
+	public long getAbstractOffset() {
+		return abstractOffset;
+	}
+
+	public void setAbstractOffset(long abstractOffset) {
+		this.abstractOffset = abstractOffset;
 	}
 
 }

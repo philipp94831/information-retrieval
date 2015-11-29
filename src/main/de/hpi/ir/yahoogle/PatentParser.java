@@ -1,6 +1,7 @@
 package de.hpi.ir.yahoogle;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
@@ -20,6 +21,8 @@ public class PatentParser extends DefaultHandler {
 	private boolean inDocNumber = false;
 	private boolean inTitle = false;
 	private Stack<String> parents;
+	private String fileName;
+	private FileInputStream input;
 
 	public PatentParser(Index index) {
 		super();
@@ -102,7 +105,7 @@ public class PatentParser extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String name, String qName, Attributes atts) {
 		if (isInPatent(qName)) {
-			currentPatent = new Patent();
+			currentPatent = new Patent(fileName);
 		}
 		if (isInAbstract(qName)) {
 			inAbstract = true;
@@ -117,6 +120,22 @@ public class PatentParser extends DefaultHandler {
 			buf = new StringBuffer();
 		}
 		parents.push(qName);
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public FileInputStream getInput() {
+		return input;
+	}
+
+	public void setInput(FileInputStream input) {
+		this.input = input;
 	}
 
 }

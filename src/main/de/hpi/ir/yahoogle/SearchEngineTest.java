@@ -65,7 +65,7 @@ public class SearchEngineTest {
 		long startTime = System.nanoTime();
 		if (create) {
 			System.out.println("Indexing...");
-			myEngine.index("patents.zip");
+			myEngine.index("patents");
 		} else {
 			System.out.println("Loading index...");
 			myEngine.loadIndex("");

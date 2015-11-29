@@ -3,9 +3,9 @@ package de.hpi.ir.yahoogle.io;
 import java.io.IOException;
 
 public class EliasDeltaReader implements AbstractReader {
-	
+
 	private BitReader in;
-	
+
 	public EliasDeltaReader(byte[] bytes, int offset, int length) {
 		in = new BitReader(bytes, offset, length);
 	}
@@ -14,15 +14,15 @@ public class EliasDeltaReader implements AbstractReader {
 	public boolean hasLeft() {
 		return in.hasLeft();
 	}
-	
-	@Override
-	public short readShort() throws IOException {
-		return (short) readInt();
-	}
-	
+
 	@Override
 	public int readInt() throws IOException {
-		int num = 1;
+		return (int) readLong();
+	}
+
+	@Override
+	public long readLong() throws IOException {
+		long num = 1;
 		int len = 1;
 		int lengthOfLen = 0;
 		while (!in.read()) {// potentially dangerous with malformed files.
@@ -41,6 +41,11 @@ public class EliasDeltaReader implements AbstractReader {
 			}
 		}
 		return num;
+	}
+
+	@Override
+	public short readShort() throws IOException {
+		return (short) readInt();
 	}
 
 }

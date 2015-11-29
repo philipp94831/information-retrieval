@@ -1,6 +1,7 @@
 package de.hpi.ir.yahoogle;
 
-
+import java.io.File;
+import java.io.FileInputStream;
 
 /**
  *
@@ -22,10 +23,8 @@ package de.hpi.ir.yahoogle;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -46,6 +42,8 @@ import de.hpi.ir.yahoogle.rm.ModelResult;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
 
+	private static final String PHRASE_DELIMITER = "'";
+	
 	private Index index = new Index();
 
 	public SearchEngineYahoogle() {
@@ -74,17 +72,15 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			xr.setErrorHandler(handler);
 			xr.setEntityResolver(handler);
 			
-			ZipFile zipFile = new ZipFile(directory);
-		    Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			File patents = new File(directory);
 
-		    while(entries.hasMoreElements()){
-		        ZipEntry entry = entries.nextElement();
-		        System.out.println(entry.getName());
-		        InputStream stream = zipFile.getInputStream(entry);
+		    for(File patentFile : patents.listFiles()){
+		        System.out.println(patentFile.getName());
+		        FileInputStream stream = new FileInputStream(patentFile);
+		        handler.setFileName(patentFile.getName());
+		        handler.setInput(stream);
 		        xr.parse(new InputSource(stream));
 		    }
-		    
-		    zipFile.close();
 
 			index.finish();
 			index.write();
@@ -185,13 +181,13 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		boolean inPhrase = false;
 		while(tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
-			if(token.startsWith("'")) {
+			if(token.startsWith(PHRASE_DELIMITER)) {
 				inPhrase = true;
 			}
-			if(token.endsWith("'")) {
+			if(token.endsWith(PHRASE_DELIMITER)) {
 				inPhrase = false;
 			}
-			buffer.append(" " + token.replaceAll("'", ""));
+			buffer.append(" " + token.replaceAll(PHRASE_DELIMITER, ""));
 			if(!inPhrase) {
 				phrases.add(buffer.toString());
 				buffer = new StringBuffer();
@@ -225,7 +221,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 				}
 				break;
 			default:
-				String cleanedToken = token.replaceAll("'", "");
+				String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
 				if(!StopWordList.isStopword(cleanedToken)) {
 					phrase.append(" " + token);
 				}

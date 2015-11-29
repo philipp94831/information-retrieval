@@ -3,17 +3,27 @@ package de.hpi.ir.yahoogle.io;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 public class ByteWriter implements AbstractWriter {
-	
+
 	private ByteArrayOutputStream out;
-	
+
 	public ByteWriter() {
 		out = new ByteArrayOutputStream();
 	}
-	
+
 	public ByteWriter(int size) {
 		out = new ByteArrayOutputStream(size);
+	}
+
+	@Override
+	public byte[] toByteArray() {
+		return out.toByteArray();
+	}
+
+	public void write(byte[] bytes) throws IOException {
+		out.write(bytes);
 	}
 
 	@Override
@@ -22,22 +32,18 @@ public class ByteWriter implements AbstractWriter {
 	}
 
 	@Override
-	public void writeShort(short s) throws IOException {
-		out.write(ByteBuffer.allocate(Short.BYTES).putShort(s).array());
-	}
-	
-	public void write(byte[] bytes) throws IOException {
-		out.write(bytes);
-	}
-	
-	@Override
-	public byte[] toByteArray() {
-		return out.toByteArray();
+	public void writeLong(long l) throws IOException {
+		out.write(ByteBuffer.allocate(Long.BYTES).putLong(l).array());
 	}
 
 	@Override
-	public void writeLong(long l) throws IOException {
-		out.write(ByteBuffer.allocate(Long.BYTES).putLong(l).array());
+	public void writeShort(short s) throws IOException {
+		out.write(ByteBuffer.allocate(Short.BYTES).putShort(s).array());
+	}
+
+	public void writeUTF(String s) throws IOException {
+		writeShort((short) s.length());
+		out.write(s.getBytes(Charset.forName("UTF-8")));
 	}
 
 }
