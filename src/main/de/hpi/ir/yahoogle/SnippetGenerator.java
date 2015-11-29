@@ -5,8 +5,6 @@ import java.util.NavigableSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
-import de.hpi.ir.yahoogle.rm.ModelResult;
-
 public class SnippetGenerator {
 
 	private static final int MAX_WINDOW_LENGTH = 10;
@@ -16,7 +14,7 @@ public class SnippetGenerator {
 		this.phrases = phrases;
 	}
 
-	public String generate(ModelResult result, String patentAbstract) {
+	public String generate(Result result, String patentAbstract) {
 		StringTokenizer tokenizer = new StringTokenizer(patentAbstract);
 		int numberOfTokens = 0;
 		while (tokenizer.hasMoreTokens()) {

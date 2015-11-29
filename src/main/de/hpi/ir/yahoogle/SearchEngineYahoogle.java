@@ -175,10 +175,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 			results = index.findRelevant(newPhrases, topK);
 			snippets = generateSnippets(results, phrases);
 		}
-		return index.generateOutput(results, snippets);
+		return generateOutput(results, snippets);
 	}
 
-	private List<String> extractPhrases(String partialQuery) {
+	private static List<String> extractPhrases(String partialQuery) {
 		List<String> phrases = new ArrayList<String>();
 		StringTokenizer tokenizer = new StringTokenizer(partialQuery);
 		StringBuffer buffer = new StringBuffer();
@@ -200,7 +200,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		return phrases;
 	}
 
-	private List<String> processQuery(String query) {
+	private static List<String> processQuery(String query) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		List<String> queryPlan = new ArrayList<String>();
 		StringBuffer phrase = new StringBuffer();
@@ -242,7 +242,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		return queryPlan;
 	}
 
-	public List<String> getTopWords(int topK, Collection<String> collection) {
+	public static List<String> getTopWords(int topK, Collection<String> collection) {
 		Map<String, Integer> topwords = new HashMap<String, Integer>();
 		for(String snippet : collection) {
 			StringTokenizer tokenizer = new StringTokenizer(snippet);
@@ -261,22 +261,31 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		return topWords.subList(0, Math.min(topK, topWords.size()));
 	}
 
-	private <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
+	private static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
 		ValueComparator<K, V> comp = new ValueComparator<K, V>(result);
 		TreeMap<K, V> sortedResults =  new TreeMap<K, V>(comp);
 		sortedResults.putAll(result);
 		return sortedResults;
 	}
 
-	public Map<Integer, String> generateSnippets(List<ModelResult> results, List<String> phrases) {
+	public Map<Integer, String> generateSnippets(List<? extends Result> results, List<String> phrases) {
 		SnippetGenerator generator = new SnippetGenerator(phrases);
 		Map<Integer, String> snippets = new HashMap<Integer, String>();
-		for(ModelResult result : results) {
+		for(Result result : results) {
 			int docNumber = result.getDocNumber();
 			String snippet = generator.generate(result, index.getPatent(docNumber).getPatentAbstract());
 			snippets.put(docNumber, snippet);
 		}
 		return snippets;
+	}
+	
+	public ArrayList<String> generateOutput(List<ModelResult> results2, Map<Integer, String> snippets) {
+		ArrayList<String> results = new ArrayList<String>();
+		for (ModelResult result : results2) {
+			int docNumber = result.getDocNumber();
+			results.add(String.format("%08d", docNumber) + "\t" + index.getPatent(docNumber).getInventionTitle() + "\n" + snippets.get(docNumber));
+		}
+		return results;
 	}
 
 }

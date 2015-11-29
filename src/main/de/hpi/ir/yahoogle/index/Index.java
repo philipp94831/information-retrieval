@@ -189,17 +189,8 @@ public class Index {
 		}
 		return results;
 	}
-	
-	public ArrayList<String> generateOutput(List<ModelResult> results2, Map<Integer, String> snippets) {
-		ArrayList<String> results = new ArrayList<String>();
-		for (ModelResult result : results2) {
-			int docNumber = result.getDocNumber();
-			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getInventionTitle() + "\n" + snippets.get(docNumber));
-		}
-		return results;
-	}
 
-	private void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
+	private static void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
 		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
 			Set<Integer> l = result.get(entry.getKey());
 			if (l != null) {
