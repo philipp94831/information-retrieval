@@ -21,7 +21,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		initialize(true);
-		printResults(search("'mobile devices'", 10, 2));
+		printResults(search("computer-readable media", 10, 2));
 
 		// long start = System.currentTimeMillis();
 

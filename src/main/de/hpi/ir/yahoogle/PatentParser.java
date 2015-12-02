@@ -1,48 +1,42 @@
 package de.hpi.ir.yahoogle;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Stack;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.XMLEvent;
 
-import de.hpi.ir.yahoogle.index.Index;
+import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.stax2.XMLStreamReader2;
 
-public class PatentParser extends DefaultHandler {
+public class PatentParser {
 
 	private StringBuffer buf = new StringBuffer();
 	private Patent currentPatent;
 	private boolean inAbstract = false;
-	private Index index;
+	private PatentParserCallback callback;
 	private boolean inDocNumber = false;
 	private boolean inTitle = false;
 	private Stack<String> parents;
 	private String fileName;
-	private FileInputStream input;
+	private XMLStreamReader2 xmlStreamReader;
 
-	public PatentParser(Index index) {
-		super();
-		this.index = index;
+	public PatentParser(PatentParserCallback callback) {
+		this.callback = callback;
 	}
 
-	@Override
-	public void characters(char ch[], int start, int length) {
+	public void characters(String ch) {
 		if (inAbstract || inTitle || inDocNumber) {
-			buf.append(ch, start, length);
+			buf.append(ch);
 		}
 	}
 
-	@Override
 	public void endDocument() {
 
 	}
 
-	@Override
-	public void endElement(String uri, String name, String qName) {
+	public void endElement(String qName) {
 		parents.pop();
 		if (isInAbstract(qName)) {
 			inAbstract = false;
@@ -57,23 +51,14 @@ public class PatentParser extends DefaultHandler {
 			currentPatent.setDocNumber(Integer.parseInt(buf.toString()));
 		}
 		if (isInPatent(qName)) {
-			index.add(currentPatent);
+			try {
+				currentPatent.setEnd(xmlStreamReader.getLocationInfo().getEndingByteOffset());
+			} catch (XMLStreamException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			callback.callback(currentPatent);
 		}
-	}
-
-	@Override
-	public void error(SAXParseException ex) throws SAXException {
-		System.out.println("ERROR: [at " + ex.getLineNumber() + "] " + ex);
-	}
-
-	@Override
-	public void fatalError(SAXParseException ex) throws SAXException {
-		System.out.println("FATAL_ERROR: [at " + ex.getLineNumber() + "] " + ex);
-	}
-
-	@Override
-	public void warning(SAXParseException ex) throws SAXException {
-		System.out.println("WARNING: [at " + ex.getLineNumber() + "] " + ex);
 	}
 
 	private boolean isInAbstract(String qName) {
@@ -92,20 +77,14 @@ public class PatentParser extends DefaultHandler {
 		return qName.equals("invention-title");
 	}
 
-	@Override
-	public InputSource resolveEntity(String publicId, String systemId) {
-		return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
-	}
-
-	@Override
 	public void startDocument() {
 		parents = new Stack<String>();
 	}
 
-	@Override
-	public void startElement(String uri, String name, String qName, Attributes atts) {
+	public void startElement(String qName) {
 		if (isInPatent(qName)) {
 			currentPatent = new Patent(fileName);
+			currentPatent.setStart(xmlStreamReader.getLocationInfo().getStartingByteOffset());
 		}
 		if (isInAbstract(qName)) {
 			inAbstract = true;
@@ -130,12 +109,37 @@ public class PatentParser extends DefaultHandler {
 		this.fileName = fileName;
 	}
 
-	public FileInputStream getInput() {
-		return input;
+	public void parse(InputStream stream) throws XMLStreamException {
+        XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory.newFactory();
+        xmlStreamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(stream);
+		parse();
 	}
 
-	public void setInput(FileInputStream input) {
-		this.input = input;
+	private void parse() throws XMLStreamException {
+		startDocument();
+        while(xmlStreamReader.hasNext()){
+            int eventType = xmlStreamReader.next();
+            switch (eventType) {
+            case XMLEvent.START_DOCUMENT:
+            	startDocument();
+            	break;
+            case XMLEvent.END_DOCUMENT:
+            	endDocument();
+            	break;
+            case XMLEvent.START_ELEMENT:
+                startElement(xmlStreamReader.getName().toString());
+                break;
+            case XMLEvent.CHARACTERS:
+                characters(xmlStreamReader.getText());
+                break;
+            case XMLEvent.END_ELEMENT:
+                endElement(xmlStreamReader.getName().toString());
+                break;
+            default:
+                //do nothing
+                break;
+            }
+        }
 	}
 
 }

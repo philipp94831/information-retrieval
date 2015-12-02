@@ -22,7 +22,6 @@ import java.io.FileInputStream;
  */
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,10 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
+
+import javax.xml.stream.XMLStreamException;
 
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.rm.ModelResult;
@@ -64,13 +61,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 	void index(String directory) {
 
 		try {
-			XMLReader xr = XMLReaderFactory.createXMLReader();
-
 			index.create();
 			PatentParser handler = new PatentParser(index);
-			xr.setContentHandler(handler);
-			xr.setErrorHandler(handler);
-			xr.setEntityResolver(handler);
 			
 			File patents = new File(directory);
 
@@ -78,20 +70,16 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 		        System.out.println(patentFile.getName());
 		        FileInputStream stream = new FileInputStream(patentFile);
 		        handler.setFileName(patentFile.getName());
-		        handler.setInput(stream);
-		        xr.parse(new InputSource(stream));
+		        handler.parse(stream);
 		    }
 
 			index.finish();
 			index.write();
 
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (XMLStreamException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.Patent;
+import de.hpi.ir.yahoogle.PatentParserCallback;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.StopWordList;
@@ -24,7 +25,7 @@ import de.hpi.ir.yahoogle.rm.Model;
 import de.hpi.ir.yahoogle.rm.ModelResult;
 import de.hpi.ir.yahoogle.rm.QLModel;
 
-public class Index {
+public class Index implements PatentParserCallback {
 
 	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
 	private static final String PATENTS_FILE = SearchEngineYahoogle.getTeamDirectory() + "/patents.yahoogle";
@@ -39,7 +40,8 @@ public class Index {
 	 * 
 	 * @param patent
 	 */
-	public void add(Patent patent) {
+	@Override
+	public void callback(Patent patent) {
 		PatentResume resume = new PatentResume(patent);		
 		String text = patent.getPatentAbstract();
 		StringTokenizer tokenizer = new StringTokenizer(text);
