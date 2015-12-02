@@ -20,7 +20,7 @@ public class PatentResume implements PatentParserCallback {
 	private String fileName;
 	private long start;
 	private long end;
-
+	private String patentFolder = "patents/";
 	private Patent patent;
 	
 	public PatentResume(Patent patent) {
@@ -41,7 +41,7 @@ public class PatentResume implements PatentParserCallback {
 		if (patent == null) {
 			PatentParser parser = new PatentParser(this);
 			try {
-				RandomAccessFile file = new RandomAccessFile("patents/" + fileName, "r");
+				RandomAccessFile file = new RandomAccessFile(patentFolder + "/" + fileName, "r");
 				byte[] bytes = new byte[(int) (end - start)];
 				file.seek(start);
 				file.read(bytes);
