@@ -39,7 +39,7 @@ import de.hpi.ir.yahoogle.rm.ModelResult;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' with your search engine's name, i.e. SearchEngineMyTeamName
 
-	private static final String PHRASE_DELIMITER = "'";
+	private static final String PHRASE_DELIMITER = "\"";
 	
 	private Index index = new Index();
 

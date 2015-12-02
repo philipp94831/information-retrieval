@@ -1,6 +1,7 @@
 package de.hpi.ir.yahoogle.index;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -15,12 +16,8 @@ import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.PatentParserCallback;
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.StopWordList;
-import de.hpi.ir.yahoogle.YahoogleUtils;
-import de.hpi.ir.yahoogle.io.ObjectReader;
-import de.hpi.ir.yahoogle.io.ObjectWriter;
 import de.hpi.ir.yahoogle.rm.Model;
 import de.hpi.ir.yahoogle.rm.ModelResult;
 import de.hpi.ir.yahoogle.rm.QLModel;
@@ -28,7 +25,6 @@ import de.hpi.ir.yahoogle.rm.QLModel;
 public class Index implements PatentParserCallback {
 
 	private static final long FLUSH_MEM_THRESHOLD = 20 * 1000 * 1000; // 20MB
-	private static final String PATENTS_FILE = SearchEngineYahoogle.getTeamDirectory() + "/patents.yahoogle";
 
 	private LinkedRandomAccessIndex linkedIndex;
 	private OrganizedRandomAccessIndex organizedIndex;
@@ -65,11 +61,16 @@ public class Index implements PatentParserCallback {
 	}
 
 	public boolean create() {
-		boolean status = YahoogleUtils.deleteIfExists(PATENTS_FILE);
 		linkedIndex = LinkedRandomAccessIndex.create();
 		indexBuffer = new IndexBuffer(linkedIndex);
 		patents = new PatentIndex();
-		return status && (linkedIndex != null);
+		try {
+			patents.create();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return (linkedIndex != null) && (patents != null);
 	}
 
 	/**
@@ -170,8 +171,9 @@ public class Index implements PatentParserCallback {
 	public boolean load() {
 		try {
 			organizedIndex = OrganizedRandomAccessIndex.load();
-			patents = (PatentIndex) ObjectReader.readObject(PATENTS_FILE);
-		} catch (FileNotFoundException e) {
+			patents = new PatentIndex();
+			patents.load();
+		} catch (IOException e) {
 			return false;
 		}
 		return (organizedIndex != null) && (patents != null);
@@ -204,7 +206,13 @@ public class Index implements PatentParserCallback {
 	}
 
 	public boolean write() {
-		return organizedIndex.saveToDisk() && ObjectWriter.writeObject(patents, PATENTS_FILE);
+		try {
+			patents.write();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return organizedIndex.saveToDisk();
 	}
 
 	public List<ModelResult> findRelevant(List<String> phrases, int topK) {

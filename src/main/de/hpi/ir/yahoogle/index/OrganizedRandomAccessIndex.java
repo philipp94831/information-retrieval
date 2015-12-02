@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.YahoogleUtils;
@@ -25,11 +26,11 @@ public class OrganizedRandomAccessIndex extends AbstractRandomAccessIndex {
 	public static OrganizedRandomAccessIndex create() {
 		YahoogleUtils.deleteIfExists(OFFSETS_FILE);
 		YahoogleUtils.deleteIfExists(POSTINGS_FILE);
-		return new OrganizedRandomAccessIndex(new OffsetsIndex());
+		return new OrganizedRandomAccessIndex(new OffsetsIndex<String>());
 	}
 
 	public static OrganizedRandomAccessIndex load() throws FileNotFoundException {
-		return new OrganizedRandomAccessIndex((OffsetsIndex) ObjectReader.readObject(OFFSETS_FILE));
+		return new OrganizedRandomAccessIndex(ObjectReader.<OffsetsIndex<String>>readObject(OFFSETS_FILE));
 	}
 
 	public OrganizedRandomAccessIndex() {
@@ -41,7 +42,7 @@ public class OrganizedRandomAccessIndex extends AbstractRandomAccessIndex {
 		}
 	}
 
-	public OrganizedRandomAccessIndex(OffsetsIndex offsets) {
+	public OrganizedRandomAccessIndex(OffsetsIndex<String> offsets) {
 		this();
 		this.offsets = offsets;
 	}
@@ -89,7 +90,7 @@ public class OrganizedRandomAccessIndex extends AbstractRandomAccessIndex {
 	}
 
 	public List<String> getTokensForPrefix(String prefix) {
-		return offsets.getTokensForPrefix(prefix);
+		return offsets.keys().stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
 	}
 	
 	public Set<String> getTokens() {

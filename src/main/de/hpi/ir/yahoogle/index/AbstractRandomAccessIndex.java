@@ -5,6 +5,6 @@ import java.io.RandomAccessFile;
 public abstract class AbstractRandomAccessIndex {
 
 	protected RandomAccessFile index;
-	protected OffsetsIndex offsets;
+	protected OffsetsIndex<String> offsets;
 
 }

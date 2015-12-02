@@ -19,7 +19,7 @@ public class LinkedRandomAccessIndex extends AbstractRandomAccessIndex {
 		return new LinkedRandomAccessIndex();
 	}
 
-	private OffsetsIndex lastOffsets = new OffsetsIndex();
+	private OffsetsIndex<String> lastOffsets = new OffsetsIndex<String>();
 
 	public LinkedRandomAccessIndex() {
 		try {
@@ -28,7 +28,7 @@ public class LinkedRandomAccessIndex extends AbstractRandomAccessIndex {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		offsets = new OffsetsIndex();
+		offsets = new OffsetsIndex<String>();
 	}
 
 	public void add(String token, TokenIndexBuffer value) throws IOException {

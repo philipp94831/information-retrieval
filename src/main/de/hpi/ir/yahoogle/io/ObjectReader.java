@@ -14,11 +14,12 @@ public class ObjectReader {
 	 *            the file where object is stored on disk
 	 * @return deserialized object
 	 */
-	public static Object readObject(String fileName) throws FileNotFoundException {
+	public static <T> T readObject(String fileName) throws FileNotFoundException {
 		try {
 			FileInputStream fin = new FileInputStream(fileName);
 			ObjectInputStream oin = new ObjectInputStream(fin);
-			Object o = oin.readObject();
+			@SuppressWarnings("unchecked")
+			T o = (T) oin.readObject();
 			oin.close();
 			fin.close();
 			return o;

@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -15,9 +14,7 @@ import de.hpi.ir.yahoogle.PatentParserCallback;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class PatentResume implements Serializable, PatentParserCallback {
-	
-	private static final long serialVersionUID = -61787145290197095L;
+public class PatentResume implements PatentParserCallback {
 	
 	private int wordCount;
 	private String fileName;

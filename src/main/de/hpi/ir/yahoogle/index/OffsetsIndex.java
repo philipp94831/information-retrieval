@@ -2,34 +2,28 @@ package de.hpi.ir.yahoogle.index;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public class OffsetsIndex implements Serializable {
+public class OffsetsIndex<K> implements Serializable {
 	
 	private static final long serialVersionUID = -5696921632134023163L;
-	private Map<String, Long> offsets = new HashMap<String, Long>();
+	private Map<K, Long> offsets = new HashMap<K, Long>();
 
-	public void put(String key, long offset) {
+	public void put(K key, long offset) {
 		offsets.put(key, offset);
 	}
 
-	public Long get(String key) {
+	public Long get(K key) {
 		return offsets.get(key);
 	}
 
-	public List<String> getTokensForPrefix(String prefix) {
-		return offsets.keySet().stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
-	}
-
-	public Set<Entry<String, Long>> entrySet() {
+	public Set<Entry<K, Long>> entrySet() {
 		return offsets.entrySet();
 	}
 
-	public Set<String> keys() {
+	public Set<K> keys() {
 		return offsets.keySet();
 	}
 
