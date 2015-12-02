@@ -41,7 +41,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 
 	private static final String PHRASE_DELIMITER = "\"";
 	
-	private Index index = new Index();
+	private Index index;
 
 	public SearchEngineYahoogle() {
 		// This should stay as is! Don't add anything here!
@@ -61,6 +61,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 	void index(String directory) {
 
 		try {
+			index = new Index(directory);
 			index.create();
 			PatentParser handler = new PatentParser(index);
 			
@@ -92,6 +93,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template' w
 
 	@Override
 	boolean loadIndex(String directory) {
+		index = new Index(directory);
 		return index.load();
 	}
 

@@ -15,14 +15,23 @@ import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class PatentResume implements PatentParserCallback {
-	
+
+	public static PatentResume fromByteArray(byte[] bytes) {
+		ByteReader in = new ByteReader(bytes);
+		String fileName = in.readUTF();
+		long start = in.readLong();
+		long end = in.readLong();
+		return new PatentResume(fileName, start, end);
+	}
+
 	private int wordCount;
 	private String fileName;
 	private long start;
 	private long end;
-	private String patentFolder = "patents/";
+	private String patentFolder;
+
 	private Patent patent;
-	
+
 	public PatentResume(Patent patent) {
 		this(patent.getFileName(), patent.getStart(), patent.getEnd());
 	}
@@ -31,6 +40,11 @@ public class PatentResume implements PatentParserCallback {
 		this.fileName = fileName;
 		this.start = start;
 		this.end = end;
+	}
+
+	@Override
+	public void callback(Patent patent) {
+		this.patent = patent;
 	}
 
 	public String getInventionTitle() {
@@ -61,38 +75,33 @@ public class PatentResume implements PatentParserCallback {
 		}
 		return patent;
 	}
-	
-	public byte[] toByteArray() throws IOException {
-		ByteWriter out = new ByteWriter();
-		out.writeUTF(fileName);
-		out.writeLong(start);
-		out.writeLong(end);
-		return out.toByteArray();
+
+	public String getPatentAbstract() {
+		return getPatent().getPatentAbstract();
 	}
-	
-	public static PatentResume fromByteArray(byte[] bytes) {
-		ByteReader in = new ByteReader(bytes);
-		String fileName = in.readUTF();
-		long start = in.readLong();
-		long end = in.readLong();
-		return new PatentResume(fileName, start, end);
+
+	public String getPatentFolder() {
+		return patentFolder;
 	}
 
 	public int getWordCount() {
 		return wordCount;
 	}
 
+	public void setPatentFolder(String patentFolder) {
+		this.patentFolder = patentFolder;
+	}
+
 	public void setWordCount(int wordCount) {
 		this.wordCount = wordCount;
 	}
 
-	public String getPatentAbstract() {		
-		return getPatent().getPatentAbstract();
-	}
-
-	@Override
-	public void callback(Patent patent) {
-		this.patent = patent;
+	public byte[] toByteArray() throws IOException {
+		ByteWriter out = new ByteWriter();
+		out.writeUTF(fileName);
+		out.writeLong(start);
+		out.writeLong(end);
+		return out.toByteArray();
 	}
 
 }

@@ -18,6 +18,11 @@ public class PatentIndex implements Loadable {
 	private OffsetsIndex<Integer> offsets;
 	private int totalWordCount = 0;
 	private RandomAccessFile file;
+	private String patentsFolder;
+	
+	public PatentIndex(String patentsFolder) {
+		this.patentsFolder = patentsFolder;
+	}
 	
 	public void add(int docNumber, PatentResume resume) {
 		totalWordCount += resume.getWordCount();
@@ -53,7 +58,9 @@ public class PatentIndex implements Loadable {
 			int length = file.readInt();
 			byte[] bytes = new byte[length];
 			file.read(bytes);
-			return PatentResume.fromByteArray(bytes);
+			PatentResume resume = PatentResume.fromByteArray(bytes);
+			resume.setPatentFolder(patentsFolder);
+			return resume;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -20,7 +20,7 @@ public class SearchEngineTest {
 
 	public static void main(String args[]) throws Exception {
 
-		initialize(true);
+		initialize("patents/", true);
 		printResults(search("\"mobile devices\"", 10, 0));
 
 		// long start = System.currentTimeMillis();
@@ -61,14 +61,14 @@ public class SearchEngineTest {
 		return results;
 	}
 
-	private static void initialize(boolean create) {
+	private static void initialize(String directory, boolean create) {
 		long startTime = System.nanoTime();
 		if (create) {
 			System.out.println("Indexing...");
-			myEngine.index("patents");
+			myEngine.index(directory);
 		} else {
 			System.out.println("Loading index...");
-			myEngine.loadIndex("");
+			myEngine.loadIndex(directory);
 		}
 		long time = (System.nanoTime() - startTime) / 1000000;
 		System.out.println("Time for index creation: " + time + "ms");

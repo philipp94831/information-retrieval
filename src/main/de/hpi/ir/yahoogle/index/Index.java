@@ -30,6 +30,11 @@ public class Index implements PatentParserCallback {
 	private OrganizedRandomAccessIndex organizedIndex;
 	private PatentIndex patents;
 	private IndexBuffer indexBuffer;
+	private String patentsFolder;
+	
+	public Index(String patentsFolder) {
+		this.patentsFolder = patentsFolder;
+	}
 
 	/**
 	 * processes the patent and adds its tokens to the indexBuffer
@@ -63,7 +68,7 @@ public class Index implements PatentParserCallback {
 	public boolean create() {
 		linkedIndex = LinkedRandomAccessIndex.create();
 		indexBuffer = new IndexBuffer(linkedIndex);
-		patents = new PatentIndex();
+		patents = new PatentIndex(patentsFolder);
 		try {
 			patents.create();
 		} catch (IOException e) {
@@ -171,7 +176,7 @@ public class Index implements PatentParserCallback {
 	public boolean load() {
 		try {
 			organizedIndex = OrganizedRandomAccessIndex.load();
-			patents = new PatentIndex();
+			patents = new PatentIndex(patentsFolder);
 			patents.load();
 		} catch (IOException e) {
 			return false;
