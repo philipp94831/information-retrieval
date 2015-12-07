@@ -194,7 +194,7 @@ public class Index implements PatentParserCallback {
 	public ArrayList<String> matchInventionTitles(Iterable<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
-			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getInventionTitle());
+			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
 		}
 		return results;
 	}

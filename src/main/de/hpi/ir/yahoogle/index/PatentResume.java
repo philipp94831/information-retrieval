@@ -47,37 +47,33 @@ public class PatentResume implements PatentParserCallback {
 		this.patent = patent;
 	}
 
-	public String getInventionTitle() {
-		return getPatent().getInventionTitle();
-	}
-
-	private Patent getPatent() {
+	public Patent getPatent() {
 		if (patent == null) {
-			PatentParser parser = new PatentParser(this);
-			try {
-				RandomAccessFile file = new RandomAccessFile(patentFolder + "/" + fileName, "r");
-				byte[] bytes = new byte[(int) (end - start)];
-				file.seek(start);
-				file.read(bytes);
-				InputStream in = new ByteArrayInputStream(bytes);
-				file.close();
-				parser.parse(in);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (XMLStreamException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			fetchPatent();
 		}
 		return patent;
 	}
 
-	public String getPatentAbstract() {
-		return getPatent().getPatentAbstract();
+	private void fetchPatent() {
+		PatentParser parser = new PatentParser(this);
+		try {
+			RandomAccessFile file = new RandomAccessFile(patentFolder + "/" + fileName, "r");
+			byte[] bytes = new byte[(int) (end - start)];
+			file.seek(start);
+			file.read(bytes);
+			InputStream in = new ByteArrayInputStream(bytes);
+			file.close();
+			parser.parse(in);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (XMLStreamException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public String getPatentFolder() {
