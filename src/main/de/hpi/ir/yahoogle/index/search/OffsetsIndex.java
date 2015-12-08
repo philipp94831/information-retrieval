@@ -65,7 +65,8 @@ public class OffsetsIndex<K> extends Loadable {
 		Set<K> keys = new HashSet<K>();
 		for (Entry<K, Long> entry : skiplist.entrySet()) {
 			file.seek(entry.getValue());
-			byte[] b = new byte[BLOCK_SIZE];
+			int size = file.readInt();
+			byte[] b = new byte[size];
 			file.readFully(b);
 			ByteReader in = new ByteReader(b);
 			while (in.hasLeft()) {
@@ -112,8 +113,10 @@ public class OffsetsIndex<K> extends Loadable {
 
 	private void writeBlock() throws IOException {
 		byte[] bytes = currentBlock.toByteArray();
-		file.writeInt(bytes.length);
-		file.write(bytes);
+		ByteWriter out = new ByteWriter();
+		out.writeInt(bytes.length);
+		out.write(bytes);
+		file.write(out.toByteArray());
 		currentBlock = new ByteWriter(BLOCK_SIZE);
 		currentBlockSize = 0;
 	}

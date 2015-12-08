@@ -13,6 +13,7 @@ import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.index.generation.PatentIndex;
+import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class SearchablePatentIndex extends Loadable {
 
@@ -38,8 +39,10 @@ public class SearchablePatentIndex extends Loadable {
 			long offset = file.length();
 			file.seek(offset);
 			offsets.put(resume.getDocNumber(), offset);
-			file.writeInt(bytes.length);
-			file.write(bytes);
+			ByteWriter out = new ByteWriter();
+			out.writeInt(bytes.length);
+			out.write(bytes);
+			file.write(out.toByteArray());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,6 +53,7 @@ public class SearchablePatentIndex extends Loadable {
 	public void create() throws IOException {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
+		file.seek(TOTAL_WORD_COUNT_OFFSET);
 		file.writeInt(0); // totalWordCount
 		offsets = new OffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
 		offsets.create();

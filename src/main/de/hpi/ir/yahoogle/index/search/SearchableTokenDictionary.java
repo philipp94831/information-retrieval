@@ -18,6 +18,7 @@ import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.generation.TokenDictionary;
 import de.hpi.ir.yahoogle.io.AbstractReader;
 import de.hpi.ir.yahoogle.io.ByteReader;
+import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.EliasDeltaReader;
 
 public class SearchableTokenDictionary extends Loadable {
@@ -148,8 +149,10 @@ public class SearchableTokenDictionary extends Loadable {
 		offsets.put(postingList.getToken(), offset);
 		byte[] bytes = postingList.getBytes();
 		file.seek(offset);
-		file.writeInt(bytes.length);
-		file.write(bytes);
+		ByteWriter out = new ByteWriter();
+		out.writeInt(bytes.length);
+		out.write(bytes);
+		file.write(out.toByteArray());
 	}
 
 }
