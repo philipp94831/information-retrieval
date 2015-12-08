@@ -13,17 +13,17 @@ import org.codehaus.stax2.XMLStreamReader2;
 public class PatentParser {
 
 	private StringBuffer buf = new StringBuffer();
-	private Patent currentPatent;
-	private boolean inAbstract = false;
 	private PatentParserCallback callback;
+	private Patent currentPatent;
+	private String fileName;
+	private boolean inAbstract = false;
 	private boolean inDocNumber = false;
 	private boolean inTitle = false;
 	private Stack<String> parents;
-	private String fileName;
 	private XMLStreamReader2 xmlStreamReader;
 
-	public PatentParser(PatentParserCallback callback) {
-		this.callback = callback;
+	public PatentParser(PatentParserCallback smallIndex) {
+		this.callback = smallIndex;
 	}
 
 	public void characters(String ch) {
@@ -61,6 +61,10 @@ public class PatentParser {
 		}
 	}
 
+	public String getFileName() {
+		return fileName;
+	}
+
 	private boolean isInAbstract(String qName) {
 		return qName.equals("p") && parents.peek().equals("abstract");
 	}
@@ -75,6 +79,44 @@ public class PatentParser {
 
 	private boolean isInTitle(String qName) {
 		return qName.equals("invention-title");
+	}
+
+	private void parse() throws XMLStreamException {
+		startDocument();
+		while (xmlStreamReader.hasNext()) {
+			int eventType = xmlStreamReader.next();
+			switch (eventType) {
+			case XMLEvent.START_DOCUMENT:
+				startDocument();
+				break;
+			case XMLEvent.END_DOCUMENT:
+				endDocument();
+				break;
+			case XMLEvent.START_ELEMENT:
+				startElement(xmlStreamReader.getName().toString());
+				break;
+			case XMLEvent.CHARACTERS:
+				characters(xmlStreamReader.getText());
+				break;
+			case XMLEvent.END_ELEMENT:
+				endElement(xmlStreamReader.getName().toString());
+				break;
+			default:
+				// do nothing
+				break;
+			}
+		}
+		endDocument();
+	}
+
+	public void parse(InputStream stream) throws XMLStreamException {
+		XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory.newFactory();
+		xmlStreamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(stream);
+		parse();
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
 	}
 
 	public void startDocument() {
@@ -99,47 +141,6 @@ public class PatentParser {
 			buf = new StringBuffer();
 		}
 		parents.push(qName);
-	}
-
-	public String getFileName() {
-		return fileName;
-	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-
-	public void parse(InputStream stream) throws XMLStreamException {
-        XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory.newFactory();
-        xmlStreamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(stream);
-		parse();
-	}
-
-	private void parse() throws XMLStreamException {
-		startDocument();
-        while(xmlStreamReader.hasNext()){
-            int eventType = xmlStreamReader.next();
-            switch (eventType) {
-            case XMLEvent.START_DOCUMENT:
-            	startDocument();
-            	break;
-            case XMLEvent.END_DOCUMENT:
-            	endDocument();
-            	break;
-            case XMLEvent.START_ELEMENT:
-                startElement(xmlStreamReader.getName().toString());
-                break;
-            case XMLEvent.CHARACTERS:
-                characters(xmlStreamReader.getText());
-                break;
-            case XMLEvent.END_ELEMENT:
-                endElement(xmlStreamReader.getName().toString());
-                break;
-            default:
-                //do nothing
-                break;
-            }
-        }
 	}
 
 }

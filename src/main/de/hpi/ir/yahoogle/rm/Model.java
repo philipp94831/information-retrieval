@@ -1,4 +1,5 @@
 package de.hpi.ir.yahoogle.rm;
+
 import java.util.List;
 import java.util.StringTokenizer;
 

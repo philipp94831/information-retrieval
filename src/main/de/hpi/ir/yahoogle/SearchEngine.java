@@ -20,44 +20,49 @@ import java.util.ArrayList;
 */
 public abstract class SearchEngine {
 
-        // paths
-	protected static String baseDirectory = "";  /************* Define your baseDirectory here !! ******************/
-        protected static String teamDirectory; // don't change this
-        
-         // we will need these later in the course
-        protected int topK; 
-        protected int prf; 
-        
+	// paths
+	protected static String baseDirectory = "";
+	/************* Define your baseDirectory here !! ******************/
+	protected static String teamDirectory; // don't change this
+
+	protected int prf;
+	// we will need these later in the course
+	protected int topK;
+
 	public SearchEngine() {
-		
-            // the baseDirectory is already defined
-            teamDirectory = baseDirectory + getClass().getSimpleName(); // creates SearchEngineMyTeamName directory
-            new File(teamDirectory).mkdirs();
+
+		// the baseDirectory is already defined
+		teamDirectory = baseDirectory + getClass().getSimpleName(); // creates
+																	// SearchEngineMyTeamName
+																	// directory
+		new File(teamDirectory).mkdirs();
 	}
 
-        // contruct your patent index and save it in a file in the teamDirectory
-        abstract void index(String directory);
-        
-        // load the index's seeklist from the teamDirectory
+	// contruct a compressed version of the index and save it in a file in the
+	// teamDirectory
+	abstract void compressIndex(String directory);
+
+	// contruct your patent index and save it in a file in the teamDirectory
+	abstract void index(String directory);
+
+	// load the seeklist for the compressed index from the teamDirectory
+	abstract boolean loadCompressedIndex(String directory);
+
+	// load the index's seeklist from the teamDirectory
 	abstract boolean loadIndex(String directory);
-        
-        // contruct a compressed version of the index and save it in a file in the teamDirectory
-        abstract void compressIndex(String directory);
 
-        // load the seeklist for the compressed index from the teamDirectory
-        abstract boolean loadCompressedIndex(String directory);
+	// search the index for a given query and return the relevant patent titles
+	// in an ArrayList of Strings
+	abstract ArrayList<String> search(String query, int topK, int prf);
 
-        // search the index for a given query and return the relevant patent titles in an ArrayList of Strings
-        abstract ArrayList<String> search(String query, int topK, int prf);
+	// we will need this later in the course
+	public void setPRF(int value) {
+		prf = value;
+	}
 
-        // we will need this later in the course
-        public void setTopK(int value){
-            topK = value; 
-        }
-        
-        // we will need this later in the course
-        public void setPRF(int value){
-            prf = value;
-        }
-        
+	// we will need this later in the course
+	public void setTopK(int value) {
+		topK = value;
+	}
+
 }

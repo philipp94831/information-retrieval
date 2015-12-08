@@ -3,9 +3,9 @@ package de.hpi.ir.yahoogle.rm;
 import de.hpi.ir.yahoogle.Result;
 
 public class ModelResult extends Result implements Comparable<ModelResult> {
-	
+
 	private double score;
-	
+
 	public ModelResult(int docNumber) {
 		super(docNumber);
 	}
@@ -14,7 +14,7 @@ public class ModelResult extends Result implements Comparable<ModelResult> {
 	public int compareTo(ModelResult o) {
 		return -Double.compare(score, o.score);
 	}
-	
+
 	public double getScore() {
 		return score;
 	}

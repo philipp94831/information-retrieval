@@ -3,11 +3,11 @@ package de.hpi.ir.yahoogle;
 public class Patent {
 
 	private int docNumber;
-	private String fileName;
-	private long start;
 	private long end;
+	private String fileName;
 	private String inventionTitle;
 	private String patentAbstract;
+	private long start;
 
 	public Patent(String fileName) {
 		this.fileName = fileName;
@@ -17,44 +17,44 @@ public class Patent {
 		return docNumber;
 	}
 
-	public void setDocNumber(int docNumber) {
-		this.docNumber = docNumber;
+	public long getEnd() {
+		return end;
 	}
 
 	public String getFileName() {
 		return fileName;
 	}
 
-	public long getStart() {
-		return start;
-	}
-
-	public void setStart(long start) {
-		this.start = start;
-	}
-
-	public long getEnd() {
-		return end;
-	}
-
-	public void setEnd(long end) {
-		this.end = end;
-	}
-
 	public String getInventionTitle() {
 		return inventionTitle;
-	}
-
-	public void setInventionTitle(String inventionTitle) {
-		this.inventionTitle = inventionTitle;
 	}
 
 	public String getPatentAbstract() {
 		return patentAbstract;
 	}
 
+	public long getStart() {
+		return start;
+	}
+
+	public void setDocNumber(int docNumber) {
+		this.docNumber = docNumber;
+	}
+
+	public void setEnd(long end) {
+		this.end = end;
+	}
+
+	public void setInventionTitle(String inventionTitle) {
+		this.inventionTitle = inventionTitle;
+	}
+
 	public void setPatentAbstract(String patentAbstract) {
 		this.patentAbstract = patentAbstract;
+	}
+
+	public void setStart(long start) {
+		this.start = start;
 	}
 
 }

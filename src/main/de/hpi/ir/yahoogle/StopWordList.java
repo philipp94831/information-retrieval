@@ -9,8 +9,8 @@ import java.util.Set;
 
 public class StopWordList {
 
-	private static final String STOPWORDS_FILE = SearchEngineYahoogle.teamDirectory + "/stopwords.txt";
-	private static Set<String> stopwords = new HashSet<String>();;
+	private static Set<String> stopwords = new HashSet<String>();
+	private static final String STOPWORDS_FILE = SearchEngineYahoogle.teamDirectory + "/stopwords.txt";;
 
 	static {
 		FileReader fr;

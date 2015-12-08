@@ -18,10 +18,22 @@ public class SearchEngineTest {
 
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 
+	private static void initialize(String directory, boolean create) {
+		long startTime = System.nanoTime();
+		if (create) {
+			System.out.println("Indexing...");
+			myEngine.index(directory);
+		}
+		System.out.println("Loading index...");
+		myEngine.loadIndex(directory);
+		long time = (System.nanoTime() - startTime) / 1000000;
+		System.out.println("Time for index creation: " + time + "ms");
+	}
+
 	public static void main(String args[]) throws Exception {
 
 		initialize("patents/", true);
-		printResults(search("\"mobile devices\"", 10, 0));
+		printResults(search("\"mobile devices\"", 10, 2));
 
 		// long start = System.currentTimeMillis();
 
@@ -59,19 +71,6 @@ public class SearchEngineTest {
 		long time = (System.nanoTime() - startTime) / 1000000;
 		System.out.println("Time for search: " + time + "ms");
 		return results;
-	}
-
-	private static void initialize(String directory, boolean create) {
-		long startTime = System.nanoTime();
-		if (create) {
-			System.out.println("Indexing...");
-			myEngine.index(directory);
-		} else {
-			System.out.println("Loading index...");
-			myEngine.loadIndex(directory);
-		}
-		long time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for index creation: " + time + "ms");
 	}
 
 }

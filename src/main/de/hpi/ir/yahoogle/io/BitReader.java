@@ -7,7 +7,7 @@ public class BitReader {
 
 	private BitSet in;
 	private int pos = 0;
-	
+
 	public BitReader(byte[] bytes) {
 		in = BitSet.valueOf(bytes);
 	}
@@ -16,14 +16,14 @@ public class BitReader {
 		in = BitSet.valueOf(ByteBuffer.wrap(b, offset, length));
 	}
 
+	public boolean hasLeft() {
+		return pos < in.length();
+	}
+
 	public boolean read() {
 		boolean result = in.get(pos);
 		pos++;
 		return result;
 	}
 
-	public boolean hasLeft() {
-		return pos < in.length();
-	}
-	
 }

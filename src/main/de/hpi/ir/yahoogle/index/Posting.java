@@ -1,7 +1,13 @@
 package de.hpi.ir.yahoogle.index;
 
-public class IndexPosting {
+import java.io.Serializable;
 
+public class Posting implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 406969836377709119L;
 	private int position;
 
 	public int getPosition() {

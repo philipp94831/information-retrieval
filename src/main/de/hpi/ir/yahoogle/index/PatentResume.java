@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -14,32 +15,40 @@ import de.hpi.ir.yahoogle.PatentParserCallback;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class PatentResume implements PatentParserCallback {
+public class PatentResume implements Serializable, PatentParserCallback, Comparable<PatentResume> {
 
-	public static PatentResume fromByteArray(byte[] bytes) {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1426829496447083131L;
+
+	public static PatentResume fromByteArray(int docNumber, byte[] bytes) {
 		ByteReader in = new ByteReader(bytes);
 		String fileName = in.readUTF();
 		long start = in.readLong();
 		long end = in.readLong();
-		return new PatentResume(fileName, start, end);
+		return new PatentResume(docNumber, fileName, start, end);
 	}
+
+	private int docNumber;
+
+	private long end;
+	private String fileName;
+	private transient Patent patent;
+	private transient String patentFolder;
+	private long start;
 
 	private int wordCount;
-	private String fileName;
-	private long start;
-	private long end;
-	private String patentFolder;
 
-	private Patent patent;
-
-	public PatentResume(Patent patent) {
-		this(patent.getFileName(), patent.getStart(), patent.getEnd());
-	}
-
-	public PatentResume(String fileName, long start, long end) {
+	public PatentResume(int docNumber, String fileName, long start, long end) {
+		this.docNumber = docNumber;
 		this.fileName = fileName;
 		this.start = start;
 		this.end = end;
+	}
+
+	public PatentResume(Patent patent) {
+		this(patent.getDocNumber(), patent.getFileName(), patent.getStart(), patent.getEnd());
 	}
 
 	@Override
@@ -47,11 +56,9 @@ public class PatentResume implements PatentParserCallback {
 		this.patent = patent;
 	}
 
-	public Patent getPatent() {
-		if (patent == null) {
-			fetchPatent();
-		}
-		return patent;
+	@Override
+	public int compareTo(PatentResume o) {
+		return Integer.compare(docNumber, o.docNumber);
 	}
 
 	private void fetchPatent() {
@@ -74,6 +81,17 @@ public class PatentResume implements PatentParserCallback {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public int getDocNumber() {
+		return docNumber;
+	}
+
+	public Patent getPatent() {
+		if (patent == null) {
+			fetchPatent();
+		}
+		return patent;
 	}
 
 	public String getPatentFolder() {

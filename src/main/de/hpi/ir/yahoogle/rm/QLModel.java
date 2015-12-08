@@ -1,4 +1,5 @@
 package de.hpi.ir.yahoogle.rm;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,10 +36,10 @@ public class QLModel extends Model {
 		List<ModelResult> results = new ArrayList<ModelResult>();
 		int[] cis = new int[query.size()];
 		List<Map<Integer, Set<Integer>>> found = new ArrayList<Map<Integer, Set<Integer>>>();
-		for(int i = 0; i < query.size(); i++) {
+		for (int i = 0; i < query.size(); i++) {
 			String phrase = query.get(i);
 			Map<Integer, Set<Integer>> result = index.findWithPositions(phrase);
-			found.add(result);			
+			found.add(result);
 			cis[i] = result.entrySet().stream().mapToInt(e -> e.getValue().size()).sum();
 		}
 		Set<Integer> all = found.stream().map(m -> m.keySet()).flatMap(Collection::stream).collect(Collectors.toSet());
@@ -46,7 +47,7 @@ public class QLModel extends Model {
 			ModelResult result = new ModelResult(docNumber);
 			double score = 0.0;
 			int ld = index.wordCount(docNumber);
-			for(int i = 0; i < query.size(); i++) {
+			for (int i = 0; i < query.size(); i++) {
 				Set<Integer> list = found.get(i).getOrDefault(docNumber, new HashSet<Integer>());
 				result.addPositions(query.get(i), list);
 				int fi = list.size();

@@ -14,6 +14,13 @@ public class SnippetGenerator {
 		this.phrases = phrases;
 	}
 
+	private int calculateMiddleAlign(int i, int leftMostPosition, int rightMostPosition) {
+		int leftDelta = leftMostPosition - i;
+		int rightDelta = i + MAX_WINDOW_LENGTH - 1 - rightMostPosition;
+		int middleAlign = leftDelta * leftDelta + rightDelta * rightDelta;
+		return middleAlign;
+	}
+
 	public String generate(Result result, String patentAbstract) {
 		StringTokenizer tokenizer = new StringTokenizer(patentAbstract);
 		int numberOfTokens = 0;
@@ -36,9 +43,7 @@ public class SnippetGenerator {
 			for (String phrase : phrases) {
 				TreeSet<Integer> positions = new TreeSet<Integer>(result.getPositions(phrase));
 				int tokensInPhrase = new StringTokenizer(phrase).countTokens();
-				NavigableSet<Integer> matches = positions
-						.tailSet(i, true)
-						.headSet(i + MAX_WINDOW_LENGTH - tokensInPhrase, true);
+				NavigableSet<Integer> matches = positions.tailSet(i, true).headSet(i + MAX_WINDOW_LENGTH - tokensInPhrase, true);
 				if (matches.size() > 0) {
 					distinctMatches++;
 				}
@@ -46,15 +51,12 @@ public class SnippetGenerator {
 				if (matches.size() > 0) {
 					int left = matches.first();
 					int right = matches.last() + tokensInPhrase - 1;
-					leftMostPosition =  left < leftMostPosition ? left : leftMostPosition;
+					leftMostPosition = left < leftMostPosition ? left : leftMostPosition;
 					rightMostPosition = right > rightMostPosition ? right : rightMostPosition;
 				}
 			}
 			int middleAlign = calculateMiddleAlign(i, leftMostPosition, rightMostPosition);
-			if (distinctMatchesInBestWindow < distinctMatches
-					|| distinctMatchesInBestWindow == distinctMatches && (matchesInBestWindow < matchesInWindow
-							|| matchesInBestWindow <= matchesInWindow && middleAlign < middleAlignInBestWindow)
-					|| distinctMatchesInBestWindow <= distinctMatches && middleAlign < middleAlignInBestWindow) {
+			if (distinctMatchesInBestWindow < distinctMatches || distinctMatchesInBestWindow == distinctMatches && (matchesInBestWindow < matchesInWindow || matchesInBestWindow <= matchesInWindow && middleAlign < middleAlignInBestWindow) || distinctMatchesInBestWindow <= distinctMatches && middleAlign < middleAlignInBestWindow) {
 				bestWindow = i;
 				distinctMatchesInBestWindow = distinctMatches;
 				matchesInBestWindow = matchesInWindow;
@@ -75,13 +77,6 @@ public class SnippetGenerator {
 			currentPosition++;
 		}
 		return snippet.toString().trim();
-	}
-
-	private int calculateMiddleAlign(int i, int leftMostPosition, int rightMostPosition) {
-		int leftDelta = leftMostPosition - i;
-		int rightDelta = i + MAX_WINDOW_LENGTH - 1 - rightMostPosition;
-		int middleAlign = leftDelta * leftDelta + rightDelta * rightDelta;
-		return middleAlign;
 	}
 
 }
