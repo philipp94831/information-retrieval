@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
-import de.hpi.ir.yahoogle.index.generation.PatentIndex;
+import de.hpi.ir.yahoogle.index.generation.PartialPatentIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class SearchablePatentIndex extends Loadable {
+public class PatentIndex extends Loadable {
 
 	private static final String FILE_NAME = "patents";
 
@@ -28,7 +28,7 @@ public class SearchablePatentIndex extends Loadable {
 
 	protected int totalWordCount = 0;
 
-	public SearchablePatentIndex(String patentsFolder) {
+	public PatentIndex(String patentsFolder) {
 		this.patentsFolder = patentsFolder;
 	}
 
@@ -100,7 +100,7 @@ public class SearchablePatentIndex extends Loadable {
 		offsets.load();
 	}
 
-	public void merge(List<PatentIndex> indexes) {
+	public void merge(List<PartialPatentIndex> indexes) {
 		List<Iterator<PatentResume>> iterators = indexes.stream().map(i -> i.iterator()).collect(Collectors.toList());
 		TreeMap<PatentResume, Integer> candidates = new TreeMap<PatentResume, Integer>();
 		for (int i = 0; i < iterators.size(); i++) {

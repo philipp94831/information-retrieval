@@ -13,14 +13,14 @@ import de.hpi.ir.yahoogle.index.Posting;
 import de.hpi.ir.yahoogle.index.PostingList;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class TokenDictionary extends Loadable implements Iterable<BinaryPostingList> {
+public class PartialTokenDictionary extends Loadable implements Iterable<BinaryPostingList> {
 
 	private static final String BASE_NAME = ".dictionary";
 	private Map<String, PostingList> dictionary;
 	private RandomAccessFile file;
 	private String name;
 
-	public TokenDictionary(String name) {
+	public PartialTokenDictionary(String name) {
 		this.name = name;
 	}
 

@@ -13,10 +13,10 @@ import de.hpi.ir.yahoogle.index.Posting;
 public class PartialIndex extends Loadable implements PatentParserCallback {
 
 	private static final String BASE_NAME = ".index";
-	private TokenDictionary dictionary;
+	private PartialTokenDictionary dictionary;
 	private String name;
 
-	private PatentIndex patents;
+	private PartialPatentIndex patents;
 
 	public PartialIndex(String name) {
 		this.name = name;
@@ -60,9 +60,9 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 	@Override
 	public void create() throws IOException {
 		deleteIfExists(fileName());
-		patents = new PatentIndex(name);
+		patents = new PartialPatentIndex(name);
 		patents.create();
-		dictionary = new TokenDictionary(name);
+		dictionary = new PartialTokenDictionary(name);
 		dictionary.create();
 	}
 
@@ -80,19 +80,19 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
 	}
 
-	public TokenDictionary getDictionary() {
+	public PartialTokenDictionary getDictionary() {
 		return dictionary;
 	}
 
-	public PatentIndex getPatents() {
+	public PartialPatentIndex getPatents() {
 		return patents;
 	}
 
 	@Override
 	public void load() throws IOException {
-		patents = new PatentIndex(name);
+		patents = new PartialPatentIndex(name);
 		patents.load();
-		dictionary = new TokenDictionary(name);
+		dictionary = new PartialTokenDictionary(name);
 		dictionary.load();
 	}
 

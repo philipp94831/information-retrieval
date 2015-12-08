@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.index.generation.PartialIndex;
-import de.hpi.ir.yahoogle.index.search.SearchablePatentIndex;
-import de.hpi.ir.yahoogle.index.search.SearchableTokenDictionary;
+import de.hpi.ir.yahoogle.index.search.PatentIndex;
+import de.hpi.ir.yahoogle.index.search.TokenDictionary;
 import de.hpi.ir.yahoogle.rm.Model;
 import de.hpi.ir.yahoogle.rm.ModelResult;
 import de.hpi.ir.yahoogle.rm.QLModel;
@@ -35,9 +35,9 @@ public class Index extends Loadable {
 		}
 	}
 
-	private SearchableTokenDictionary dictionary;
+	private TokenDictionary dictionary;
 	private int indexNumber;
-	private SearchablePatentIndex patents;
+	private PatentIndex patents;
 
 	private String patentsFolder;
 
@@ -53,10 +53,10 @@ public class Index extends Loadable {
 			index.load();
 			indexes.add(index);
 		}
-		patents = new SearchablePatentIndex(patentsFolder);
+		patents = new PatentIndex(patentsFolder);
 		patents.create();
 		patents.merge(indexes.stream().map(i -> i.getPatents()).collect(Collectors.toList()));
-		dictionary = new SearchableTokenDictionary();
+		dictionary = new TokenDictionary();
 		dictionary.create();
 		dictionary.merge(indexes.stream().map(i -> i.getDictionary()).collect(Collectors.toList()));
 		indexes.forEach(e -> e.delete());
@@ -126,9 +126,9 @@ public class Index extends Loadable {
 
 	@Override
 	public void load() throws IOException {
-		patents = new SearchablePatentIndex(patentsFolder);
+		patents = new PatentIndex(patentsFolder);
 		patents.load();
-		dictionary = new SearchableTokenDictionary();
+		dictionary = new TokenDictionary();
 		dictionary.load();
 	}
 

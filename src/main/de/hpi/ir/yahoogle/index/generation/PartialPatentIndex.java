@@ -10,14 +10,14 @@ import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class PatentIndex extends Loadable implements Iterable<PatentResume> {
+public class PartialPatentIndex extends Loadable implements Iterable<PatentResume> {
 
 	private static final String BASE_NAME = ".patents";
 	private String name;
 	private RandomAccessFile file;
 	private Set<PatentResume> patents;
 
-	public PatentIndex(String name) {
+	public PartialPatentIndex(String name) {
 		this.name = name;
 	}
 

@@ -15,13 +15,13 @@ import java.util.stream.Collectors;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.BinaryPostingList;
 import de.hpi.ir.yahoogle.index.Loadable;
-import de.hpi.ir.yahoogle.index.generation.TokenDictionary;
+import de.hpi.ir.yahoogle.index.generation.PartialTokenDictionary;
 import de.hpi.ir.yahoogle.io.AbstractReader;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.EliasDeltaReader;
 
-public class SearchableTokenDictionary extends Loadable {
+public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
 	private RandomAccessFile file;
@@ -107,7 +107,7 @@ public class SearchableTokenDictionary extends Loadable {
 		offsets.load();
 	}
 
-	public void merge(List<TokenDictionary> indexes) throws IOException {
+	public void merge(List<PartialTokenDictionary> indexes) throws IOException {
 		List<Iterator<BinaryPostingList>> iterators = indexes.stream().map(i -> i.iterator())
 				.collect(Collectors.toList());
 		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<BinaryPostingList, Integer>();
