@@ -4,29 +4,33 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 
 public class Tokenizer implements Iterator<String> {
-	
+
 	private StringTokenizer string;
 	private int pos = 0;
 	private boolean skipStopWords = false;
 	private String nextToken;
-	
-	public Tokenizer(String string, boolean skipStopWords) {
-		this(string);
-		this.skipStopWords = skipStopWords;
-	}
-	
+
 	public Tokenizer(String string) {
 		this.string = new StringTokenizer(string);
 	}
 
+	public Tokenizer(String string, boolean skipStopWords) {
+		this(string);
+		this.skipStopWords = skipStopWords;
+	}
+
+	public int getPosition() {
+		return pos;
+	}
+
 	@Override
 	public boolean hasNext() {
-		if(skipStopWords) {
-			if(string.hasMoreTokens()) {
+		if (skipStopWords) {
+			if (string.hasMoreTokens()) {
 				nextToken = string.nextToken();
-				while(StopWordList.isStopword(nextToken)) {
-					if(string.hasMoreTokens()) {
-						nextToken = string.nextToken();					
+				while (StopWordList.isStopword(nextToken)) {
+					if (string.hasMoreTokens()) {
+						nextToken = string.nextToken();
 					} else {
 						return false;
 					}
@@ -43,16 +47,11 @@ public class Tokenizer implements Iterator<String> {
 	@Override
 	public String next() {
 		pos++;
-		if(skipStopWords) {
+		if (skipStopWords) {
 			return nextToken;
-		}
-		else {
+		} else {
 			return string.nextToken();
 		}
-	}
-	
-	public int getPosition() {
-		return pos;
 	}
 
 }

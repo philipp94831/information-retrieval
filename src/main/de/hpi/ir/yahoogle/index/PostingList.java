@@ -44,6 +44,10 @@ public class PostingList implements Serializable, Comparable<PostingList>, Itera
 		}
 	}
 
+	public DocumentPosting get(int i) {
+		return documents.get(i);
+	}
+
 	public String getToken() {
 		return token;
 	}

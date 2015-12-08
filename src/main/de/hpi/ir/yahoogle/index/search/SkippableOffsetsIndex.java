@@ -24,9 +24,9 @@ public class SkippableOffsetsIndex<K> extends Loadable {
 	private RandomAccessFile file;
 	private String name;
 	private KeyReaderWriter<K> reader;
-	
+
 	private TreeMap<K, Long> skiplist;
-	
+
 	public SkippableOffsetsIndex(KeyReaderWriter<K> reader, String name) {
 		this.name = name;
 		this.reader = reader;
@@ -51,10 +51,10 @@ public class SkippableOffsetsIndex<K> extends Loadable {
 		byte[] b = new byte[size];
 		file.read(b);
 		ByteReader in = new ByteReader(b);
-		while(in.hasLeft()) {
+		while (in.hasLeft()) {
 			K newKey = reader.readKey(in);
 			long offset = in.readLong();
-			if(newKey.equals(key)) {
+			if (newKey.equals(key)) {
 				return offset;
 			}
 		}
@@ -63,12 +63,12 @@ public class SkippableOffsetsIndex<K> extends Loadable {
 
 	public Set<K> keys() throws IOException {
 		Set<K> keys = new HashSet<K>();
-		for(Entry<K, Long> entry : skiplist.entrySet()) {
+		for (Entry<K, Long> entry : skiplist.entrySet()) {
 			file.seek(entry.getValue());
 			byte[] b = new byte[BLOCK_SIZE];
 			file.readFully(b);
 			ByteReader in = new ByteReader(b);
-			while(in.hasLeft()) {
+			while (in.hasLeft()) {
 				K key = reader.readKey(in);
 				in.readLong();
 				keys.add(key);
@@ -88,10 +88,10 @@ public class SkippableOffsetsIndex<K> extends Loadable {
 		reader.writeKey(key, out);
 		out.writeLong(offset);
 		byte[] b = out.toByteArray();
-		if(currentBlockSize + b.length > BLOCK_SIZE) {
+		if (currentBlockSize + b.length > BLOCK_SIZE) {
 			writeBlock();
 		}
-		if(currentBlockSize == 0) {
+		if (currentBlockSize == 0) {
 			long skipOffset = file.length();
 			skiplist.put(key, skipOffset);
 		}

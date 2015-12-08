@@ -99,7 +99,8 @@ public class Index extends Loadable {
 			result = findAll(tokenizer.nextToken());
 		}
 		for (int i = 1; tokenizer.hasMoreTokens(); i++) {
-			matchNextPhraseToken(result, findAll(tokenizer.nextToken()), i);
+			Map<Integer, Set<Integer>> newResult = findAll(tokenizer.nextToken());
+			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;
 	}
@@ -109,7 +110,8 @@ public class Index extends Loadable {
 	}
 
 	private Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey())
+				.collect(Collectors.toSet());
 	}
 
 	public PartialIndex getPartialIndex() throws IOException {
@@ -140,12 +142,14 @@ public class Index extends Loadable {
 	public ArrayList<String> matchInventionTitles(Iterable<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
-			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
+			results.add(
+					String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
 		}
 		return results;
 	}
 
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult,
+			int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {

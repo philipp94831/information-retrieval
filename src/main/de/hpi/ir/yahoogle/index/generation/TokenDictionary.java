@@ -43,6 +43,10 @@ public class TokenDictionary extends Loadable implements Iterable<PostingList> {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
 	}
 
+	public Map<String, PostingList> getDict() {
+		return dictionary;
+	}
+
 	@Override
 	public Iterator<PostingList> iterator() {
 		return dictionary.values().iterator();

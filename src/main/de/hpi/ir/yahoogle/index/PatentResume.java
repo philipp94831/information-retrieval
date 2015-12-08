@@ -33,22 +33,23 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 
 	private long end;
 	private String fileName;
+	private TreeMap<Integer, PatentParts> parts = new TreeMap<Integer, PatentParts>();
 	private transient Patent patent;
 	private transient String patentFolder;
 	private long start;
-	private TreeMap<Integer, PatentParts> parts = new TreeMap<Integer, PatentParts>();
 
 	private int wordCount;
 
 	public PatentResume(int docNumber, byte[] bytes) {
 		ByteReader in = new ByteReader(bytes);
+		this.docNumber = docNumber;
 		this.fileName = in.readUTF();
 		this.start = in.readLong();
 		this.end = in.readLong();
 		this.wordCount = in.readInt();
 		this.setTitlePosition(in.readInt());
 		this.setAbstractPosition(in.readInt());
-		
+
 	}
 
 	public PatentResume(Patent patent) {
@@ -56,18 +57,6 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		this.fileName = patent.getFileName();
 		this.start = patent.getStart();
 		this.end = patent.getEnd();
-	}
-	
-	public void setTitlePosition(int pos) {
-		parts.put(pos, PatentParts.TITLE);
-	}
-	
-	public void setAbstractPosition(int pos) {
-		parts.put(pos, PatentParts.ABSTRACT);
-	}
-	
-	public PatentParts getPartAtPosition(int pos) {
-		return parts.floorEntry(pos).getValue();
 	}
 
 	@Override
@@ -106,6 +95,10 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		return docNumber;
 	}
 
+	public PatentParts getPartAtPosition(int pos) {
+		return parts.floorEntry(pos).getValue();
+	}
+
 	public Patent getPatent() {
 		if (patent == null) {
 			fetchPatent();
@@ -117,12 +110,29 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		return patentFolder;
 	}
 
+	public int getPosition(PatentParts part) {
+		for (Entry<Integer, PatentParts> entry : parts.entrySet()) {
+			if (entry.getValue().equals(part)) {
+				return entry.getKey();
+			}
+		}
+		return -1;
+	}
+
 	public int getWordCount() {
 		return wordCount;
 	}
 
+	public void setAbstractPosition(int pos) {
+		parts.put(pos, PatentParts.ABSTRACT);
+	}
+
 	public void setPatentFolder(String patentFolder) {
 		this.patentFolder = patentFolder;
+	}
+
+	public void setTitlePosition(int pos) {
+		parts.put(pos, PatentParts.TITLE);
 	}
 
 	public void setWordCount(int wordCount) {
@@ -138,15 +148,6 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		out.writeInt(getPosition(PatentParts.TITLE));
 		out.writeInt(getPosition(PatentParts.ABSTRACT));
 		return out.toByteArray();
-	}
-	
-	private int getPosition(PatentParts part) {
-		for(Entry<Integer, PatentParts> entry : parts.entrySet()) {
-			if(entry.getValue().equals(part)) {
-				return entry.getKey();
-			}
-		}
-		return -1;		
 	}
 
 }

@@ -156,7 +156,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		ArrayList<String> results = new ArrayList<String>();
 		for (ModelResult result : results2) {
 			int docNumber = result.getDocNumber();
-			results.add(String.format("%08d", docNumber) + "\t" + index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
+			results.add(String.format("%08d", docNumber) + "\t"
+					+ index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
 		}
 		return results;
 	}
@@ -166,7 +167,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		Map<Integer, String> snippets = new HashMap<Integer, String>();
 		for (Result result : results) {
 			int docNumber = result.getDocNumber();
-			String snippet = generator.generate(result, index.getPatent(docNumber).getPatent().getPatentAbstract());
+			String snippet = generator.generate(result, index.getPatent(docNumber));
 			snippets.put(docNumber, snippet);
 		}
 		return snippets;
