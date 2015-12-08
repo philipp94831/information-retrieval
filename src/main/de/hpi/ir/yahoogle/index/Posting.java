@@ -1,13 +1,7 @@
 package de.hpi.ir.yahoogle.index;
 
-import java.io.Serializable;
+public class Posting implements Comparable<Posting> {
 
-public class Posting implements Serializable, Comparable<Posting> {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 406969836377709119L;
 	private int position;
 
 	@Override

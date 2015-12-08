@@ -13,9 +13,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.index.DocumentPosting;
+import de.hpi.ir.yahoogle.index.BinaryPostingList;
 import de.hpi.ir.yahoogle.index.Loadable;
-import de.hpi.ir.yahoogle.index.PostingList;
 import de.hpi.ir.yahoogle.index.generation.TokenDictionary;
 import de.hpi.ir.yahoogle.io.AbstractReader;
 import de.hpi.ir.yahoogle.io.ByteReader;
@@ -31,7 +30,7 @@ public class SearchableTokenDictionary extends Loadable {
 	public void create() throws IOException {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new OffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
+		offsets = new OffsetsIndex<String>(new StringKeyReaderWriter(), FILE_NAME);
 		offsets.create();
 	}
 
@@ -108,32 +107,34 @@ public class SearchableTokenDictionary extends Loadable {
 	}
 
 	public void merge(List<TokenDictionary> indexes) throws IOException {
-		List<Iterator<PostingList>> iterators = indexes.stream().map(i -> i.iterator()).collect(Collectors.toList());
-		TreeMap<PostingList, Integer> candidates = new TreeMap<PostingList, Integer>();
+		List<Iterator<BinaryPostingList>> iterators = indexes.stream().map(i -> i.iterator())
+				.collect(Collectors.toList());
+		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<BinaryPostingList, Integer>();
 		for (int i = 0; i < iterators.size(); i++) {
-			Iterator<PostingList> iterator = iterators.get(i);
+			Iterator<BinaryPostingList> iterator = iterators.get(i);
 			candidates.put(iterator.next(), i);
 		}
-		PostingList currentPostings = null;
+		BinaryPostingList currentPostings = null;
 		while (!candidates.isEmpty()) {
-			Entry<PostingList, Integer> entry = candidates.pollFirstEntry();
-			PostingList postingList = entry.getKey();
-			String token = postingList.getToken();
-			if (currentPostings == null) {
-				currentPostings = new PostingList(token);
-			}
-			if (!token.equals(currentPostings.getToken())) {
-				writePostingList(currentPostings);
-				currentPostings = new PostingList(token);
-			}
-			for (DocumentPosting postings : postingList) {
-				currentPostings.add(postings);
-			}
-			Iterator<PostingList> iterator = iterators.get(entry.getValue());
+			Entry<BinaryPostingList, Integer> entry = candidates.pollFirstEntry();
+			Iterator<BinaryPostingList> iterator = iterators.get(entry.getValue());
 			if (iterator.hasNext()) {
 				candidates.put(iterator.next(), entry.getValue());
 			}
+			BinaryPostingList postingList = entry.getKey();
+			String token = postingList.getToken();
+			if (currentPostings == null) {
+				currentPostings = postingList;
+				continue;
+			}
+			if (!token.equals(currentPostings.getToken())) {
+				writePostingList(currentPostings);
+				currentPostings = postingList;
+			} else {
+				currentPostings.append(postingList.getBytes());
+			}
 		}
+		writePostingList(currentPostings);
 	}
 
 	@Override
@@ -142,10 +143,10 @@ public class SearchableTokenDictionary extends Loadable {
 		offsets.write();
 	}
 
-	public void writePostingList(PostingList postingList) throws IOException {
+	public void writePostingList(BinaryPostingList postingList) throws IOException {
 		long offset = file.length();
 		offsets.put(postingList.getToken(), offset);
-		byte[] bytes = postingList.toByteArray();
+		byte[] bytes = postingList.getBytes();
 		file.seek(offset);
 		file.writeInt(bytes.length);
 		file.write(bytes);

@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -18,12 +17,7 @@ import de.hpi.ir.yahoogle.PatentPart;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class PatentResume implements Serializable, PatentParserCallback, Comparable<PatentResume> {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1426829496447083131L;
+public class PatentResume implements PatentParserCallback, Comparable<PatentResume> {
 
 	public static PatentResume fromByteArray(int docNumber, byte[] bytes) {
 		return new PatentResume(docNumber, bytes);
