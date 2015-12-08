@@ -17,24 +17,6 @@ public class PostingList implements Comparable<PostingList>, Iterable<DocumentPo
 		this.token = token;
 	}
 
-	public byte[] toByteArray() throws IOException {
-		ByteWriter block = new ByteWriter();
-		for (DocumentPosting entry : documents.values()) {
-			AbstractWriter positions = new EliasDeltaWriter();
-			int oldPos = 0;
-			for (Posting posting : entry) {
-				short dp = (short) (posting.getPosition() - oldPos);
-				positions.writeShort(dp);
-				oldPos = posting.getPosition();
-			}
-			byte[] encoded = positions.toByteArray();
-			block.writeInt(entry.getDocNumber()); // docNumber
-			block.writeShort((short) encoded.length); // size of block
-			block.write(encoded);
-		}
-		return block.toByteArray();
-	}
-
 	public void add(DocumentPosting posting) {
 		documents.put(posting.getDocNumber(), posting);
 	}
@@ -67,6 +49,24 @@ public class PostingList implements Comparable<PostingList>, Iterable<DocumentPo
 	@Override
 	public Iterator<DocumentPosting> iterator() {
 		return documents.values().iterator();
+	}
+
+	public byte[] toByteArray() throws IOException {
+		ByteWriter block = new ByteWriter();
+		for (DocumentPosting entry : documents.values()) {
+			AbstractWriter positions = new EliasDeltaWriter();
+			int oldPos = 0;
+			for (Posting posting : entry) {
+				short dp = (short) (posting.getPosition() - oldPos);
+				positions.writeShort(dp);
+				oldPos = posting.getPosition();
+			}
+			byte[] encoded = positions.toByteArray();
+			block.writeInt(entry.getDocNumber()); // docNumber
+			block.writeShort((short) encoded.length); // size of block
+			block.write(encoded);
+		}
+		return block.toByteArray();
 	}
 
 }

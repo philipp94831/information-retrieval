@@ -1,5 +1,5 @@
 package de.hpi.ir.yahoogle;
 
 public enum PatentPart {
-	TITLE, ABSTRACT
+	ABSTRACT, TITLE
 }

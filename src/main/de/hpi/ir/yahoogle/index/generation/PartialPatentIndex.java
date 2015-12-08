@@ -13,8 +13,8 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class PartialPatentIndex extends Loadable implements Iterable<PatentResume> {
 
 	private static final String BASE_NAME = ".patents";
-	private String name;
 	private RandomAccessFile file;
+	private String name;
 	private Set<PatentResume> patents;
 
 	public PartialPatentIndex(String name) {
@@ -31,6 +31,10 @@ public class PartialPatentIndex extends Loadable implements Iterable<PatentResum
 		patents = new TreeSet<PatentResume>();
 	}
 
+	public long currentOffset() throws IOException {
+		return file.getFilePointer();
+	}
+
 	public void delete() throws IOException {
 		file.close();
 		deleteIfExists(fileName());
@@ -38,6 +42,10 @@ public class PartialPatentIndex extends Loadable implements Iterable<PatentResum
 
 	protected String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
+	}
+
+	public long fileSize() throws IOException {
+		return file.length();
 	}
 
 	@Override
@@ -50,24 +58,6 @@ public class PartialPatentIndex extends Loadable implements Iterable<PatentResum
 		file = new RandomAccessFile(fileName(), "rw");
 	}
 
-	@Override
-	public void write() throws IOException {
-		file = new RandomAccessFile(fileName(), "rw");
-		for(PatentResume resume: patents) {
-			byte[] bytes = resume.toByteArray();
-			ByteWriter out = new ByteWriter();
-			out.writeInt(bytes.length);
-			out.writeInt(resume.getDocNumber());
-			out.write(bytes);
-			file.write(out.toByteArray());
-		}
-		file.close();
-	}
-	
-	public long currentOffset() throws IOException {
-		return file.getFilePointer();
-	}
-	
 	public PatentResume read(long offset) throws IOException {
 		file.seek(offset);
 		int size = file.readInt();
@@ -76,9 +66,19 @@ public class PartialPatentIndex extends Loadable implements Iterable<PatentResum
 		file.read(b);
 		return PatentResume.fromByteArray(docNumber, b);
 	}
-	
-	public long fileSize() throws IOException {
-		return file.length();
+
+	@Override
+	public void write() throws IOException {
+		file = new RandomAccessFile(fileName(), "rw");
+		for (PatentResume resume : patents) {
+			byte[] bytes = resume.toByteArray();
+			ByteWriter out = new ByteWriter();
+			out.writeInt(bytes.length);
+			out.writeInt(resume.getDocNumber());
+			out.write(bytes);
+			file.write(out.toByteArray());
+		}
+		file.close();
 	}
 
 }

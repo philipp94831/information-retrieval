@@ -30,8 +30,7 @@ public class SnippetGenerator {
 			for (String phrase : phrases) {
 				TreeSet<Integer> positions = new TreeSet<Integer>(result.getPositions(phrase));
 				int tokensInPhrase = new StringTokenizer(phrase).countTokens();
-				NavigableSet<Integer> matches = positions.tailSet(i, true)
-						.headSet(i + MAX_WINDOW_LENGTH - tokensInPhrase, true);
+				NavigableSet<Integer> matches = positions.tailSet(i, true).headSet(i + MAX_WINDOW_LENGTH - tokensInPhrase, true);
 				if (matches.size() > 0) {
 					window.addDistinctMatch();
 					int left = matches.first() - i;

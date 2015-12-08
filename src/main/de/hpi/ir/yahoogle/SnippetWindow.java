@@ -2,10 +2,10 @@ package de.hpi.ir.yahoogle;
 
 public class SnippetWindow implements Comparable<SnippetWindow> {
 
-	int pos;
 	int distinctMatches = 0;
-	int matches = 0;
 	int leftMostPosition = SnippetGenerator.MAX_WINDOW_LENGTH;
+	int matches = 0;
+	int pos;
 	int rightMostPosition = 0;
 
 	public SnippetWindow(int pos) {
@@ -30,8 +30,7 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 
 	@Override
 	public int compareTo(SnippetWindow o) {
-		if ((distinctMatches < o.distinctMatches) || (distinctMatches == o.distinctMatches)
-				&& ((matches < o.matches) || (matches == o.matches) && (getMiddleAlign() > o.getMiddleAlign()))) {
+		if ((distinctMatches < o.distinctMatches) || (distinctMatches == o.distinctMatches) && ((matches < o.matches) || (matches == o.matches) && (getMiddleAlign() > o.getMiddleAlign()))) {
 			return -1;
 		}
 		return 1;

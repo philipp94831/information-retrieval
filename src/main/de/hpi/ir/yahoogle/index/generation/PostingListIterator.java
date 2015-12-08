@@ -7,9 +7,9 @@ import de.hpi.ir.yahoogle.index.BinaryPostingList;
 
 public class PostingListIterator implements Iterator<BinaryPostingList> {
 
-	private long nextPosition;
 	private PartialTokenDictionary index;
-	
+	private long nextPosition;
+
 	public PostingListIterator(PartialTokenDictionary tokenDictionary) {
 		this.index = tokenDictionary;
 	}

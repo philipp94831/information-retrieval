@@ -36,6 +36,7 @@ import javax.xml.stream.XMLStreamException;
 
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.generation.PartialIndex;
+import de.hpi.ir.yahoogle.index.generation.PartialIndexFactory;
 import de.hpi.ir.yahoogle.rm.ModelResult;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
@@ -154,8 +155,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		ArrayList<String> results = new ArrayList<String>();
 		for (ModelResult result : results2) {
 			int docNumber = result.getDocNumber();
-			results.add(String.format("%08d", docNumber) + "\t"
-					+ index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
+			results.add(String.format("%08d", docNumber) + "\t" + index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
 		}
 		return results;
 	}
@@ -175,12 +175,12 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	void index(String directory) {
 
 		try {
-			index = new Index(directory);
 
+			PartialIndexFactory factory = new PartialIndexFactory();
 			File patents = new File(directory);
 
 			for (File patentFile : patents.listFiles()) {
-				PartialIndex partialIndex = index.getPartialIndex();
+				PartialIndex partialIndex = factory.getPartialIndex();
 				partialIndex.create();
 				PatentParser handler = new PatentParser(partialIndex);
 				System.out.println(patentFile.getName());
@@ -190,7 +190,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				partialIndex.write();
 			}
 
+			index = new Index(directory);
 			index.create();
+			index.mergeIndices(factory.getNames());
 			index.write();
 
 		} catch (IOException e) {

@@ -7,9 +7,9 @@ import de.hpi.ir.yahoogle.index.PatentResume;
 
 public class PatentResumeIterator implements Iterator<PatentResume> {
 
-	private long nextPosition;
 	private PartialPatentIndex index;
-	
+	private long nextPosition;
+
 	public PatentResumeIterator(PartialPatentIndex patentIndex) {
 		this.index = patentIndex;
 	}

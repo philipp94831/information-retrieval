@@ -108,8 +108,7 @@ public class TokenDictionary extends Loadable {
 	}
 
 	public void merge(List<PartialTokenDictionary> indexes) throws IOException {
-		List<Iterator<BinaryPostingList>> iterators = indexes.stream().map(i -> i.iterator())
-				.collect(Collectors.toList());
+		List<Iterator<BinaryPostingList>> iterators = indexes.stream().map(i -> i.iterator()).collect(Collectors.toList());
 		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<BinaryPostingList, Integer>();
 		for (int i = 0; i < iterators.size(); i++) {
 			Iterator<BinaryPostingList> iterator = iterators.get(i);

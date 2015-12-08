@@ -37,6 +37,10 @@ public class PartialTokenDictionary extends Loadable implements Iterable<BinaryP
 		dictionary = new TreeMap<String, PostingList>();
 	}
 
+	public long currentOffset() throws IOException {
+		return file.getFilePointer();
+	}
+
 	public void delete() throws IOException {
 		file.close();
 		deleteIfExists(fileName());
@@ -44,6 +48,10 @@ public class PartialTokenDictionary extends Loadable implements Iterable<BinaryP
 
 	private String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
+	}
+
+	public long fileSize() throws IOException {
+		return file.length();
 	}
 
 	public Map<String, PostingList> getDict() {
@@ -60,21 +68,6 @@ public class PartialTokenDictionary extends Loadable implements Iterable<BinaryP
 		file = new RandomAccessFile(fileName(), "rw");
 	}
 
-	@Override
-	public void write() throws IOException {
-		file = new RandomAccessFile(fileName(), "rw");
-		for(Entry<String, PostingList> entry : dictionary.entrySet()) {
-			PostingList postingList = entry.getValue();
-			byte[] bytes = postingList.toByteArray();
-			ByteWriter out = new ByteWriter();
-			out.writeInt(bytes.length);
-			out.writeUTF(postingList.getToken());
-			out.write(bytes);
-			file.write(out.toByteArray());
-		}
-		file.close();
-	}
-	
 	public BinaryPostingList read(long offset) throws IOException {
 		file.seek(offset);
 		int size = file.readInt();
@@ -84,12 +77,19 @@ public class PartialTokenDictionary extends Loadable implements Iterable<BinaryP
 		return new BinaryPostingList(token, b);
 	}
 
-	public long currentOffset() throws IOException {
-		return file.getFilePointer();
-	}
-
-	public long fileSize() throws IOException {
-		return file.length();
+	@Override
+	public void write() throws IOException {
+		file = new RandomAccessFile(fileName(), "rw");
+		for (Entry<String, PostingList> entry : dictionary.entrySet()) {
+			PostingList postingList = entry.getValue();
+			byte[] bytes = postingList.toByteArray();
+			ByteWriter out = new ByteWriter();
+			out.writeInt(bytes.length);
+			out.writeUTF(postingList.getToken());
+			out.write(bytes);
+			file.write(out.toByteArray());
+		}
+		file.close();
 	}
 
 }

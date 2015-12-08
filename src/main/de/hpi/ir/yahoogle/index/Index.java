@@ -47,19 +47,10 @@ public class Index extends Loadable {
 
 	@Override
 	public void create() throws IOException {
-		List<PartialIndex> indexes = new ArrayList<PartialIndex>();
-		for (int i = 0; i < indexNumber; i++) {
-			PartialIndex index = new PartialIndex(Integer.toString(i));
-			index.load();
-			indexes.add(index);
-		}
 		patents = new PatentIndex(patentsFolder);
 		patents.create();
-		patents.merge(indexes.stream().map(i -> i.getPatents()).collect(Collectors.toList()));
 		dictionary = new TokenDictionary();
 		dictionary.create();
-		dictionary.merge(indexes.stream().map(i -> i.getDictionary()).collect(Collectors.toList()));
-		indexes.forEach(e -> e.delete());
 	}
 
 	/**
@@ -110,8 +101,7 @@ public class Index extends Loadable {
 	}
 
 	private Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey())
-				.collect(Collectors.toSet());
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
 	}
 
 	public PartialIndex getPartialIndex() throws IOException {
@@ -142,14 +132,12 @@ public class Index extends Loadable {
 	public ArrayList<String> matchInventionTitles(Iterable<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
-			results.add(
-					String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
+			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
 		}
 		return results;
 	}
 
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult,
-			int delta) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {
@@ -160,6 +148,18 @@ public class Index extends Loadable {
 				result.get(entry.getKey()).clear();
 			}
 		}
+	}
+
+	public void mergeIndices(List<String> names) throws IOException {
+		List<PartialIndex> indexes = new ArrayList<PartialIndex>();
+		for (String name : names) {
+			PartialIndex index = new PartialIndex(name);
+			index.load();
+			indexes.add(index);
+		}
+		patents.merge(indexes.stream().map(i -> i.getPatents()).collect(Collectors.toList()));
+		dictionary.merge(indexes.stream().map(i -> i.getDictionary()).collect(Collectors.toList()));
+		indexes.forEach(e -> e.delete());
 	}
 
 	@SuppressWarnings("unused")

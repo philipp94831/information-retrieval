@@ -5,10 +5,10 @@ import java.util.StringTokenizer;
 
 public class Tokenizer implements Iterator<String> {
 
-	private StringTokenizer string;
+	private String nextToken;
 	private int pos = 0;
 	private boolean skipStopWords = false;
-	private String nextToken;
+	private StringTokenizer string;
 
 	public Tokenizer(String string) {
 		this.string = new StringTokenizer(string);
