@@ -2,21 +2,27 @@ package de.hpi.ir.yahoogle.rm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import de.hpi.ir.yahoogle.PatentParts;
 import de.hpi.ir.yahoogle.index.Index;
+import de.hpi.ir.yahoogle.index.PatentResume;
 
 public class QLModel extends Model {
 
 	private final double lambda;
 	private final int lc;
+	private Map<PatentParts, Double> partWeights = new HashMap<PatentParts, Double>();
 
 	public QLModel(Index index) {
 		this(index, 0.2);
+		partWeights.put(PatentParts.TITLE, 1.2);
+		partWeights.put(PatentParts.ABSTRACT, 1.0);
 	}
 
 	public QLModel(Index index, double lambda) {
@@ -25,7 +31,7 @@ public class QLModel extends Model {
 		this.lc = index.wordCount();
 	}
 
-	private double compute(int fi, int ld, int ci) {
+	private double compute(double fi, int ld, int ci) {
 		double first = (1 - lambda) * fi / ld;
 		double second = lambda * ci / lc;
 		return Math.log(first + second);
@@ -50,7 +56,8 @@ public class QLModel extends Model {
 			for (int i = 0; i < query.size(); i++) {
 				Set<Integer> list = found.get(i).getOrDefault(docNumber, new HashSet<Integer>());
 				result.addPositions(query.get(i), list);
-				int fi = list.size();
+				PatentResume resume = index.getPatent(docNumber);
+				double fi = list.stream().mapToDouble(pos -> partWeights.get(resume.getPartAtPosition(pos))).sum();
 				score += compute(fi, ld, cis[i]);
 			}
 			result.setScore(score);

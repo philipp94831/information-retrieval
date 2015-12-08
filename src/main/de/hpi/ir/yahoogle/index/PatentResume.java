@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import javax.xml.stream.XMLStreamException;
 
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.PatentParser;
 import de.hpi.ir.yahoogle.PatentParserCallback;
+import de.hpi.ir.yahoogle.PatentParts;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
@@ -23,11 +26,7 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 	private static final long serialVersionUID = -1426829496447083131L;
 
 	public static PatentResume fromByteArray(int docNumber, byte[] bytes) {
-		ByteReader in = new ByteReader(bytes);
-		String fileName = in.readUTF();
-		long start = in.readLong();
-		long end = in.readLong();
-		return new PatentResume(docNumber, fileName, start, end);
+		return new PatentResume(docNumber, bytes);
 	}
 
 	private int docNumber;
@@ -37,18 +36,38 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 	private transient Patent patent;
 	private transient String patentFolder;
 	private long start;
+	private TreeMap<Integer, PatentParts> parts = new TreeMap<Integer, PatentParts>();
 
 	private int wordCount;
 
-	public PatentResume(int docNumber, String fileName, long start, long end) {
-		this.docNumber = docNumber;
-		this.fileName = fileName;
-		this.start = start;
-		this.end = end;
+	public PatentResume(int docNumber, byte[] bytes) {
+		ByteReader in = new ByteReader(bytes);
+		this.fileName = in.readUTF();
+		this.start = in.readLong();
+		this.end = in.readLong();
+		this.wordCount = in.readInt();
+		this.setTitlePosition(in.readInt());
+		this.setAbstractPosition(in.readInt());
+		
 	}
 
 	public PatentResume(Patent patent) {
-		this(patent.getDocNumber(), patent.getFileName(), patent.getStart(), patent.getEnd());
+		this.docNumber = patent.getDocNumber();
+		this.fileName = patent.getFileName();
+		this.start = patent.getStart();
+		this.end = patent.getEnd();
+	}
+	
+	public void setTitlePosition(int pos) {
+		parts.put(pos, PatentParts.TITLE);
+	}
+	
+	public void setAbstractPosition(int pos) {
+		parts.put(pos, PatentParts.ABSTRACT);
+	}
+	
+	public PatentParts getPartAtPosition(int pos) {
+		return parts.floorEntry(pos).getValue();
 	}
 
 	@Override
@@ -115,7 +134,19 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		out.writeUTF(fileName);
 		out.writeLong(start);
 		out.writeLong(end);
+		out.writeInt(wordCount);
+		out.writeInt(getPosition(PatentParts.TITLE));
+		out.writeInt(getPosition(PatentParts.ABSTRACT));
 		return out.toByteArray();
+	}
+	
+	private int getPosition(PatentParts part) {
+		for(Entry<Integer, PatentParts> entry : parts.entrySet()) {
+			if(entry.getValue().equals(part)) {
+				return entry.getKey();
+			}
+		}
+		return -1;		
 	}
 
 }

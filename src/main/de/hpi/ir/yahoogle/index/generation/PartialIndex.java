@@ -1,13 +1,11 @@
 package de.hpi.ir.yahoogle.index.generation;
 
 import java.io.IOException;
-import java.util.StringTokenizer;
-
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.PatentParserCallback;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
-import de.hpi.ir.yahoogle.StopWordList;
+import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.index.Posting;
@@ -32,20 +30,29 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 	@Override
 	public void callback(Patent patent) {
 		PatentResume resume = new PatentResume(patent);
-		String text = patent.getPatentAbstract();
-		StringTokenizer tokenizer = new StringTokenizer(text);
-		int i = 1;
-		while (tokenizer.hasMoreTokens()) {
-			String token = Stemmer.stem(tokenizer.nextToken());
-			if (StopWordList.isStopword(token)) {
-				continue;
-			}
+		int wordCount = 0;
+		int startOffset = 0;
+		resume.setTitlePosition(startOffset + 1);
+		String title = patent.getInventionTitle();
+		Tokenizer tokenizer = new Tokenizer(title, true);
+		while (tokenizer.hasNext()) {
+			String token = Stemmer.stem(tokenizer.next());
 			Posting posting = new Posting();
-			posting.setPosition(i);
+			posting.setPosition(startOffset + tokenizer.getPosition());
 			dictionary.add(token, patent.getDocNumber(), posting);
-			i++;
 		}
-		int wordCount = i - 1;
+		wordCount += tokenizer.getPosition();
+		startOffset += tokenizer.getPosition() + 1;
+		resume.setAbstractPosition(startOffset + 1);
+		String patentAbstract = patent.getPatentAbstract();
+		tokenizer = new Tokenizer(patentAbstract, true);
+		while (tokenizer.hasNext()) {
+			String token = Stemmer.stem(tokenizer.next());
+			Posting posting = new Posting();
+			posting.setPosition(startOffset + tokenizer.getPosition());
+			dictionary.add(token, patent.getDocNumber(), posting);
+		}
+		wordCount += tokenizer.getPosition();
 		resume.setWordCount(wordCount);
 		patents.add(resume);
 	}

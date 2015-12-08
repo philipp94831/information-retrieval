@@ -22,15 +22,11 @@ public class SnippetGenerator {
 	}
 
 	public String generate(Result result, String patentAbstract) {
-		StringTokenizer tokenizer = new StringTokenizer(patentAbstract);
-		int numberOfTokens = 0;
-		while (tokenizer.hasMoreTokens()) {
-			String token = Stemmer.stem(tokenizer.nextToken());
-			if (StopWordList.isStopword(token)) {
-				continue;
-			}
-			numberOfTokens++;
+		Tokenizer tokenizer = new Tokenizer(patentAbstract, true);
+		while (tokenizer.hasNext()) {
+			tokenizer.next();
 		}
+		int numberOfTokens = tokenizer.getPosition() - 1;
 		int bestWindow = 0;
 		int distinctMatchesInBestWindow = 0;
 		int matchesInBestWindow = 0;
@@ -63,11 +59,11 @@ public class SnippetGenerator {
 				middleAlignInBestWindow = middleAlign;
 			}
 		}
-		tokenizer = new StringTokenizer(patentAbstract);
+		StringTokenizer tokenizer2 = new StringTokenizer(patentAbstract);
 		int currentPosition = 1;
 		StringBuilder snippet = new StringBuilder();
-		while (tokenizer.hasMoreTokens() && currentPosition < bestWindow + MAX_WINDOW_LENGTH) {
-			String token = tokenizer.nextToken();
+		while (tokenizer2.hasMoreTokens() && currentPosition < bestWindow + MAX_WINDOW_LENGTH) {
+			String token = tokenizer2.nextToken();
 			if (currentPosition >= bestWindow) {
 				snippet.append(" " + token);
 			}
