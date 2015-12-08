@@ -45,6 +45,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// SearchEngineMyTeamName
 
 	private static final String PHRASE_DELIMITER = "\"";
+	private static final int TOP_WORDS = 4;
 
 	private static List<String> extractPhrases(String partialQuery) {
 		List<String> phrases = new ArrayList<String>();
@@ -75,12 +76,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	public static List<String> getTopWords(int topK, Collection<String> collection) {
 		Map<String, Integer> topwords = new HashMap<String, Integer>();
 		for (String snippet : collection) {
-			StringTokenizer tokenizer = new StringTokenizer(snippet);
-			while (tokenizer.hasMoreTokens()) {
-				String token = Stemmer.stem(tokenizer.nextToken());
-				if (StopWordList.isStopword(token)) {
-					continue;
-				}
+			Tokenizer tokenizer = new Tokenizer(snippet, true);
+			while (tokenizer.hasNext()) {
+				String token = Stemmer.stem(tokenizer.next());
 				Integer count = topwords.getOrDefault(token, 0);
 				count++;
 				topwords.put(token, count);
@@ -279,7 +277,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		List<ModelResult> results = index.findRelevant(phrases, Math.max(topK, prf));
 		Map<Integer, String> snippets = generateSnippets(results, phrases);
 		if (prf > 0) {
-			List<String> topWords = getTopWords(10, snippets.values());
+			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());
 			List<String> newPhrases = new ArrayList<String>();
 			newPhrases.addAll(phrases);
 			newPhrases.addAll(topWords);

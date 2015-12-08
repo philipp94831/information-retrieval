@@ -25,13 +25,13 @@ public class SearchableTokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
 	private RandomAccessFile file;
-	private SkippableOffsetsIndex<String> offsets;
+	private OffsetsIndex<String> offsets;
 
 	@Override
 	public void create() throws IOException {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new SkippableOffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
+		offsets = new OffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
 		offsets.create();
 	}
 
@@ -103,7 +103,7 @@ public class SearchableTokenDictionary extends Loadable {
 	@Override
 	public void load() throws IOException {
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new SkippableOffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
+		offsets = new OffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
 		offsets.load();
 	}
 

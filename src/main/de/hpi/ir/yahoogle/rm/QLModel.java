@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.hpi.ir.yahoogle.PatentParts;
+import de.hpi.ir.yahoogle.PatentPart;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 
@@ -17,12 +17,12 @@ public class QLModel extends Model {
 
 	private final double lambda;
 	private final int lc;
-	private Map<PatentParts, Double> partWeights = new HashMap<PatentParts, Double>();
+	private Map<PatentPart, Double> partWeights = new HashMap<PatentPart, Double>();
 
 	public QLModel(Index index) {
 		this(index, 0.2);
-		partWeights.put(PatentParts.TITLE, 1.2);
-		partWeights.put(PatentParts.ABSTRACT, 1.0);
+		partWeights.put(PatentPart.TITLE, 1.2);
+		partWeights.put(PatentPart.ABSTRACT, 1.0);
 	}
 
 	public QLModel(Index index, double lambda) {

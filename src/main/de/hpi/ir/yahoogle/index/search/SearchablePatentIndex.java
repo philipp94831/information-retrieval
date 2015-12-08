@@ -21,7 +21,7 @@ public class SearchablePatentIndex extends Loadable {
 	protected static final long TOTAL_WORD_COUNT_OFFSET = 0;
 	protected RandomAccessFile file;
 
-	private SkippableOffsetsIndex<Integer> offsets;
+	private OffsetsIndex<Integer> offsets;
 
 	private String patentsFolder;
 
@@ -51,7 +51,7 @@ public class SearchablePatentIndex extends Loadable {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
 		file.writeInt(0); // totalWordCount
-		offsets = new SkippableOffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
+		offsets = new OffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
 		offsets.create();
 	}
 
@@ -92,7 +92,7 @@ public class SearchablePatentIndex extends Loadable {
 		file = new RandomAccessFile(fileName(), "rw");
 		file.seek(TOTAL_WORD_COUNT_OFFSET);
 		this.totalWordCount = file.readInt();
-		offsets = new SkippableOffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
+		offsets = new OffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
 		offsets.load();
 	}
 

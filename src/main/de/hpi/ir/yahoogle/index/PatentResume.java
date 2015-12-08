@@ -14,7 +14,7 @@ import javax.xml.stream.XMLStreamException;
 import de.hpi.ir.yahoogle.Patent;
 import de.hpi.ir.yahoogle.PatentParser;
 import de.hpi.ir.yahoogle.PatentParserCallback;
-import de.hpi.ir.yahoogle.PatentParts;
+import de.hpi.ir.yahoogle.PatentPart;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
@@ -33,7 +33,7 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 
 	private long end;
 	private String fileName;
-	private TreeMap<Integer, PatentParts> parts = new TreeMap<Integer, PatentParts>();
+	private TreeMap<Integer, PatentPart> parts = new TreeMap<Integer, PatentPart>();
 	private transient Patent patent;
 	private transient String patentFolder;
 	private long start;
@@ -95,7 +95,7 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		return docNumber;
 	}
 
-	public PatentParts getPartAtPosition(int pos) {
+	public PatentPart getPartAtPosition(int pos) {
 		return parts.floorEntry(pos).getValue();
 	}
 
@@ -110,8 +110,8 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		return patentFolder;
 	}
 
-	public int getPosition(PatentParts part) {
-		for (Entry<Integer, PatentParts> entry : parts.entrySet()) {
+	public int getPosition(PatentPart part) {
+		for (Entry<Integer, PatentPart> entry : parts.entrySet()) {
 			if (entry.getValue().equals(part)) {
 				return entry.getKey();
 			}
@@ -124,7 +124,7 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 	}
 
 	public void setAbstractPosition(int pos) {
-		parts.put(pos, PatentParts.ABSTRACT);
+		parts.put(pos, PatentPart.ABSTRACT);
 	}
 
 	public void setPatentFolder(String patentFolder) {
@@ -132,7 +132,7 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 	}
 
 	public void setTitlePosition(int pos) {
-		parts.put(pos, PatentParts.TITLE);
+		parts.put(pos, PatentPart.TITLE);
 	}
 
 	public void setWordCount(int wordCount) {
@@ -145,8 +145,8 @@ public class PatentResume implements Serializable, PatentParserCallback, Compara
 		out.writeLong(start);
 		out.writeLong(end);
 		out.writeInt(wordCount);
-		out.writeInt(getPosition(PatentParts.TITLE));
-		out.writeInt(getPosition(PatentParts.ABSTRACT));
+		out.writeInt(getPosition(PatentPart.TITLE));
+		out.writeInt(getPosition(PatentPart.ABSTRACT));
 		return out.toByteArray();
 	}
 

@@ -23,7 +23,7 @@ public class SnippetGenerator {
 			tokenizer.next();
 		}
 		int numberOfTokens = tokenizer.getPosition() - 1;
-		int start = resume.getPosition(PatentParts.ABSTRACT);
+		int start = resume.getPosition(PatentPart.ABSTRACT);
 		SnippetWindow bestWindow = new SnippetWindow(start);
 		for (int i = start; i <= Math.max(1, start + numberOfTokens - MAX_WINDOW_LENGTH); i++) {
 			SnippetWindow window = new SnippetWindow(i);

@@ -30,8 +30,8 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 
 	@Override
 	public int compareTo(SnippetWindow o) {
-		if (distinctMatches < o.distinctMatches || distinctMatches == o.distinctMatches
-				&& (matches < o.matches || matches == o.matches && getMiddleAlign() < o.getMiddleAlign())) {
+		if ((distinctMatches < o.distinctMatches) || (distinctMatches == o.distinctMatches)
+				&& ((matches < o.matches) || (matches == o.matches) && (getMiddleAlign() > o.getMiddleAlign()))) {
 			return -1;
 		}
 		return 1;

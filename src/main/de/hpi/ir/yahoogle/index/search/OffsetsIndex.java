@@ -14,7 +14,7 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
 
-public class SkippableOffsetsIndex<K> extends Loadable {
+public class OffsetsIndex<K> extends Loadable {
 
 	private static final String BASE_NAME = ".offsets";
 	private static final int BLOCK_SIZE = 16 * 1024 - Integer.BYTES;
@@ -27,7 +27,7 @@ public class SkippableOffsetsIndex<K> extends Loadable {
 
 	private TreeMap<K, Long> skiplist;
 
-	public SkippableOffsetsIndex(KeyReaderWriter<K> reader, String name) {
+	public OffsetsIndex(KeyReaderWriter<K> reader, String name) {
 		this.name = name;
 		this.reader = reader;
 	}
