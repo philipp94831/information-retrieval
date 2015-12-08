@@ -29,7 +29,8 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 
 	@Override
 	public int compareTo(BinaryPostingList o) {
-		return token.compareTo(o.token);
+		int comp = token.compareTo(o.token);
+		return comp == 0? 1 : comp;
 	}
 
 
