@@ -2,7 +2,6 @@ package de.hpi.ir.yahoogle.index.search;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -52,7 +51,7 @@ public class SearchablePatentIndex extends Loadable {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
 		file.writeInt(0); // totalWordCount
-		offsets = new SkippableOffsetsIndex<Integer>(FILE_NAME);
+		offsets = new SkippableOffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
 		offsets.create();
 	}
 
@@ -75,7 +74,13 @@ public class SearchablePatentIndex extends Loadable {
 	}
 
 	public Set<Integer> getAllDocNumbers() {
-		return new HashSet<Integer>(offsets.keys());
+		try {
+			return offsets.keys();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public int getTotalWordCount() {
@@ -87,7 +92,7 @@ public class SearchablePatentIndex extends Loadable {
 		file = new RandomAccessFile(fileName(), "rw");
 		file.seek(TOTAL_WORD_COUNT_OFFSET);
 		this.totalWordCount = file.readInt();
-		offsets = new SkippableOffsetsIndex<Integer>(FILE_NAME);
+		offsets = new SkippableOffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
 		offsets.load();
 	}
 

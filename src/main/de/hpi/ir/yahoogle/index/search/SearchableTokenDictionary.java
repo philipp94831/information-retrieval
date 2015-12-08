@@ -31,7 +31,7 @@ public class SearchableTokenDictionary extends Loadable {
 	public void create() throws IOException {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new SkippableOffsetsIndex<>(FILE_NAME);
+		offsets = new SkippableOffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
 		offsets.create();
 	}
 
@@ -41,50 +41,69 @@ public class SearchableTokenDictionary extends Loadable {
 
 	public Map<Integer, Set<Integer>> find(String token) {
 		Map<Integer, Set<Integer>> docNumbers = new HashMap<Integer, Set<Integer>>();
-		Long offset = offsets.get(token);
-		if (offset != null) {
-			try {
-				file.seek(offset);
-				int size = file.readInt();
-				byte[] b = new byte[size];
-				file.readFully(b);
-				int i = 0;
-				while (i < b.length) {
-					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
-					i += Integer.BYTES + Short.BYTES;
-					int docNumber = in.readInt();
-					short bsize = in.readShort();
-					in = new EliasDeltaReader(b, i, bsize);
-					Set<Integer> pos = new HashSet<Integer>();
-					int oldPos = 0;
-					while (in.hasLeft()) {
-						short p = in.readShort();
-						pos.add(oldPos + p);
-						oldPos += p;
+		Long offset;
+		try {
+			offset = offsets.get(token);
+			if (offset != null) {
+				try {
+					file.seek(offset);
+					int size = file.readInt();
+					byte[] b = new byte[size];
+					file.readFully(b);
+					int i = 0;
+					while (i < b.length) {
+						AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
+						i += Integer.BYTES + Short.BYTES;
+						int docNumber = in.readInt();
+						short bsize = in.readShort();
+						in = new EliasDeltaReader(b, i, bsize);
+						Set<Integer> pos = new HashSet<Integer>();
+						int oldPos = 0;
+						while (in.hasLeft()) {
+							short p = in.readShort();
+							pos.add(oldPos + p);
+							oldPos += p;
+						}
+						docNumbers.put(docNumber, pos);
+						i += bsize;
 					}
-					docNumbers.put(docNumber, pos);
-					i += bsize;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+			return docNumbers;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return docNumbers;
+		return null;
 	}
 
 	public Set<String> getTokens() {
-		return offsets.keys();
+		try {
+			return offsets.keys();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public List<String> getTokensForPrefix(String prefix) {
-		return offsets.keys().stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
+		try {
+			return offsets.keys().stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
 	public void load() throws IOException {
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new SkippableOffsetsIndex<>(FILE_NAME);
+		offsets = new SkippableOffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
 		offsets.load();
 	}
 
