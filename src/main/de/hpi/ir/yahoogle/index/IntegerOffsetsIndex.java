@@ -20,5 +20,4 @@ public class IntegerOffsetsIndex extends OffsetsIndex<Integer> {
 	protected void writeKey(Integer key, ByteWriter out) throws IOException {
 		out.writeInt(key);
 	}
-
 }

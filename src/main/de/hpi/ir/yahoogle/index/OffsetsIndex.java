@@ -22,7 +22,6 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	private int currentBlockSize = 0;
 	protected RandomAccessFile file;
 	private String name;
-
 	protected TreeMap<K, Long> skiplist;
 
 	public OffsetsIndex(String name) {
@@ -121,5 +120,4 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	}
 
 	protected abstract void writeKey(K key, ByteWriter out) throws IOException;
-
 }

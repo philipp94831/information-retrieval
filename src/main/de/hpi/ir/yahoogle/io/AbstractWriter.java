@@ -11,5 +11,4 @@ public interface AbstractWriter {
 	public abstract void writeLong(long l) throws IOException;
 
 	public abstract void writeShort(short s) throws IOException;
-
 }

@@ -63,5 +63,4 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 	public String getToken() {
 		return token;
 	}
-
 }

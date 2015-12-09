@@ -37,5 +37,4 @@ public class PostingListIterator implements Iterator<BinaryPostingList> {
 		}
 		return null;
 	}
-
 }

@@ -47,5 +47,4 @@ public class EliasDeltaReader implements AbstractReader {
 	public short readShort() throws IOException {
 		return (short) readInt();
 	}
-
 }

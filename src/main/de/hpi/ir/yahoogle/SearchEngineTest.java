@@ -13,7 +13,6 @@ import java.util.ArrayList;
  *          this file during the development of your search engine. Any changes
  *          you make here will be ignored for the final test!
  */
-
 public class SearchEngineTest {
 
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
@@ -31,26 +30,16 @@ public class SearchEngineTest {
 	}
 
 	public static void main(String args[]) throws Exception {
-
 		initialize("patents/", true);
 		printResults(search("mobile device", 10, 2));
-
 		// long start = System.currentTimeMillis();
-
 		// myEngine.index(String directory)
-
 		// long time = System.currentTimeMillis() - start;
-
 		// System.out.print("Indexing Time:\t" + time + "\tms\n");
-
 		// myEngine.loadIndex(String directory)
-
 		// String query = "";
-
 		// ArrayList <String> results = new ArrayList <> ();
-
 		// results = myEngine.search(String query, int topK, int prf)
-
 	}
 
 	private static void printResults(ArrayList<String> results) {
@@ -72,5 +61,4 @@ public class SearchEngineTest {
 		System.out.println("Time for search: " + time + "ms");
 		return results;
 	}
-
 }

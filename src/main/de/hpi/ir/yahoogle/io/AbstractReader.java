@@ -1,4 +1,3 @@
-
 package de.hpi.ir.yahoogle.io;
 
 import java.io.IOException;
@@ -12,5 +11,4 @@ public interface AbstractReader {
 	public abstract long readLong() throws IOException;
 
 	public abstract short readShort() throws IOException;
-
 }

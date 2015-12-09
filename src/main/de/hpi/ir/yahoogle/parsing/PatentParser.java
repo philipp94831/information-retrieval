@@ -33,7 +33,6 @@ public class PatentParser {
 	}
 
 	public void endDocument() {
-
 	}
 
 	public void endElement(String qName) {
@@ -142,5 +141,4 @@ public class PatentParser {
 		}
 		parents.push(qName);
 	}
-
 }

@@ -24,14 +24,12 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 	}
 
 	private int docNumber;
-
 	private long end;
 	private String fileName;
 	private TreeMap<Integer, PatentPart> parts = new TreeMap<Integer, PatentPart>();
 	private transient Patent patent;
 	private transient String patentFolder;
 	private long start;
-
 	private int wordCount;
 
 	public PatentResume(int docNumber, byte[] bytes) {
@@ -43,7 +41,6 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 		this.wordCount = in.readInt();
 		this.setTitlePosition(in.readInt());
 		this.setAbstractPosition(in.readInt());
-
 	}
 
 	public PatentResume(Patent patent) {
@@ -143,5 +140,4 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 		out.writeInt(getPosition(PatentPart.ABSTRACT));
 		return out.toByteArray();
 	}
-
 }

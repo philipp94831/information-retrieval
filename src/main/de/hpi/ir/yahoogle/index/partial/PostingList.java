@@ -68,5 +68,4 @@ public class PostingList implements Comparable<PostingList>, Iterable<DocumentPo
 		}
 		return block.toByteArray();
 	}
-
 }

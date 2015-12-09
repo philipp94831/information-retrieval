@@ -6,7 +6,6 @@ package de.hpi.ir.yahoogle;
  * @dataset: US patent grants : ipg files from http://www.google.com/googlebooks/uspto-patents-grants-text.html
  * @course: Information Retrieval and Web Search, Hasso-Plattner Institut, 2015
  */
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -24,13 +23,11 @@ public abstract class SearchEngine {
 	protected static String baseDirectory = "";
 	/************* Define your baseDirectory here !! ******************/
 	protected static String teamDirectory; // don't change this
-
 	protected int prf;
 	// we will need these later in the course
 	protected int topK;
 
 	public SearchEngine() {
-
 		// the baseDirectory is already defined
 		teamDirectory = baseDirectory + getClass().getSimpleName(); // creates
 																	// SearchEngineMyTeamName
@@ -64,5 +61,4 @@ public abstract class SearchEngine {
 	public void setTopK(int value) {
 		topK = value;
 	}
-
 }

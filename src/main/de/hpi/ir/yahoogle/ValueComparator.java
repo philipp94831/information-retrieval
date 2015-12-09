@@ -16,5 +16,4 @@ public class ValueComparator<K, T extends Comparable<T>> implements Comparator<K
 		int c = base.get(k1).compareTo(base.get(k2));
 		return c == 0 ? 1 : -c;
 	}
-
 }

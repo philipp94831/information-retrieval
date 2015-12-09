@@ -7,6 +7,7 @@ public class Tokenizer implements Iterator<String> {
 
 	private String nextToken;
 	private int pos = 0;
+	private String separator = " ";
 	private boolean skipStopWords = false;
 	private StringTokenizer string;
 
@@ -46,12 +47,19 @@ public class Tokenizer implements Iterator<String> {
 
 	@Override
 	public String next() {
-		pos++;
+		String token;
 		if (skipStopWords) {
-			return nextToken;
+			token = nextToken;
 		} else {
-			return string.nextToken();
+			token = string.nextToken();
 		}
+		if (!StopWordList.isStopword(token)) {
+			pos++;
+		}
+		return token;
 	}
 
+	public String separator() {
+		return separator;
+	}
 }

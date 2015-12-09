@@ -35,5 +35,4 @@ public class StopWordList {
 	public static boolean isStopword(String word) {
 		return !word.endsWith("*") && stopwords.contains(Stemmer.stem(word));
 	}
-
 }

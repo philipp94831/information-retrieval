@@ -16,14 +16,10 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class PatentIndex extends Loadable {
 
 	private static final String FILE_NAME = "patents";
-
 	protected static final long TOTAL_WORD_COUNT_OFFSET = 0;
 	protected RandomAccessFile file;
-
 	private IntegerOffsetsIndex offsets;
-
 	private String patentsFolder;
-
 	protected int totalWordCount = 0;
 
 	public PatentIndex(String patentsFolder) {
@@ -134,5 +130,4 @@ public class PatentIndex extends Loadable {
 		file.close();
 		offsets.write();
 	}
-
 }

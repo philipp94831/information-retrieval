@@ -19,8 +19,6 @@ public class ObjectWriter {
 		} catch (IOException e) {
 			return false;
 		}
-
 		return true;
 	}
-
 }

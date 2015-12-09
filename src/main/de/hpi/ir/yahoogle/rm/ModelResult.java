@@ -20,5 +20,4 @@ public class ModelResult extends Result implements Comparable<ModelResult> {
 	public void setScore(double score) {
 		this.score = score;
 	}
-
 }

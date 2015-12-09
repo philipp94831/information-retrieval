@@ -30,5 +30,4 @@ public abstract class Model {
 	}
 
 	public abstract List<ModelResult> compute(List<String> query);
-
 }

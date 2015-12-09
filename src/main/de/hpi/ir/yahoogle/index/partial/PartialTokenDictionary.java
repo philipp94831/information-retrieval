@@ -89,5 +89,4 @@ public class PartialTokenDictionary extends Loadable implements Iterable<BinaryP
 		}
 		file.close();
 	}
-
 }

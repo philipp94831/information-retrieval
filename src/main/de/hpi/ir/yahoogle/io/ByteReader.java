@@ -41,5 +41,4 @@ public class ByteReader implements AbstractReader {
 		in.get(b);
 		return new String(b, Charset.forName("UTF-8"));
 	}
-
 }

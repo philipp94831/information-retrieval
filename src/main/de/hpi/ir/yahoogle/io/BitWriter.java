@@ -19,5 +19,4 @@ public class BitWriter {
 	public void write(long bit) {
 		write(bit != 0);
 	}
-
 }

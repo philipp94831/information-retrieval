@@ -56,5 +56,4 @@ public class Patent {
 	public void setStart(long start) {
 		this.start = start;
 	}
-
 }

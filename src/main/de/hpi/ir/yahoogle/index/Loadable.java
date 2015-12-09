@@ -17,5 +17,4 @@ public abstract class Loadable {
 	public abstract void load() throws IOException;
 
 	public abstract void write() throws IOException;
-
 }

@@ -15,7 +15,6 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 	private static final String BASE_NAME = ".index";
 	private PartialTokenDictionary dictionary;
 	private String name;
-
 	private PartialPatentIndex patents;
 
 	public PartialIndex(String name) {
@@ -101,5 +100,4 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		patents.write();
 		dictionary.write();
 	}
-
 }

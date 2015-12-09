@@ -5,9 +5,9 @@ import java.io.RandomAccessFile;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
@@ -17,11 +17,12 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
+
 	protected static String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
 	}
-	private RandomAccessFile file;
 
+	private RandomAccessFile file;
 	private StringOffsetIndex offsets;
 
 	@Override
@@ -124,5 +125,4 @@ public class TokenDictionary extends Loadable {
 		out.write(bytes);
 		file.write(out.toByteArray());
 	}
-
 }

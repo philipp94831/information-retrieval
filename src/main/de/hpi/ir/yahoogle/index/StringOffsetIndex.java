@@ -49,5 +49,4 @@ public class StringOffsetIndex extends OffsetsIndex<String> {
 	protected void writeKey(String key, ByteWriter out) throws IOException {
 		out.writeUTF(key);
 	}
-
 }

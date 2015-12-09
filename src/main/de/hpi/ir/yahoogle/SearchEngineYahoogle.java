@@ -177,12 +177,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	void index(String directory) {
-
 		try {
-
 			PartialIndexFactory factory = new PartialIndexFactory();
 			File patents = new File(directory);
-
 			for (File patentFile : patents.listFiles()) {
 				PartialIndex partialIndex = factory.getPartialIndex();
 				partialIndex.create();
@@ -193,12 +190,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				handler.parse(stream);
 				partialIndex.write();
 			}
-
 			index = new Index(directory);
 			index.create();
 			index.mergeIndices(factory.getNames());
 			index.write();
-
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -292,5 +287,4 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		}
 		return generateOutput(results, snippets);
 	}
-
 }

@@ -10,5 +10,4 @@ public class Stemmer {
 		stemmer.stem();
 		return stemmer.getCurrent();
 	}
-
 }

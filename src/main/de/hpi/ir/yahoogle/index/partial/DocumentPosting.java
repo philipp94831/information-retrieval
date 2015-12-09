@@ -38,5 +38,4 @@ public class DocumentPosting implements Comparable<DocumentPosting>, Iterable<Po
 	public int size() {
 		return postings.size();
 	}
-
 }

@@ -65,5 +65,4 @@ public class QLModel extends Model {
 		}
 		return results;
 	}
-
 }

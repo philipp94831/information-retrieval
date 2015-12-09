@@ -16,5 +16,4 @@ public class Posting implements Comparable<Posting> {
 	public void setPosition(int position) {
 		this.position = position;
 	}
-
 }

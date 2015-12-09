@@ -37,11 +37,10 @@ public class Index extends Loadable {
 			}
 		}
 	}
+
 	private TokenDictionary dictionary;
 	private int indexNumber;
-
 	private PatentIndex patents;
-
 	private String patentsFolder;
 
 	public Index(String patentsFolder) {
@@ -193,5 +192,4 @@ public class Index extends Loadable {
 		patents.write();
 		dictionary.write();
 	}
-
 }

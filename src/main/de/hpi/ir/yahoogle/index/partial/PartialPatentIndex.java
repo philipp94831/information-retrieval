@@ -80,5 +80,4 @@ public class PartialPatentIndex extends Loadable implements Iterable<PatentResum
 		}
 		file.close();
 	}
-
 }

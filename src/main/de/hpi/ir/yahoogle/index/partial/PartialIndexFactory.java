@@ -20,5 +20,4 @@ public class PartialIndexFactory {
 		indexNumber++;
 		return index;
 	}
-
 }

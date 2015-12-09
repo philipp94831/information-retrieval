@@ -43,5 +43,4 @@ public class EliasDeltaWriter implements AbstractWriter {
 	public void writeShort(short s) throws IOException {
 		writeLong((long) s);
 	}
-
 }

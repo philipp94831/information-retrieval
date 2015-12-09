@@ -45,5 +45,4 @@ public class ByteWriter implements AbstractWriter {
 		writeShort((short) s.length());
 		out.write(s.getBytes(Charset.forName("UTF-8")));
 	}
-
 }

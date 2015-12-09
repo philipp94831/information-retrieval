@@ -24,5 +24,4 @@ public class Result {
 	public Set<Integer> getPositions(String phrase) {
 		return positions.get(phrase);
 	}
-
 }

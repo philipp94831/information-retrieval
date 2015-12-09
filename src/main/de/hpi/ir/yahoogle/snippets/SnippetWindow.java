@@ -32,9 +32,9 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 	public int compareTo(SnippetWindow o) {
 		if ((distinctMatches < o.distinctMatches) || (distinctMatches == o.distinctMatches)
 				&& ((matches < o.matches) || (matches == o.matches) && (getMiddleAlign() > o.getMiddleAlign()))) {
-			return -1;
+			return 1;
 		}
-		return 1;
+		return -1;
 	}
 
 	public int getMiddleAlign() {
@@ -45,5 +45,4 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 	public int getPosition() {
 		return pos;
 	}
-
 }

@@ -37,5 +37,4 @@ public class PatentResumeIterator implements Iterator<PatentResume> {
 		}
 		return null;
 	}
-
 }
