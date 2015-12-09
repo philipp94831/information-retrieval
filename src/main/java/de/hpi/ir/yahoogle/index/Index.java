@@ -24,14 +24,12 @@ import de.hpi.ir.yahoogle.rm.Result;
 
 public class Index extends Loadable {
 
-	private static Set<Integer> getNotEmptyKeys(
-			Map<Integer, Set<Integer>> result) {
+	private static Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
 		return result.entrySet().stream().filter(e -> e.getValue().size() > 0)
 				.map(e -> e.getKey()).collect(Collectors.toSet());
 	}
 
-	private static void merge(Map<Integer, Set<Integer>> result,
-			Map<Integer, Set<Integer>> newResult) {
+	private static void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
 		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
 			Set<Integer> l = result.get(entry.getKey());
 			if (l != null) {
@@ -122,8 +120,7 @@ public class Index extends Loadable {
 		dictionary.load();
 	}
 
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result,
-			Map<Integer, Set<Integer>> nextResult, int delta) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {

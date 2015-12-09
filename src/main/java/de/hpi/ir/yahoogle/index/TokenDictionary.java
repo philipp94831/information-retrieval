@@ -119,8 +119,7 @@ public class TokenDictionary extends Loadable {
 		offsets.write();
 	}
 
-	public void writePostingList(BinaryPostingList postingList)
-			throws IOException {
+	public void writePostingList(BinaryPostingList postingList) throws IOException {
 		long offset = file.length();
 		offsets.put(postingList.getToken(), offset);
 		byte[] bytes = postingList.getBytes();

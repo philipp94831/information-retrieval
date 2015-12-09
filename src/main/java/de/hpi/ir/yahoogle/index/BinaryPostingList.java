@@ -38,8 +38,7 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 		return bytes;
 	}
 
-	public Map<Integer, Set<Integer>> getDocumentsWithPositions()
-			throws IOException {
+	public Map<Integer, Set<Integer>> getDocumentsWithPositions() throws IOException {
 		Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
 		int i = 0;
 		while (i < bytes.length) {

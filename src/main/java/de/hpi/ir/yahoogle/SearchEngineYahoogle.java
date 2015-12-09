@@ -78,8 +78,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return teamDirectory;
 	}
 
-	public static List<String> getTopWords(int topK,
-			Collection<String> collection) {
+	public static List<String> getTopWords(int topK, Collection<String> collection) {
 		Map<String, Integer> topwords = new HashMap<String, Integer>();
 		for (String snippet : collection) {
 			Tokenizer tokenizer = new Tokenizer(snippet, true);
@@ -137,8 +136,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return queryPlan;
 	}
 
-	private static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(
-			Map<K, V> result) {
+	private static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
 		ValueComparator<K, V> comp = new ValueComparator<K, V>(result);
 		TreeMap<K, V> sortedResults = new TreeMap<K, V>(comp);
 		sortedResults.putAll(result);
@@ -167,8 +165,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return output;
 	}
 
-	public ArrayList<String> generateOutput(List<ModelResult> results2,
-			Map<Integer, String> snippets) {
+	public ArrayList<String> generateOutput(List<ModelResult> results2, Map<Integer, String> snippets) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (ModelResult result : results2) {
 			int docNumber = result.getDocNumber();
@@ -179,8 +176,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return results;
 	}
 
-	public Map<Integer, String> generateSnippets(List<? extends Result> results,
-			List<String> phrases) {
+	public Map<Integer, String> generateSnippets(List<? extends Result> results, List<String> phrases) {
 		SnippetGenerator generator = new SnippetGenerator(phrases);
 		Map<Integer, String> snippets = new HashMap<Integer, String>();
 		for (Result result : results) {
@@ -291,8 +287,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return generateOutput(docNumbers);
 	}
 
-	private ArrayList<String> searchRelevant(int topK, int prf,
-			List<String> queryPlan) {
+	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {
 		List<String> phrases = extractPhrases(queryPlan.get(0));
 		List<ModelResult> results = index.findRelevant(phrases,
 				Math.max(topK, prf));
