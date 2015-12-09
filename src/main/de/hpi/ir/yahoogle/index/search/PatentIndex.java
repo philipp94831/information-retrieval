@@ -22,7 +22,7 @@ public class PatentIndex extends Loadable {
 	protected static final long TOTAL_WORD_COUNT_OFFSET = 0;
 	protected RandomAccessFile file;
 
-	private OffsetsIndex<Integer> offsets;
+	private IntegerOffsetsIndex offsets;
 
 	private String patentsFolder;
 
@@ -55,7 +55,7 @@ public class PatentIndex extends Loadable {
 		file = new RandomAccessFile(fileName(), "rw");
 		file.seek(TOTAL_WORD_COUNT_OFFSET);
 		file.writeInt(0); // totalWordCount
-		offsets = new OffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
+		offsets = new IntegerOffsetsIndex(FILE_NAME);
 		offsets.create();
 	}
 
@@ -96,7 +96,7 @@ public class PatentIndex extends Loadable {
 		file = new RandomAccessFile(fileName(), "rw");
 		file.seek(TOTAL_WORD_COUNT_OFFSET);
 		this.totalWordCount = file.readInt();
-		offsets = new OffsetsIndex<Integer>(new IntegerKeyReaderWriter(), FILE_NAME);
+		offsets = new IntegerOffsetsIndex(FILE_NAME);
 		offsets.load();
 	}
 

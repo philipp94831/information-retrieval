@@ -14,22 +14,20 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
 
-public class OffsetsIndex<K> extends Loadable {
+public abstract class OffsetsIndex<K> extends Loadable {
 
 	private static final String BASE_NAME = ".offsets";
 	private static final int BLOCK_SIZE = 16 * 1024 - Integer.BYTES;
 	private static final String SKIPLIST_BASE_NAME = ".skiplist" + BASE_NAME;
-	private ByteWriter currentBlock = new ByteWriter(BLOCK_SIZE);
+	private ByteWriter currentBlock = new ByteWriter();
 	private int currentBlockSize = 0;
-	private RandomAccessFile file;
+	protected RandomAccessFile file;
 	private String name;
-	private KeyReaderWriter<K> reader;
 
-	private TreeMap<K, Long> skiplist;
+	protected TreeMap<K, Long> skiplist;
 
-	public OffsetsIndex(KeyReaderWriter<K> reader, String name) {
+	public OffsetsIndex(String name) {
 		this.name = name;
-		this.reader = reader;
 	}
 
 	@Override
@@ -52,7 +50,7 @@ public class OffsetsIndex<K> extends Loadable {
 		file.read(b);
 		ByteReader in = new ByteReader(b);
 		while (in.hasLeft()) {
-			K newKey = reader.readKey(in);
+			K newKey = readKey(in);
 			long offset = in.readLong();
 			if (newKey.equals(key)) {
 				return offset;
@@ -60,6 +58,8 @@ public class OffsetsIndex<K> extends Loadable {
 		}
 		return null;
 	}
+
+	protected abstract K readKey(ByteReader in);
 
 	public Set<K> keys() throws IOException {
 		Set<K> keys = new HashSet<K>();
@@ -70,7 +70,7 @@ public class OffsetsIndex<K> extends Loadable {
 			file.readFully(b);
 			ByteReader in = new ByteReader(b);
 			while (in.hasLeft()) {
-				K key = reader.readKey(in);
+				K key = readKey(in);
 				in.readLong();
 				keys.add(key);
 			}
@@ -86,7 +86,7 @@ public class OffsetsIndex<K> extends Loadable {
 
 	public void put(K key, long offset) throws IOException {
 		ByteWriter out = new ByteWriter();
-		reader.writeKey(key, out);
+		writeKey(key, out);
 		out.writeLong(offset);
 		byte[] b = out.toByteArray();
 		if (currentBlockSize + b.length > BLOCK_SIZE) {
@@ -99,6 +99,8 @@ public class OffsetsIndex<K> extends Loadable {
 		currentBlock.write(b);
 		currentBlockSize += b.length;
 	}
+
+	protected abstract void writeKey(K key, ByteWriter out) throws IOException;
 
 	private String skipListFileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + SKIPLIST_BASE_NAME + FILE_EXTENSION;
@@ -117,7 +119,7 @@ public class OffsetsIndex<K> extends Loadable {
 		out.writeInt(bytes.length);
 		out.write(bytes);
 		file.write(out.toByteArray());
-		currentBlock = new ByteWriter(BLOCK_SIZE);
+		currentBlock = new ByteWriter();
 		currentBlockSize = 0;
 	}
 

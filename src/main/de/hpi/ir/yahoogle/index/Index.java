@@ -100,7 +100,7 @@ public class Index extends Loadable {
 		return patents.getAllDocNumbers();
 	}
 
-	private Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
+	private static Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
 		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
 	}
 

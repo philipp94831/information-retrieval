@@ -25,51 +25,45 @@ public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
 	private RandomAccessFile file;
-	private OffsetsIndex<String> offsets;
+	private StringOffsetIndex offsets;
 
 	@Override
 	public void create() throws IOException {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new OffsetsIndex<String>(new StringKeyReaderWriter(), FILE_NAME);
+		offsets = new StringOffsetIndex(FILE_NAME);
 		offsets.create();
 	}
 
-	protected String fileName() {
+	protected static String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
 	}
 
 	public Map<Integer, Set<Integer>> find(String token) {
 		Map<Integer, Set<Integer>> docNumbers = new HashMap<Integer, Set<Integer>>();
-		Long offset;
 		try {
-			offset = offsets.get(token);
+			Long offset = offsets.get(token);
 			if (offset != null) {
-				try {
-					file.seek(offset);
-					int size = file.readInt();
-					byte[] b = new byte[size];
-					file.readFully(b);
-					int i = 0;
-					while (i < b.length) {
-						AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
-						i += Integer.BYTES + Short.BYTES;
-						int docNumber = in.readInt();
-						short bsize = in.readShort();
-						in = new EliasDeltaReader(b, i, bsize);
-						Set<Integer> pos = new HashSet<Integer>();
-						int oldPos = 0;
-						while (in.hasLeft()) {
-							short p = in.readShort();
-							pos.add(oldPos + p);
-							oldPos += p;
-						}
-						docNumbers.put(docNumber, pos);
-						i += bsize;
+				file.seek(offset);
+				int size = file.readInt();
+				byte[] b = new byte[size];
+				file.readFully(b);
+				int i = 0;
+				while (i < b.length) {
+					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
+					i += Integer.BYTES + Short.BYTES;
+					int docNumber = in.readInt();
+					short bsize = in.readShort();
+					in = new EliasDeltaReader(b, i, bsize);
+					Set<Integer> pos = new HashSet<Integer>();
+					int oldPos = 0;
+					while (in.hasLeft()) {
+						short p = in.readShort();
+						pos.add(oldPos + p);
+						oldPos += p;
 					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					docNumbers.put(docNumber, pos);
+					i += bsize;
 				}
 			}
 			return docNumbers;
@@ -92,7 +86,7 @@ public class TokenDictionary extends Loadable {
 
 	public List<String> getTokensForPrefix(String prefix) {
 		try {
-			return offsets.keys().stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
+			return offsets.getKeysForPrefix(prefix);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -103,12 +97,13 @@ public class TokenDictionary extends Loadable {
 	@Override
 	public void load() throws IOException {
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new OffsetsIndex<>(new StringKeyReaderWriter(), FILE_NAME);
+		offsets = new StringOffsetIndex(FILE_NAME);
 		offsets.load();
 	}
 
 	public void merge(List<PartialTokenDictionary> indexes) throws IOException {
-		List<Iterator<BinaryPostingList>> iterators = indexes.stream().map(i -> i.iterator()).collect(Collectors.toList());
+		List<Iterator<BinaryPostingList>> iterators = indexes.stream().map(i -> i.iterator())
+				.collect(Collectors.toList());
 		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<BinaryPostingList, Integer>();
 		for (int i = 0; i < iterators.size(); i++) {
 			Iterator<BinaryPostingList> iterator = iterators.get(i);
