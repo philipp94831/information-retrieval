@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.index.search;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 

@@ -35,9 +35,12 @@ import java.util.TreeMap;
 import javax.xml.stream.XMLStreamException;
 
 import de.hpi.ir.yahoogle.index.Index;
-import de.hpi.ir.yahoogle.index.generation.PartialIndex;
-import de.hpi.ir.yahoogle.index.generation.PartialIndexFactory;
+import de.hpi.ir.yahoogle.index.partial.PartialIndex;
+import de.hpi.ir.yahoogle.index.partial.PartialIndexFactory;
+import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.rm.ModelResult;
+import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// with your search
@@ -155,7 +158,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		ArrayList<String> results = new ArrayList<String>();
 		for (ModelResult result : results2) {
 			int docNumber = result.getDocNumber();
-			results.add(String.format("%08d", docNumber) + "\t" + index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
+			results.add(String.format("%08d", docNumber) + "\t"
+					+ index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
 		}
 		return results;
 	}

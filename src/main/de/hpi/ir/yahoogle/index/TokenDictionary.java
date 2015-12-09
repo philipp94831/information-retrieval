@@ -1,9 +1,7 @@
-package de.hpi.ir.yahoogle.index.search;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,18 +11,17 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.index.BinaryPostingList;
-import de.hpi.ir.yahoogle.index.Loadable;
-import de.hpi.ir.yahoogle.index.generation.PartialTokenDictionary;
-import de.hpi.ir.yahoogle.io.AbstractReader;
-import de.hpi.ir.yahoogle.io.ByteReader;
+import de.hpi.ir.yahoogle.index.partial.PartialTokenDictionary;
 import de.hpi.ir.yahoogle.io.ByteWriter;
-import de.hpi.ir.yahoogle.io.EliasDeltaReader;
 
 public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
+	protected static String fileName() {
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
+	}
 	private RandomAccessFile file;
+
 	private StringOffsetIndex offsets;
 
 	@Override
@@ -35,12 +32,7 @@ public class TokenDictionary extends Loadable {
 		offsets.create();
 	}
 
-	protected static String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
-	}
-
 	public Map<Integer, Set<Integer>> find(String token) {
-		Map<Integer, Set<Integer>> docNumbers = new HashMap<Integer, Set<Integer>>();
 		try {
 			Long offset = offsets.get(token);
 			if (offset != null) {
@@ -48,25 +40,9 @@ public class TokenDictionary extends Loadable {
 				int size = file.readInt();
 				byte[] b = new byte[size];
 				file.readFully(b);
-				int i = 0;
-				while (i < b.length) {
-					AbstractReader in = new ByteReader(b, i, Integer.BYTES + Short.BYTES);
-					i += Integer.BYTES + Short.BYTES;
-					int docNumber = in.readInt();
-					short bsize = in.readShort();
-					in = new EliasDeltaReader(b, i, bsize);
-					Set<Integer> pos = new HashSet<Integer>();
-					int oldPos = 0;
-					while (in.hasLeft()) {
-						short p = in.readShort();
-						pos.add(oldPos + p);
-						oldPos += p;
-					}
-					docNumbers.put(docNumber, pos);
-					i += bsize;
-				}
+				BinaryPostingList postingList = new BinaryPostingList(token, b);
+				return postingList.getDocumentsWithPositions();
 			}
-			return docNumbers;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

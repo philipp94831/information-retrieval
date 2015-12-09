@@ -33,7 +33,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 
 		initialize("patents/", true);
-		printResults(search("pr*", 10, 2));
+		printResults(search("mobile device", 10, 2));
 
 		// long start = System.currentTimeMillis();
 

@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.index.generation;
+package de.hpi.ir.yahoogle.index.partial;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -9,8 +9,6 @@ import java.util.TreeMap;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.BinaryPostingList;
 import de.hpi.ir.yahoogle.index.Loadable;
-import de.hpi.ir.yahoogle.index.Posting;
-import de.hpi.ir.yahoogle.index.PostingList;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class PartialTokenDictionary extends Loadable implements Iterable<BinaryPostingList> {

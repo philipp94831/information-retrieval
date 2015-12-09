@@ -1,17 +1,17 @@
-package de.hpi.ir.yahoogle.index.generation;
+package de.hpi.ir.yahoogle.index.partial;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.hpi.ir.yahoogle.index.BinaryPostingList;
+import de.hpi.ir.yahoogle.index.PatentResume;
 
-public class PostingListIterator implements Iterator<BinaryPostingList> {
+public class PatentResumeIterator implements Iterator<PatentResume> {
 
-	private PartialTokenDictionary index;
+	private PartialPatentIndex index;
 	private long nextPosition;
 
-	public PostingListIterator(PartialTokenDictionary tokenDictionary) {
-		this.index = tokenDictionary;
+	public PatentResumeIterator(PartialPatentIndex patentIndex) {
+		this.index = patentIndex;
 	}
 
 	@Override
@@ -26,11 +26,11 @@ public class PostingListIterator implements Iterator<BinaryPostingList> {
 	}
 
 	@Override
-	public BinaryPostingList next() {
+	public PatentResume next() {
 		try {
-			BinaryPostingList postingList = index.read(nextPosition);
+			PatentResume resume = index.read(nextPosition);
 			nextPosition = index.currentOffset();
-			return postingList;
+			return resume;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

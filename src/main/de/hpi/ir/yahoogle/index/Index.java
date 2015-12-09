@@ -15,14 +15,17 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.Stemmer;
-import de.hpi.ir.yahoogle.index.generation.PartialIndex;
-import de.hpi.ir.yahoogle.index.search.PatentIndex;
-import de.hpi.ir.yahoogle.index.search.TokenDictionary;
+import de.hpi.ir.yahoogle.index.partial.PartialIndex;
 import de.hpi.ir.yahoogle.rm.Model;
 import de.hpi.ir.yahoogle.rm.ModelResult;
 import de.hpi.ir.yahoogle.rm.QLModel;
 
 public class Index extends Loadable {
+
+	private static Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey())
+				.collect(Collectors.toSet());
+	}
 
 	private static void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
 		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
@@ -34,9 +37,9 @@ public class Index extends Loadable {
 			}
 		}
 	}
-
 	private TokenDictionary dictionary;
 	private int indexNumber;
+
 	private PatentIndex patents;
 
 	private String patentsFolder;
@@ -100,10 +103,6 @@ public class Index extends Loadable {
 		return patents.getAllDocNumbers();
 	}
 
-	private static Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey()).collect(Collectors.toSet());
-	}
-
 	public PartialIndex getPartialIndex() throws IOException {
 		PartialIndex index = new PartialIndex(Integer.toString(indexNumber));
 		indexNumber++;
@@ -132,12 +131,14 @@ public class Index extends Loadable {
 	public ArrayList<String> matchInventionTitles(Iterable<Integer> docNumbers) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (Integer docNumber : docNumbers) {
-			results.add(String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
+			results.add(
+					String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
 		}
 		return results;
 	}
 
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult,
+			int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {

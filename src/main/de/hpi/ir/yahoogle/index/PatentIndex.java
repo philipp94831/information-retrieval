@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.index.search;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -10,9 +10,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.index.Loadable;
-import de.hpi.ir.yahoogle.index.PatentResume;
-import de.hpi.ir.yahoogle.index.generation.PartialPatentIndex;
+import de.hpi.ir.yahoogle.index.partial.PartialPatentIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class PatentIndex extends Loadable {

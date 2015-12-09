@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.hpi.ir.yahoogle.PatentPart;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
+import de.hpi.ir.yahoogle.parsing.PatentPart;
 
 public class QLModel extends Model {
 

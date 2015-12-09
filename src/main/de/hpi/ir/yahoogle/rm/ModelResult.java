@@ -1,7 +1,5 @@
 package de.hpi.ir.yahoogle.rm;
 
-import de.hpi.ir.yahoogle.Result;
-
 public class ModelResult extends Result implements Comparable<ModelResult> {
 
 	private double score;

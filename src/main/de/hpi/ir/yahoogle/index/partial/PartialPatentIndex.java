@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.index.generation;
+package de.hpi.ir.yahoogle.index.partial;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

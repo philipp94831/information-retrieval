@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.index.search;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.ObjectReader;
@@ -59,8 +58,6 @@ public abstract class OffsetsIndex<K> extends Loadable {
 		return null;
 	}
 
-	protected abstract K readKey(ByteReader in);
-
 	public Set<K> keys() throws IOException {
 		Set<K> keys = new HashSet<K>();
 		for (Entry<K, Long> entry : skiplist.entrySet()) {
@@ -100,7 +97,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 		currentBlockSize += b.length;
 	}
 
-	protected abstract void writeKey(K key, ByteWriter out) throws IOException;
+	protected abstract K readKey(ByteReader in);
 
 	private String skipListFileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + SKIPLIST_BASE_NAME + FILE_EXTENSION;
@@ -122,5 +119,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 		currentBlock = new ByteWriter();
 		currentBlockSize = 0;
 	}
+
+	protected abstract void writeKey(K key, ByteWriter out) throws IOException;
 
 }

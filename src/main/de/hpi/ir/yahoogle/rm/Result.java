@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.rm;
 
 import java.util.HashMap;
 import java.util.Map;

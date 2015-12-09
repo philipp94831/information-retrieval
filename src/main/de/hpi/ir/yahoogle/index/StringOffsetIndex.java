@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.index.search;
+package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,21 +14,11 @@ public class StringOffsetIndex extends OffsetsIndex<String> {
 		super(name);
 	}
 
-	@Override
-	protected String readKey(ByteReader in) {
-		return in.readUTF();
-	}
-
-	@Override
-	protected void writeKey(String key, ByteWriter out) throws IOException {
-		out.writeUTF(key);
-	}
-
 	public List<String> getKeysForPrefix(String prefix) throws IOException {
 		Entry<String, Long> entry = skiplist.floorEntry(prefix);
 		file.seek(entry.getValue());
 		List<String> keys = new ArrayList<String>();
-		while(true) {
+		while (true) {
 			int size = file.readInt();
 			byte[] b = new byte[size];
 			file.read(b);
@@ -37,17 +27,27 @@ public class StringOffsetIndex extends OffsetsIndex<String> {
 				String newKey = readKey(in);
 				in.readLong();
 				int comp = newKey.substring(0, Math.min(prefix.length(), newKey.length())).compareTo(prefix);
-				if(comp < 0) {
+				if (comp < 0) {
 					continue;
 				}
-				if(comp == 0) {
+				if (comp == 0) {
 					keys.add(newKey);
 				}
-				if(comp > 0) {
+				if (comp > 0) {
 					return keys;
 				}
-			}			
+			}
 		}
+	}
+
+	@Override
+	protected String readKey(ByteReader in) {
+		return in.readUTF();
+	}
+
+	@Override
+	protected void writeKey(String key, ByteWriter out) throws IOException {
+		out.writeUTF(key);
 	}
 
 }

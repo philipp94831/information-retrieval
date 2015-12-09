@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.parsing;
 
 import java.io.InputStream;
 import java.util.Stack;

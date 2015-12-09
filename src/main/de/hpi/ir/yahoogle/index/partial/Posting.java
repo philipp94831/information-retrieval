@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.index;
+package de.hpi.ir.yahoogle.index.partial;
 
 public class Posting implements Comparable<Posting> {
 

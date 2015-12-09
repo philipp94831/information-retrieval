@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import de.hpi.ir.yahoogle.SnippetWindow;
+import de.hpi.ir.yahoogle.snippets.SnippetWindow;
 
 public class SnippetWindowTest {
 

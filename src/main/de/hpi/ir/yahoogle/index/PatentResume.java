@@ -10,12 +10,12 @@ import java.util.TreeMap;
 
 import javax.xml.stream.XMLStreamException;
 
-import de.hpi.ir.yahoogle.Patent;
-import de.hpi.ir.yahoogle.PatentParser;
-import de.hpi.ir.yahoogle.PatentParserCallback;
-import de.hpi.ir.yahoogle.PatentPart;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.parsing.Patent;
+import de.hpi.ir.yahoogle.parsing.PatentParser;
+import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
+import de.hpi.ir.yahoogle.parsing.PatentPart;
 
 public class PatentResume implements PatentParserCallback, Comparable<PatentResume> {
 
