@@ -31,7 +31,11 @@ public class SearchEngineTest {
 
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", true);
-		printResults(search("mobile device", 10, 2));
+		System.out.println("==============================");
+		String[] queries = {"access", "control", "image data", "program", "vulnerability", "\"mobile device\""};
+		for(String query : queries) {
+			printResults(search(query, 10, 0), query);
+		}
 		// long start = System.currentTimeMillis();
 		// myEngine.index(String directory)
 		// long time = System.currentTimeMillis() - start;
@@ -42,23 +46,24 @@ public class SearchEngineTest {
 		// results = myEngine.search(String query, int topK, int prf)
 	}
 
-	private static void printResults(ArrayList<String> results) {
-		System.out.println("==============================");
+	private static void printResults(ArrayList<String> results, String query) {
+		System.out.println(query);
 		if (results.size() == 0) {
 			System.out.println("No matches found");
 		}
 		for (String result : results) {
 			System.out.println(result);
 		}
-		System.out.println(results.size() + " Results returned");
+//		System.out.println(results.size() + " Results returned");
+		System.out.println();
 	}
 
 	private static ArrayList<String> search(String query, int topK, int prf) {
-		System.out.println("Searching...");
+//		System.out.println("Searching...");
 		long startTime = System.nanoTime();
 		ArrayList<String> results = myEngine.search(query, topK, prf);
 		long time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for search: " + time + "ms");
+//		System.out.println("Time for search: " + time + "ms");
 		return results;
 	}
 }

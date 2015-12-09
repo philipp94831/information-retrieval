@@ -21,7 +21,7 @@ public class QLModel extends Model {
 
 	public QLModel(Index index) {
 		this(index, 0.2);
-		partWeights.put(PatentPart.TITLE, 1.2);
+		partWeights.put(PatentPart.TITLE, 1.5);
 		partWeights.put(PatentPart.ABSTRACT, 1.0);
 	}
 
