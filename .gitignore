@@ -1,5 +1,9 @@
 bin/
+.settings/
+.classpath
+.project
 **/*.yahoogle
 res/patents/
 res/patentfetcher.py
 res/patents.zip
+/target/
