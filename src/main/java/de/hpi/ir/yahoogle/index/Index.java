@@ -18,16 +18,20 @@ import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
 import de.hpi.ir.yahoogle.rm.Model;
 import de.hpi.ir.yahoogle.rm.ModelResult;
+import de.hpi.ir.yahoogle.rm.ModelResultComparator;
 import de.hpi.ir.yahoogle.rm.QLModel;
+import de.hpi.ir.yahoogle.rm.Result;
 
 public class Index extends Loadable {
 
-	private static Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> e.getKey())
-				.collect(Collectors.toSet());
+	private static Set<Integer> getNotEmptyKeys(
+			Map<Integer, Set<Integer>> result) {
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0)
+				.map(e -> e.getKey()).collect(Collectors.toSet());
 	}
 
-	private static void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
+	private static void merge(Map<Integer, Set<Integer>> result,
+			Map<Integer, Set<Integer>> newResult) {
 		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
 			Set<Integer> l = result.get(entry.getKey());
 			if (l != null) {
@@ -55,13 +59,10 @@ public class Index extends Loadable {
 		dictionary.create();
 	}
 
-	/**
-	 * @param token
-	 * @return docnumbers of patents that contain the token
-	 */
-	public Set<Integer> find(String phrase) {
+	public Set<Result> find(String phrase) {
 		Map<Integer, Set<Integer>> result = findWithPositions(phrase);
-		return getNotEmptyKeys(result);
+		return getNotEmptyKeys(result).stream().map(d -> new Result(d))
+				.collect(Collectors.toSet());
 	}
 
 	private Map<Integer, Set<Integer>> findAll(String token) {
@@ -81,7 +82,7 @@ public class Index extends Loadable {
 	public List<ModelResult> findRelevant(List<String> phrases, int topK) {
 		Model model = new QLModel(this);
 		List<ModelResult> results = model.compute(phrases);
-		Collections.sort(results);
+		Collections.sort(results, new ModelResultComparator());
 		return results.subList(0, Math.min(topK, results.size()));
 	}
 
@@ -92,7 +93,8 @@ public class Index extends Loadable {
 			result = findAll(tokenizer.nextToken());
 		}
 		for (int i = 1; tokenizer.hasMoreTokens(); i++) {
-			Map<Integer, Set<Integer>> newResult = findAll(tokenizer.nextToken());
+			Map<Integer, Set<Integer>> newResult = findAll(
+					tokenizer.nextToken());
 			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;
@@ -120,29 +122,14 @@ public class Index extends Loadable {
 		dictionary.load();
 	}
 
-	/**
-	 * matches given docNumbers to invention titles
-	 * 
-	 * @param docNumbers
-	 *            a set of docNumbers
-	 * @return list of invention titles
-	 */
-	public ArrayList<String> matchInventionTitles(Iterable<Integer> docNumbers) {
-		ArrayList<String> results = new ArrayList<String>();
-		for (Integer docNumber : docNumbers) {
-			results.add(
-					String.format("%08d", docNumber) + "\t" + patents.get(docNumber).getPatent().getInventionTitle());
-		}
-		return results;
-	}
-
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult,
-			int delta) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result,
+			Map<Integer, Set<Integer>> nextResult, int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {
 				Set<Integer> oldPos = entry.getValue();
-				oldPos.retainAll(newPos.stream().map(p -> p - delta).collect(Collectors.toSet()));
+				oldPos.retainAll(newPos.stream().map(p -> p - delta)
+						.collect(Collectors.toSet()));
 				result.put(entry.getKey(), oldPos);
 			} else {
 				result.get(entry.getKey()).clear();
@@ -157,8 +144,10 @@ public class Index extends Loadable {
 			index.load();
 			indexes.add(index);
 		}
-		patents.merge(indexes.stream().map(i -> i.getPatents()).collect(Collectors.toList()));
-		dictionary.merge(indexes.stream().map(i -> i.getDictionary()).collect(Collectors.toList()));
+		patents.merge(indexes.stream().map(i -> i.getPatents())
+				.collect(Collectors.toList()));
+		dictionary.merge(indexes.stream().map(i -> i.getDictionary())
+				.collect(Collectors.toList()));
 		indexes.forEach(e -> e.delete());
 	}
 
@@ -181,10 +170,6 @@ public class Index extends Loadable {
 
 	public int wordCount() {
 		return patents.getTotalWordCount();
-	}
-
-	public int wordCount(Integer docNumber) {
-		return patents.wordCount(docNumber);
 	}
 
 	@Override

@@ -11,7 +11,8 @@ import de.hpi.ir.yahoogle.index.BinaryPostingList;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class PartialTokenDictionary extends Loadable implements Iterable<BinaryPostingList> {
+public class PartialTokenDictionary extends Loadable
+		implements Iterable<BinaryPostingList> {
 
 	private static final String BASE_NAME = ".dictionary";
 	private Map<String, PostingList> dictionary;
@@ -45,7 +46,8 @@ public class PartialTokenDictionary extends Loadable implements Iterable<BinaryP
 	}
 
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
+				+ FILE_EXTENSION;
 	}
 
 	public long fileSize() throws IOException {

@@ -21,11 +21,6 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		this.name = name;
 	}
 
-	/**
-	 * processes the patent and adds its tokens to the indexBuffer
-	 * 
-	 * @param patent
-	 */
 	@Override
 	public void callback(Patent patent) {
 		PatentResume resume = new PatentResume(patent);
@@ -76,7 +71,8 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 	}
 
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
+				+ FILE_EXTENSION;
 	}
 
 	public PartialTokenDictionary getDictionary() {

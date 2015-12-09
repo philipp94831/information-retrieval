@@ -16,7 +16,7 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class PatentIndex extends Loadable {
 
 	private static final String FILE_NAME = "patents";
-	protected static final long TOTAL_WORD_COUNT_OFFSET = 0;
+	protected static final long TOTAL_WORD_COUNT_OFFSET = 0L;
 	protected RandomAccessFile file;
 	private IntegerOffsetsIndex offsets;
 	private String patentsFolder;
@@ -30,8 +30,7 @@ public class PatentIndex extends Loadable {
 		totalWordCount += resume.getWordCount();
 		try {
 			byte[] bytes = resume.toByteArray();
-			long offset = file.length();
-			file.seek(offset);
+			long offset = file.getFilePointer();
 			offsets.put(resume.getDocNumber(), offset);
 			ByteWriter out = new ByteWriter();
 			out.writeInt(bytes.length);
@@ -48,13 +47,14 @@ public class PatentIndex extends Loadable {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
 		file.seek(TOTAL_WORD_COUNT_OFFSET);
-		file.writeInt(0); // totalWordCount
+		file.writeInt(-1); // totalWordCount
 		offsets = new IntegerOffsetsIndex(FILE_NAME);
 		offsets.create();
 	}
 
 	protected String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
+				+ FILE_EXTENSION;
 	}
 
 	public PatentResume get(Integer docNumber) {
@@ -95,7 +95,8 @@ public class PatentIndex extends Loadable {
 	}
 
 	public void merge(List<PartialPatentIndex> indexes) {
-		List<Iterator<PatentResume>> iterators = indexes.stream().map(i -> i.iterator()).collect(Collectors.toList());
+		List<Iterator<PatentResume>> iterators = indexes.stream()
+				.map(i -> i.iterator()).collect(Collectors.toList());
 		TreeMap<PatentResume, Integer> candidates = new TreeMap<PatentResume, Integer>();
 		for (int i = 0; i < iterators.size(); i++) {
 			Iterator<PatentResume> iterator = iterators.get(i);
@@ -117,10 +118,6 @@ public class PatentIndex extends Loadable {
 		byte[] bytes = new byte[length];
 		file.read(bytes);
 		return bytes;
-	}
-
-	public int wordCount(Integer docNumber) {
-		return get(docNumber).getWordCount();
 	}
 
 	@Override

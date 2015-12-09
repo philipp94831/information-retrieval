@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -77,7 +78,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return teamDirectory;
 	}
 
-	public static List<String> getTopWords(int topK, Collection<String> collection) {
+	public static List<String> getTopWords(int topK,
+			Collection<String> collection) {
 		Map<String, Integer> topwords = new HashMap<String, Integer>();
 		for (String snippet : collection) {
 			Tokenizer tokenizer = new Tokenizer(snippet, true);
@@ -135,7 +137,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return queryPlan;
 	}
 
-	private static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
+	private static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(
+			Map<K, V> result) {
 		ValueComparator<K, V> comp = new ValueComparator<K, V>(result);
 		TreeMap<K, V> sortedResults = new TreeMap<K, V>(comp);
 		sortedResults.putAll(result);
@@ -154,22 +157,36 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		index(directory);
 	}
 
-	public ArrayList<String> generateOutput(List<ModelResult> results2, Map<Integer, String> snippets) {
+	private ArrayList<String> generateOutput(Iterable<Result> results) {
+		ArrayList<String> output = new ArrayList<String>();
+		for (Result result : results) {
+			int docNumber = result.getDocNumber();
+			output.add(String.format("%08d", docNumber) + "\t" + index
+					.getPatent(docNumber).getPatent().getInventionTitle());
+		}
+		return output;
+	}
+
+	public ArrayList<String> generateOutput(List<ModelResult> results2,
+			Map<Integer, String> snippets) {
 		ArrayList<String> results = new ArrayList<String>();
 		for (ModelResult result : results2) {
 			int docNumber = result.getDocNumber();
 			results.add(String.format("%08d", docNumber) + "\t"
-					+ index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
+					+ index.getPatent(docNumber).getPatent().getInventionTitle()
+					+ "\n" + snippets.get(docNumber));
 		}
 		return results;
 	}
 
-	public Map<Integer, String> generateSnippets(List<? extends Result> results, List<String> phrases) {
+	public Map<Integer, String> generateSnippets(List<? extends Result> results,
+			List<String> phrases) {
 		SnippetGenerator generator = new SnippetGenerator(phrases);
 		Map<Integer, String> snippets = new HashMap<Integer, String>();
 		for (Result result : results) {
 			int docNumber = result.getDocNumber();
-			String snippet = generator.generate(result, index.getPatent(docNumber));
+			String snippet = generator.generate(result,
+					index.getPatent(docNumber));
 			snippets.put(docNumber, snippet);
 		}
 		return snippets;
@@ -234,10 +251,11 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	private ArrayList<String> searchBoolean(List<String> queryPlan) {
-		Set<Integer> docNumbers = new HashSet<Integer>();
+		Set<Result> docNumbers = new HashSet<Result>();
 		Operator operator = Operator.OR;
 		if (queryPlan.get(0).toLowerCase().equals("not")) {
-			docNumbers = index.getAllDocNumbers();
+			docNumbers = index.getAllDocNumbers().stream()
+					.map(d -> new Result(d)).collect(Collectors.toSet());
 		}
 		for (String phrase : queryPlan) {
 			switch (phrase.toLowerCase()) {
@@ -252,7 +270,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				break;
 			default:
 				List<String> phrases = extractPhrases(phrase);
-				Set<Integer> result = new HashSet<Integer>();
+				Set<Result> result = new HashSet<Result>();
 				for (int i = 0; i < phrases.size(); i++) {
 					result.addAll(index.find(phrases.get(i)));
 				}
@@ -270,12 +288,14 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				break;
 			}
 		}
-		return index.matchInventionTitles(docNumbers);
+		return generateOutput(docNumbers);
 	}
 
-	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {
+	private ArrayList<String> searchRelevant(int topK, int prf,
+			List<String> queryPlan) {
 		List<String> phrases = extractPhrases(queryPlan.get(0));
-		List<ModelResult> results = index.findRelevant(phrases, Math.max(topK, prf));
+		List<ModelResult> results = index.findRelevant(phrases,
+				Math.max(topK, prf));
 		Map<Integer, String> snippets = generateSnippets(results, phrases);
 		if (prf > 0) {
 			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());

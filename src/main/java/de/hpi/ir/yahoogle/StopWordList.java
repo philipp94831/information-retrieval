@@ -1,7 +1,6 @@
 package de.hpi.ir.yahoogle;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
@@ -10,7 +9,8 @@ import java.util.Set;
 public class StopWordList {
 
 	private static Set<String> stopwords = new HashSet<String>();
-	private static final String STOPWORDS_FILE = SearchEngineYahoogle.teamDirectory + "/stopwords.txt";;
+	private static final String STOPWORDS_FILE = SearchEngineYahoogle
+			.getTeamDirectory() + "/stopwords.txt";;
 
 	static {
 		FileReader fr;
@@ -23,9 +23,6 @@ public class StopWordList {
 			}
 			br.close();
 			fr.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

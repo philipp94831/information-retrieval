@@ -2,6 +2,7 @@ package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,8 @@ public class TokenDictionary extends Loadable {
 	private static final String FILE_NAME = "dictionary";
 
 	protected static String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
+				+ FILE_EXTENSION;
 	}
 
 	private RandomAccessFile file;
@@ -48,7 +50,7 @@ public class TokenDictionary extends Loadable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return new HashMap<Integer, Set<Integer>>();
 	}
 
 	public Set<String> getTokens() {
@@ -79,8 +81,8 @@ public class TokenDictionary extends Loadable {
 	}
 
 	public void merge(List<PartialTokenDictionary> indexes) throws IOException {
-		List<Iterator<BinaryPostingList>> iterators = indexes.stream().map(i -> i.iterator())
-				.collect(Collectors.toList());
+		List<Iterator<BinaryPostingList>> iterators = indexes.stream()
+				.map(i -> i.iterator()).collect(Collectors.toList());
 		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<BinaryPostingList, Integer>();
 		for (int i = 0; i < iterators.size(); i++) {
 			Iterator<BinaryPostingList> iterator = iterators.get(i);
@@ -88,8 +90,10 @@ public class TokenDictionary extends Loadable {
 		}
 		BinaryPostingList currentPostings = null;
 		while (!candidates.isEmpty()) {
-			Entry<BinaryPostingList, Integer> entry = candidates.pollFirstEntry();
-			Iterator<BinaryPostingList> iterator = iterators.get(entry.getValue());
+			Entry<BinaryPostingList, Integer> entry = candidates
+					.pollFirstEntry();
+			Iterator<BinaryPostingList> iterator = iterators
+					.get(entry.getValue());
 			if (iterator.hasNext()) {
 				candidates.put(iterator.next(), entry.getValue());
 			}
@@ -115,7 +119,8 @@ public class TokenDictionary extends Loadable {
 		offsets.write();
 	}
 
-	public void writePostingList(BinaryPostingList postingList) throws IOException {
+	public void writePostingList(BinaryPostingList postingList)
+			throws IOException {
 		long offset = file.length();
 		offsets.put(postingList.getToken(), offset);
 		byte[] bytes = postingList.getBytes();

@@ -19,38 +19,11 @@ public class SnippetGenerator {
 		this.phrases = phrases;
 	}
 
-	public String generate(Result result, PatentResume resume) {
-		String patentAbstract = resume.getPatent().getPatentAbstract();
-		Tokenizer tokenizer = new Tokenizer(patentAbstract, true);
-		while (tokenizer.hasNext()) {
-			tokenizer.next();
-		}
-		int numberOfTokens = tokenizer.getPosition() - 1;
-		int start = resume.getPosition(PatentPart.ABSTRACT);
-		SnippetWindow bestWindow = new SnippetWindow(start);
-		for (int i = start; i <= Math.max(1, start + numberOfTokens - MAX_WINDOW_LENGTH); i++) {
-			SnippetWindow window = buildWindow(result, i);
-			if (bestWindow.compareTo(window) > 0) {
-				bestWindow = window;
-			}
-		}
-		tokenizer = new Tokenizer(patentAbstract);
-		StringBuilder snippet = new StringBuilder();
-		while (tokenizer.hasNext() && start + tokenizer.getPosition() < bestWindow.getPosition() + MAX_WINDOW_LENGTH) {
-			if (start + tokenizer.getPosition() >= bestWindow.getPosition()) {
-				String token = tokenizer.next();
-				snippet.append(tokenizer.separator() + token);
-			} else {
-				tokenizer.next();
-			}
-		}
-		return snippet.toString().trim();
-	}
-
 	private SnippetWindow buildWindow(Result result, int i) {
 		SnippetWindow window = new SnippetWindow(i);
 		for (String phrase : phrases) {
-			TreeSet<Integer> positions = new TreeSet<Integer>(result.getPositions(phrase));
+			TreeSet<Integer> positions = new TreeSet<Integer>(
+					result.getPositions(phrase));
 			int tokensInPhrase = new StringTokenizer(phrase).countTokens();
 			NavigableSet<Integer> matches = positions.tailSet(i, true)
 					.headSet(i + MAX_WINDOW_LENGTH - tokensInPhrase, true);
@@ -64,5 +37,36 @@ public class SnippetGenerator {
 			window.addMatches(matches.size());
 		}
 		return window;
+	}
+
+	public String generate(Result result, PatentResume resume) {
+		String patentAbstract = resume.getPatent().getPatentAbstract();
+		Tokenizer tokenizer = new Tokenizer(patentAbstract, true);
+		while (tokenizer.hasNext()) {
+			tokenizer.next();
+		}
+		int numberOfTokens = tokenizer.getPosition() - 1;
+		int start = resume.getPosition(PatentPart.ABSTRACT);
+		SnippetWindow bestWindow = new SnippetWindow(start);
+		for (int i = start; i <= Math.max(1,
+				start + numberOfTokens - MAX_WINDOW_LENGTH); i++) {
+			SnippetWindow window = buildWindow(result, i);
+			if (bestWindow.compareTo(window) > 0) {
+				bestWindow = window;
+			}
+		}
+		tokenizer = new Tokenizer(patentAbstract);
+		StringBuilder snippet = new StringBuilder();
+		while (tokenizer.hasNext()
+				&& start + tokenizer.getPosition() < bestWindow.getPosition()
+						+ MAX_WINDOW_LENGTH) {
+			if (start + tokenizer.getPosition() >= bestWindow.getPosition()) {
+				String token = tokenizer.next();
+				snippet.append(tokenizer.separator() + token);
+			} else {
+				tokenizer.next();
+			}
+		}
+		return snippet.toString().trim();
 	}
 }

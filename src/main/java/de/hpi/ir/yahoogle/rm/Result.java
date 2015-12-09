@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class Result {
+public class Result implements Comparable<Result> {
 
 	private int docNumber;
 	private Map<String, Set<Integer>> positions = new HashMap<String, Set<Integer>>();
@@ -15,6 +15,11 @@ public class Result {
 
 	public void addPositions(String phrase, Set<Integer> positionList) {
 		positions.put(phrase, positionList);
+	}
+
+	@Override
+	public int compareTo(Result o) {
+		return Integer.compare(docNumber, o.docNumber);
 	}
 
 	public int getDocNumber() {

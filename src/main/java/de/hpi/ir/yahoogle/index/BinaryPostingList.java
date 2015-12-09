@@ -38,11 +38,13 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 		return bytes;
 	}
 
-	public Map<Integer, Set<Integer>> getDocumentsWithPositions() throws IOException {
+	public Map<Integer, Set<Integer>> getDocumentsWithPositions()
+			throws IOException {
 		Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
 		int i = 0;
 		while (i < bytes.length) {
-			AbstractReader in = new ByteReader(bytes, i, Integer.BYTES + Short.BYTES);
+			AbstractReader in = new ByteReader(bytes, i,
+					Integer.BYTES + Short.BYTES);
 			i += Integer.BYTES + Short.BYTES;
 			int docNumber = in.readInt();
 			short bsize = in.readShort();

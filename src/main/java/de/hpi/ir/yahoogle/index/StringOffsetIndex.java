@@ -26,15 +26,18 @@ public class StringOffsetIndex extends OffsetsIndex<String> {
 			while (in.hasLeft()) {
 				String newKey = readKey(in);
 				in.readLong();
-				int comp = newKey.substring(0, Math.min(prefix.length(), newKey.length())).compareTo(prefix);
-				if (comp < 0) {
-					continue;
-				}
-				if (comp == 0) {
+				int comp = newKey
+						.substring(0,
+								Math.min(prefix.length(), newKey.length()))
+						.compareTo(prefix);
+				switch (Integer.signum(comp)) {
+				case 0:
 					keys.add(newKey);
-				}
-				if (comp > 0) {
+					break;
+				case 1:
 					return keys;
+				default:
+					break;
 				}
 			}
 		}

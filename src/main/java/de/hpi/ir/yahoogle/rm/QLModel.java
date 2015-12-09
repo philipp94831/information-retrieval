@@ -46,18 +46,23 @@ public class QLModel extends Model {
 			String phrase = query.get(i);
 			Map<Integer, Set<Integer>> result = index.findWithPositions(phrase);
 			found.add(result);
-			cis[i] = result.entrySet().stream().mapToInt(e -> e.getValue().size()).sum();
+			cis[i] = result.entrySet().stream()
+					.mapToInt(e -> e.getValue().size()).sum();
 		}
-		Set<Integer> all = found.stream().map(Map::keySet).flatMap(Collection::stream).collect(Collectors.toSet());
+		Set<Integer> all = found.stream().map(Map::keySet)
+				.flatMap(Collection::stream).collect(Collectors.toSet());
 		for (Integer docNumber : all) {
 			ModelResult result = new ModelResult(docNumber);
 			double score = 0.0;
 			PatentResume resume = index.getPatent(docNumber);
 			int ld = resume.getWordCount();
 			for (int i = 0; i < query.size(); i++) {
-				Set<Integer> list = found.get(i).getOrDefault(docNumber, new HashSet<Integer>());
+				Set<Integer> list = found.get(i).getOrDefault(docNumber,
+						new HashSet<Integer>());
 				result.addPositions(query.get(i), list);
-				double fi = list.stream().mapToDouble(pos -> partWeights.get(resume.getPartAtPosition(pos))).sum();
+				double fi = list.stream().mapToDouble(
+						pos -> partWeights.get(resume.getPartAtPosition(pos)))
+						.sum();
 				score += compute(fi, ld, cis[i]);
 			}
 			result.setScore(score);

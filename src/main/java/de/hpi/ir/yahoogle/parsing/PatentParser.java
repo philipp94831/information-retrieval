@@ -51,7 +51,8 @@ public class PatentParser {
 		}
 		if (isInPatent(qName)) {
 			try {
-				currentPatent.setEnd(xmlStreamReader.getLocationInfo().getEndingByteOffset());
+				currentPatent.setEnd(xmlStreamReader.getLocationInfo()
+						.getEndingByteOffset());
 			} catch (XMLStreamException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -69,7 +70,8 @@ public class PatentParser {
 	}
 
 	private boolean isInDocNumber(String qName) {
-		return qName.equals("doc-number") && parents.elementAt(parents.size() - 2).equals("publication-reference");
+		return qName.equals("doc-number") && parents
+				.elementAt(parents.size() - 2).equals("publication-reference");
 	}
 
 	private boolean isInPatent(String qName) {
@@ -109,8 +111,10 @@ public class PatentParser {
 	}
 
 	public void parse(InputStream stream) throws XMLStreamException {
-		XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory.newFactory();
-		xmlStreamReader = (XMLStreamReader2) xmlInputFactory.createXMLStreamReader(stream);
+		XMLInputFactory2 xmlInputFactory = (XMLInputFactory2) XMLInputFactory
+				.newFactory();
+		xmlStreamReader = (XMLStreamReader2) xmlInputFactory
+				.createXMLStreamReader(stream);
 		parse();
 	}
 
@@ -125,7 +129,8 @@ public class PatentParser {
 	public void startElement(String qName) {
 		if (isInPatent(qName)) {
 			currentPatent = new Patent(fileName);
-			currentPatent.setStart(xmlStreamReader.getLocationInfo().getStartingByteOffset());
+			currentPatent.setStart(
+					xmlStreamReader.getLocationInfo().getStartingByteOffset());
 		}
 		if (isInAbstract(qName)) {
 			inAbstract = true;

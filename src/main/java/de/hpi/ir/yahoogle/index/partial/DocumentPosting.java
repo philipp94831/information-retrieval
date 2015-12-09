@@ -4,7 +4,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class DocumentPosting implements Comparable<DocumentPosting>, Iterable<Posting> {
+public class DocumentPosting
+		implements Comparable<DocumentPosting>, Iterable<Posting> {
 
 	private int docNumber;
 	private Set<Posting> postings = new TreeSet<Posting>();

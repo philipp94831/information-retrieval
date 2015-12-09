@@ -32,9 +32,9 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", true);
 		System.out.println("==============================");
-		String[] queries = {"access", "control", "image data", "program", "vulnerability", "\"mobile device\""};
-		for(String query : queries) {
-			printResults(search(query, 10, 0), query);
+		String[] queries = { "pro*" };
+		for (String query : queries) {
+			printResults(search(query, 10, 2), query);
 		}
 		// long start = System.currentTimeMillis();
 		// myEngine.index(String directory)
@@ -54,16 +54,16 @@ public class SearchEngineTest {
 		for (String result : results) {
 			System.out.println(result);
 		}
-//		System.out.println(results.size() + " Results returned");
+		// System.out.println(results.size() + " Results returned");
 		System.out.println();
 	}
 
 	private static ArrayList<String> search(String query, int topK, int prf) {
-//		System.out.println("Searching...");
+		// System.out.println("Searching...");
 		long startTime = System.nanoTime();
 		ArrayList<String> results = myEngine.search(query, topK, prf);
 		long time = (System.nanoTime() - startTime) / 1000000;
-//		System.out.println("Time for search: " + time + "ms");
+		System.out.println("Time for search: " + time + "ms");
 		return results;
 	}
 }

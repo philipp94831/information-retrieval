@@ -3,7 +3,8 @@ package de.hpi.ir.yahoogle;
 import java.util.Comparator;
 import java.util.Map;
 
-public class ValueComparator<K, T extends Comparable<T>> implements Comparator<K> {
+public class ValueComparator<K, T extends Comparable<T>>
+		implements Comparator<K> {
 
 	Map<K, T> base;
 

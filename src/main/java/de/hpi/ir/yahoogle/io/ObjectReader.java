@@ -7,14 +7,8 @@ import java.io.ObjectInputStream;
 
 public class ObjectReader {
 
-	/**
-	 * loads object from disk
-	 * 
-	 * @param fileName
-	 *            the file where object is stored on disk
-	 * @return deserialized object
-	 */
-	public static <T> T readObject(String fileName) throws FileNotFoundException {
+	public static <T> T readObject(String fileName)
+			throws FileNotFoundException {
 		try {
 			FileInputStream fin = new FileInputStream(fileName);
 			ObjectInputStream oin = new ObjectInputStream(fin);

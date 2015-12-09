@@ -8,9 +8,11 @@ import java.util.TreeSet;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
+import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class PartialPatentIndex extends Loadable implements Iterable<PatentResume> {
+public class PartialPatentIndex extends Loadable
+		implements Iterable<PatentResume> {
 
 	private static final String BASE_NAME = ".patents";
 	private RandomAccessFile file;
@@ -41,7 +43,8 @@ public class PartialPatentIndex extends Loadable implements Iterable<PatentResum
 	}
 
 	protected String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
+				+ FILE_EXTENSION;
 	}
 
 	public long fileSize() throws IOException {
@@ -60,8 +63,11 @@ public class PartialPatentIndex extends Loadable implements Iterable<PatentResum
 
 	public PatentResume read(long offset) throws IOException {
 		file.seek(offset);
-		int size = file.readInt();
-		int docNumber = file.readInt();
+		byte[] bytes = new byte[2 * Integer.BYTES];
+		file.read(bytes);
+		ByteReader in = new ByteReader(bytes);
+		int size = in.readInt();
+		int docNumber = in.readInt();
 		byte[] b = new byte[size];
 		file.read(b);
 		return PatentResume.fromByteArray(docNumber, b);

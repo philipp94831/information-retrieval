@@ -18,14 +18,15 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	private static final String BASE_NAME = ".offsets";
 	private static final int BLOCK_SIZE = 16 * 1024 - Integer.BYTES;
 	private static final String SKIPLIST_BASE_NAME = ".skiplist" + BASE_NAME;
-	private ByteWriter currentBlock = new ByteWriter();
-	private int currentBlockSize = 0;
+	private ByteWriter currentBlock;
+	private int currentBlockSize;
 	protected RandomAccessFile file;
 	private String name;
 	protected TreeMap<K, Long> skiplist;
 
 	public OffsetsIndex(String name) {
 		this.name = name;
+		createNewBlock();
 	}
 
 	@Override
@@ -36,8 +37,14 @@ public abstract class OffsetsIndex<K> extends Loadable {
 		file = new RandomAccessFile(fileName(), "rw");
 	}
 
+	private void createNewBlock() {
+		currentBlock = new ByteWriter();
+		currentBlockSize = 0;
+	}
+
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
+				+ FILE_EXTENSION;
 	}
 
 	public Long get(K key) throws IOException {
@@ -63,7 +70,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 			file.seek(entry.getValue());
 			int size = file.readInt();
 			byte[] b = new byte[size];
-			file.readFully(b);
+			file.read(b);
 			ByteReader in = new ByteReader(b);
 			while (in.hasLeft()) {
 				K key = readKey(in);
@@ -76,7 +83,8 @@ public abstract class OffsetsIndex<K> extends Loadable {
 
 	@Override
 	public void load() throws IOException {
-		skiplist = ObjectReader.<TreeMap<K, Long>> readObject(skipListFileName());
+		skiplist = ObjectReader
+				.<TreeMap<K, Long>> readObject(skipListFileName());
 		file = new RandomAccessFile(fileName(), "rw");
 	}
 
@@ -89,7 +97,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 			writeBlock();
 		}
 		if (currentBlockSize == 0) {
-			long skipOffset = file.length();
+			long skipOffset = file.getFilePointer();
 			skiplist.put(key, skipOffset);
 		}
 		currentBlock.write(b);
@@ -99,7 +107,8 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	protected abstract K readKey(ByteReader in);
 
 	private String skipListFileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + SKIPLIST_BASE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + name
+				+ SKIPLIST_BASE_NAME + FILE_EXTENSION;
 	}
 
 	@Override
@@ -115,8 +124,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 		out.writeInt(bytes.length);
 		out.write(bytes);
 		file.write(out.toByteArray());
-		currentBlock = new ByteWriter();
-		currentBlockSize = 0;
+		createNewBlock();
 	}
 
 	protected abstract void writeKey(K key, ByteWriter out) throws IOException;

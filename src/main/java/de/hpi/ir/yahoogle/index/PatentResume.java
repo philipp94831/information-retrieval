@@ -1,7 +1,6 @@
 package de.hpi.ir.yahoogle.index;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -17,7 +16,8 @@ import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 
-public class PatentResume implements PatentParserCallback, Comparable<PatentResume> {
+public class PatentResume
+		implements PatentParserCallback, Comparable<PatentResume> {
 
 	public static PatentResume fromByteArray(int docNumber, byte[] bytes) {
 		return new PatentResume(docNumber, bytes);
@@ -27,8 +27,8 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 	private long end;
 	private String fileName;
 	private TreeMap<Integer, PatentPart> parts = new TreeMap<Integer, PatentPart>();
-	private transient Patent patent;
-	private transient String patentFolder;
+	private Patent patent;
+	private String patentFolder;
 	private long start;
 	private int wordCount;
 
@@ -63,16 +63,14 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 	private void fetchPatent() {
 		PatentParser parser = new PatentParser(this);
 		try {
-			RandomAccessFile file = new RandomAccessFile(patentFolder + "/" + fileName, "r");
+			RandomAccessFile file = new RandomAccessFile(getFullFileName(),
+					"r");
 			byte[] bytes = new byte[(int) (end - start)];
 			file.seek(start);
 			file.read(bytes);
-			InputStream in = new ByteArrayInputStream(bytes);
 			file.close();
+			InputStream in = new ByteArrayInputStream(bytes);
 			parser.parse(in);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -84,6 +82,10 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 
 	public int getDocNumber() {
 		return docNumber;
+	}
+
+	private String getFullFileName() {
+		return patentFolder + "/" + fileName;
 	}
 
 	public PatentPart getPartAtPosition(int pos) {
