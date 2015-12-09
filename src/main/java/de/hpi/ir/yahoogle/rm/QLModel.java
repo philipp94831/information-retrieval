@@ -21,14 +21,14 @@ public class QLModel extends Model {
 
 	public QLModel(Index index) {
 		this(index, 0.2);
-		partWeights.put(PatentPart.TITLE, 1.5);
-		partWeights.put(PatentPart.ABSTRACT, 1.0);
 	}
 
 	public QLModel(Index index, double lambda) {
 		super(index);
 		this.lambda = lambda;
 		this.lc = index.wordCount();
+		partWeights.put(PatentPart.TITLE, 1.5);
+		partWeights.put(PatentPart.ABSTRACT, 1.0);
 	}
 
 	private double compute(double fi, int ld, int ci) {
