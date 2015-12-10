@@ -160,8 +160,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		for (Result result : results2) {
 			int docNumber = result.getDocNumber();
 			results.add(String.format("%08d", docNumber) + "\t"
-					+ index.getPatent(docNumber).getPatent().getInventionTitle()
-					+ "\n" + snippets.get(docNumber));
+					+ index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
 		}
 		return results;
 	}
@@ -171,8 +170,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		Map<Integer, String> snippets = new HashMap<Integer, String>();
 		for (Result result : results) {
 			int docNumber = result.getDocNumber();
-			String snippet = generator.generate(result,
-					index.getPatent(docNumber));
+			String snippet = generator.generate(result, index.getPatent(docNumber));
 			snippets.put(docNumber, snippet);
 		}
 		return snippets;
@@ -240,8 +238,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		Map<Integer, Result> docNumbers = new HashMap<Integer, Result>();
 		Operator operator = Operator.OR;
 		if (queryPlan.get(0).toLowerCase().equals("not")) {
-			docNumbers.putAll(index.getAllDocNumbers().stream()
-					.collect(Collectors.toMap(d -> d, d -> new Result(d))));
+			docNumbers.putAll(index.getAllDocNumbers().stream().collect(Collectors.toMap(d -> d, d -> new Result(d))));
 		}
 		List<String> allPhrases = new ArrayList<String>();
 		for (String phrase : queryPlan) {
@@ -263,32 +260,32 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				}
 				switch (operator) {
 				case AND:
-					docNumbers.keySet().retainAll(result);
-					result.retainAll(docNumbers.keySet());
+					docNumbers.keySet()
+							.retainAll(result.stream().map(Result::getDocNumber).collect(Collectors.toSet()));
+					result = result.stream().filter(r -> docNumbers.containsKey(r.getDocNumber()))
+							.collect(Collectors.toSet());
 				case OR:
-					result.forEach(r -> docNumbers.merge(r.getDocNumber(), r,
-							(r1, r2) -> {
-								r1.merge(r2);
-								return r1;
-							}));
+					result.forEach(r -> docNumbers.merge(r.getDocNumber(), r, (r1, r2) -> {
+						r1.merge(r2);
+						return r1;
+					}));
 					allPhrases.addAll(phrases);
 					break;
 				case NOT:
-					docNumbers.keySet().removeAll(result);
+					docNumbers.keySet()
+							.removeAll(result.stream().map(Result::getDocNumber).collect(Collectors.toSet()));
 					break;
 				}
 				break;
 			}
 		}
-		Map<Integer, String> snippets = generateSnippets(docNumbers.values(),
-				allPhrases);
+		Map<Integer, String> snippets = generateSnippets(docNumbers.values(), allPhrases);
 		return generateOutput(docNumbers.values(), snippets);
 	}
 
 	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {
 		List<String> phrases = extractPhrases(queryPlan.get(0));
-		List<ModelResult> results = index.findRelevant(phrases,
-				Math.max(topK, prf));
+		List<ModelResult> results = index.findRelevant(phrases, Math.max(topK, prf));
 		Map<Integer, String> snippets = generateSnippets(results, phrases);
 		if (prf > 0) {
 			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());

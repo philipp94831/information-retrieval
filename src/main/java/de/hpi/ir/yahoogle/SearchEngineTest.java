@@ -32,7 +32,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", true);
 		System.out.println("==============================");
-		String[] queries = { "pr*" };
+		String[] queries = { "mobile OR mobile" };
 		for (String query : queries) {
 			printResults(search(query, 10, 2), query);
 		}
