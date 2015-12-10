@@ -24,17 +24,6 @@ import de.hpi.ir.yahoogle.rm.Result;
 
 public class Index extends Loadable {
 
-	private static void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
-		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
-			Set<Integer> l = result.get(entry.getKey());
-			if (l != null) {
-				l.addAll(entry.getValue());
-			} else {
-				result.put(entry.getKey(), entry.getValue());
-			}
-		}
-	}
-
 	private TokenDictionary dictionary;
 	private int indexNumber;
 	private PatentIndex patents;
@@ -54,12 +43,11 @@ public class Index extends Loadable {
 
 	public Set<Result> find(String phrase) {
 		Map<Integer, Set<Integer>> result = findWithPositions(phrase);
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0)
-				.map(e -> {
-					Result r = new Result(e.getKey());
-					r.addPositions(phrase, e.getValue());
-					return r;
-				}).collect(Collectors.toSet());
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> {
+			Result r = new Result(e.getKey());
+			r.addPositions(phrase, e.getValue());
+			return r;
+		}).collect(Collectors.toSet());
 	}
 
 	private Map<Integer, Set<Integer>> findAll(String token) {
@@ -68,7 +56,10 @@ public class Index extends Loadable {
 			String pre = token.substring(0, token.length() - 1);
 			Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
 			for (String t : dictionary.getTokensForPrefix(pre)) {
-				merge(result, dictionary.find(t));
+				dictionary.find(t).entrySet().forEach(e -> result.merge(e.getKey(), e.getValue(), (v1, v2) -> {
+					v1.addAll(v2);
+					return v1;
+				}));
 			}
 			return result;
 		} else {
@@ -90,8 +81,7 @@ public class Index extends Loadable {
 			result = findAll(tokenizer.nextToken());
 		}
 		for (int i = 1; tokenizer.hasMoreTokens(); i++) {
-			Map<Integer, Set<Integer>> newResult = findAll(
-					tokenizer.nextToken());
+			Map<Integer, Set<Integer>> newResult = findAll(tokenizer.nextToken());
 			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;
@@ -119,13 +109,13 @@ public class Index extends Loadable {
 		dictionary.load();
 	}
 
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult,
+			int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {
 				Set<Integer> oldPos = entry.getValue();
-				oldPos.retainAll(newPos.stream().map(p -> p - delta)
-						.collect(Collectors.toSet()));
+				oldPos.retainAll(newPos.stream().map(p -> p - delta).collect(Collectors.toSet()));
 				result.put(entry.getKey(), oldPos);
 			} else {
 				result.get(entry.getKey()).clear();
@@ -140,10 +130,8 @@ public class Index extends Loadable {
 			index.load();
 			indexes.add(index);
 		}
-		patents.merge(indexes.stream().map(i -> i.getPatents())
-				.collect(Collectors.toList()));
-		dictionary.merge(indexes.stream().map(i -> i.getDictionary())
-				.collect(Collectors.toList()));
+		patents.merge(indexes.stream().map(i -> i.getPatents()).collect(Collectors.toList()));
+		dictionary.merge(indexes.stream().map(i -> i.getDictionary()).collect(Collectors.toList()));
 		indexes.forEach(e -> e.delete());
 	}
 
