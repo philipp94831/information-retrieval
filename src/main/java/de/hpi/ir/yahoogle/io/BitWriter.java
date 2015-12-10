@@ -2,7 +2,7 @@ package de.hpi.ir.yahoogle.io;
 
 import java.util.BitSet;
 
-public class BitWriter {
+class BitWriter {
 
 	private final BitSet out = new BitSet();
 	private int pos = 0;

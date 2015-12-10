@@ -20,11 +20,11 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	private static final String SKIPLIST_BASE_NAME = ".skiplist" + BASE_NAME;
 	private ByteWriter currentBlock;
 	private int currentBlockSize;
-	protected RandomAccessFile file;
+	RandomAccessFile file;
 	private final String name;
-	protected TreeMap<K, Long> skiplist;
+	TreeMap<K, Long> skiplist;
 
-	public OffsetsIndex(String name) {
+	OffsetsIndex(String name) {
 		this.name = name;
 		createNewBlock();
 	}

@@ -41,7 +41,7 @@ public class PartialPatentIndex extends Loadable
 		deleteIfExists(fileName());
 	}
 
-	protected String fileName() {
+	private String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
 				+ FILE_EXTENSION;
 	}

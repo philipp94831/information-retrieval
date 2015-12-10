@@ -6,9 +6,9 @@ import de.hpi.ir.yahoogle.index.Index;
 
 public abstract class Model {
 
-	protected final Index index;
+	final Index index;
 
-	public Model(Index index) {
+	Model(Index index) {
 		this.index = index;
 	}
 

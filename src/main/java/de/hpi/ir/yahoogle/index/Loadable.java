@@ -7,7 +7,7 @@ public abstract class Loadable {
 
 	protected static final String FILE_EXTENSION = ".yahoogle";
 
-	public static boolean deleteIfExists(String fileName) {
+	protected static boolean deleteIfExists(String fileName) {
 		File f = new File(fileName);
 		return !f.exists() || f.delete();
 	}

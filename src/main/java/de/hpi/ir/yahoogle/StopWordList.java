@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StopWordList {
+class StopWordList {
 
 	private static final Set<String> stopwords = new HashSet<>();
 	private static final String STOPWORDS_FILE = SearchEngineYahoogle

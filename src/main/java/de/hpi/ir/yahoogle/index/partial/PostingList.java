@@ -8,7 +8,7 @@ import de.hpi.ir.yahoogle.io.AbstractWriter;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.EliasDeltaWriter;
 
-public class PostingList
+class PostingList
 		implements Comparable<PostingList>, Iterable<DocumentPosting> {
 
 	private final TreeMap<Integer, DocumentPosting> documents = new TreeMap<>();

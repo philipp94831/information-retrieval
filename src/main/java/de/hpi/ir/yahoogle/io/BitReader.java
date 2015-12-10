@@ -3,7 +3,7 @@ package de.hpi.ir.yahoogle.io;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
 
-public class BitReader {
+class BitReader {
 
 	private final BitSet in;
 	private int pos = 0;

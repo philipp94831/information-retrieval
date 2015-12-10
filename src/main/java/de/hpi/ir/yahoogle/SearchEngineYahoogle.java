@@ -53,7 +53,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	private static List<String> extractPhrases(String partialQuery) {
 		List<String> phrases = new ArrayList<>();
 		StringTokenizer tokenizer = new StringTokenizer(partialQuery);
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		boolean inPhrase = false;
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
@@ -66,7 +66,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			buffer.append(" ").append(token.replaceAll(PHRASE_DELIMITER, ""));
 			if (!inPhrase) {
 				phrases.add(buffer.toString());
-				buffer = new StringBuffer();
+				buffer = new StringBuilder();
 			}
 		}
 		return phrases;
@@ -95,7 +95,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	private static List<String> processQuery(String query) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		List<String> queryPlan = new ArrayList<>();
-		StringBuffer phrase = new StringBuffer();
+		StringBuilder phrase = new StringBuilder();
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
 			boolean checkEmpty = false;
@@ -106,9 +106,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			case "not":
 				if (phrase.length() > 0) {
 					queryPlan.add(phrase.toString());
-					phrase = new StringBuffer();
+					phrase = new StringBuilder();
 				} else {
-					if (queryPlan.size() > 0) {
+					if (!queryPlan.isEmpty()) {
 						queryPlan.remove(queryPlan.size() - 1);
 					}
 				}
@@ -127,7 +127,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		if (phrase.length() > 0) {
 			queryPlan.add(phrase.toString());
 		} else {
-			if (queryPlan.size() > 0) {
+			if (!queryPlan.isEmpty()) {
 				queryPlan.remove(queryPlan.size() - 1);
 			}
 		}
@@ -237,7 +237,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan) {
 		Map<Integer, Result> docNumbers = new HashMap<>();
 		Operator operator = Operator.OR;
-		if (queryPlan.get(0).toLowerCase().equals("not")) {
+		if (queryPlan.get(0).equalsIgnoreCase("not")) {
 			docNumbers.putAll(index.getAllDocNumbers().stream()
 					.collect(Collectors.toMap(d -> d, Result::new)));
 		}
@@ -277,6 +277,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 					break;
 				case NOT:
 					docNumbers.keySet().removeAll(result.keySet());
+					break;
+				default:
 					break;
 				}
 				break;
