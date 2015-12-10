@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
+import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
 import de.hpi.ir.yahoogle.rm.Model;
 import de.hpi.ir.yahoogle.rm.ModelResult;
@@ -80,14 +80,13 @@ public class Index extends Loadable {
 	}
 
 	public Map<Integer, Set<Integer>> findWithPositions(String phrase) {
-		StringTokenizer tokenizer = new StringTokenizer(phrase);
+		Tokenizer tokenizer = new Tokenizer(phrase);
 		Map<Integer, Set<Integer>> result = null;
-		if (tokenizer.hasMoreTokens()) {
-			result = findAll(tokenizer.nextToken());
+		if (tokenizer.hasNext()) {
+			result = findAll(tokenizer.next());
 		}
-		for (int i = 1; tokenizer.hasMoreTokens(); i++) {
-			Map<Integer, Set<Integer>> newResult = findAll(
-					tokenizer.nextToken());
+		for (int i = 1; tokenizer.hasNext(); i++) {
+			Map<Integer, Set<Integer>> newResult = findAll(tokenizer.next());
 			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;

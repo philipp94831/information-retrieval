@@ -39,31 +39,6 @@ public class ByteReadWriteTest {
 	}
 
 	@Test
-	public void testReadAndWriteShort() {
-		List<Short> list = new ArrayList<>(
-				Arrays.asList((short) 1, (short) 2, (short) 3));
-		ByteWriter out = new ByteWriter();
-		try {
-			for (Short i : list) {
-				out.writeShort(i);
-			}
-			byte[] bytes = out.toByteArray();
-			ByteReader in = new ByteReader(bytes, 0, bytes.length);
-			List<Short> decoded = new ArrayList<>();
-			while (in.hasLeft()) {
-				decoded.add(in.readShort());
-			}
-			assertEquals(list.size(), decoded.size());
-			for (int i = 0; i < list.size(); i++) {
-				assertEquals(list.get(i), decoded.get(i));
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@Test
 	public void testReadAndWriteLong() {
 		List<Long> list = new ArrayList<>(
 				Arrays.asList((long) 1, (long) 2, (long) 3));
@@ -77,6 +52,31 @@ public class ByteReadWriteTest {
 			List<Long> decoded = new ArrayList<>();
 			while (in.hasLeft()) {
 				decoded.add(in.readLong());
+			}
+			assertEquals(list.size(), decoded.size());
+			for (int i = 0; i < list.size(); i++) {
+				assertEquals(list.get(i), decoded.get(i));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testReadAndWriteShort() {
+		List<Short> list = new ArrayList<>(
+				Arrays.asList((short) 1, (short) 2, (short) 3));
+		ByteWriter out = new ByteWriter();
+		try {
+			for (Short i : list) {
+				out.writeShort(i);
+			}
+			byte[] bytes = out.toByteArray();
+			ByteReader in = new ByteReader(bytes, 0, bytes.length);
+			List<Short> decoded = new ArrayList<>();
+			while (in.hasLeft()) {
+				decoded.add(in.readShort());
 			}
 			assertEquals(list.size(), decoded.size());
 			for (int i = 0; i < list.size(); i++) {

@@ -8,8 +8,10 @@ public class Tokenizer implements Iterator<String> {
 	private static final String DELIM = "- \t\n\r\f";
 	private String nextToken;
 	private int pos = 0;
+	private boolean returnDelims;
 	private final boolean skipStopWords;
-	private final StringTokenizer string;
+	private final String string;
+	private StringTokenizer tokenizer;
 
 	public Tokenizer(String string) {
 		this(string, true, false);
@@ -20,8 +22,24 @@ public class Tokenizer implements Iterator<String> {
 	}
 
 	public Tokenizer(String string, boolean skipStopWords, boolean returnDelims) {
-		this.string = new StringTokenizer(string, DELIM, returnDelims);
+		this.string = string;
+		this.returnDelims = returnDelims;
+		this.tokenizer = new StringTokenizer(string, DELIM, returnDelims);
 		this.skipStopWords = skipStopWords;
+	}
+
+	public int countTokens() {
+		StringTokenizer old = tokenizer;
+		int oldPos = pos;
+		pos = 0;
+		tokenizer = new StringTokenizer(string, DELIM, returnDelims);
+		while (hasNext()) {
+			next();
+		}
+		int result = pos;
+		tokenizer = old;
+		pos = oldPos;
+		return result;
 	}
 
 	public int getPosition() {
@@ -31,11 +49,11 @@ public class Tokenizer implements Iterator<String> {
 	@Override
 	public boolean hasNext() {
 		if (skipStopWords) {
-			if (string.hasMoreTokens()) {
-				nextToken = string.nextToken();
+			if (tokenizer.hasMoreTokens()) {
+				nextToken = tokenizer.nextToken();
 				while (StopWordList.isStopword(nextToken)) {
-					if (string.hasMoreTokens()) {
-						nextToken = string.nextToken();
+					if (tokenizer.hasMoreTokens()) {
+						nextToken = tokenizer.nextToken();
 					} else {
 						return false;
 					}
@@ -45,7 +63,7 @@ public class Tokenizer implements Iterator<String> {
 				return false;
 			}
 		} else {
-			return string.hasMoreTokens();
+			return tokenizer.hasMoreTokens();
 		}
 	}
 
@@ -55,7 +73,7 @@ public class Tokenizer implements Iterator<String> {
 		if (skipStopWords) {
 			token = nextToken;
 		} else {
-			token = string.nextToken();
+			token = tokenizer.nextToken();
 		}
 		if (!StopWordList.isStopword(token)
 				&& !token.matches("[" + DELIM + "]+")) {

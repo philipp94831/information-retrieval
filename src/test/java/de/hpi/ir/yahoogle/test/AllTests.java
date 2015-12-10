@@ -6,6 +6,6 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ EliasDeltaReadWriteTest.class, ByteReadWriteTest.class,
-		SnippetWindowTest.class })
+		SnippetWindowTest.class, TokenizerTest.class })
 public class AllTests {
 }

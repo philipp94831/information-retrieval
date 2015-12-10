@@ -2,7 +2,6 @@ package de.hpi.ir.yahoogle.snippets;
 
 import java.util.List;
 import java.util.NavigableSet;
-import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import de.hpi.ir.yahoogle.Tokenizer;
@@ -24,7 +23,7 @@ public class SnippetGenerator {
 		for (String phrase : phrases) {
 			TreeSet<Integer> positions = new TreeSet<>(
 					result.getPositions(phrase));
-			int tokensInPhrase = new StringTokenizer(phrase).countTokens();
+			int tokensInPhrase = new Tokenizer(phrase).countTokens();
 			NavigableSet<Integer> matches = positions.tailSet(i, true)
 					.headSet(i + MAX_WINDOW_LENGTH - tokensInPhrase, true);
 			if (matches.size() > 0) {
