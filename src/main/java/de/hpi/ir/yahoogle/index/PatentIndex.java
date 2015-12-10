@@ -21,8 +21,8 @@ public class PatentIndex extends Loadable {
 
 	private static final String FILE_NAME = "patents";
 	protected static final long TOTAL_WORD_COUNT_OFFSET = 0L;
-	private static final int MAX_CACHE_SIZE = 10000;
-	private static final int MAX_BYTE_READ = 1024 * 64;
+	private static final int MAX_CACHE_SIZE = 100000;
+	private static final int MAX_BYTE_READ = 1024 * 128;
 	protected RandomAccessFile file;
 	private IntegerOffsetsIndex offsets;
 	private String patentsFolder;

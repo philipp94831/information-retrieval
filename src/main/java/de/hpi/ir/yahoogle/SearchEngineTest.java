@@ -30,9 +30,9 @@ public class SearchEngineTest {
 	}
 
 	public static void main(String args[]) throws Exception {
-		initialize("patents/", true);
+		initialize("patents/", false);
 		System.out.println("==============================");
-		String[] queries = { "pr* OR mobile device" };
+		String[] queries = { "\"mobile device\"" };
 		for (String query : queries) {
 			printResults(search(query, 10, 2), query);
 		}
