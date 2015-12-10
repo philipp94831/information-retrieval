@@ -5,18 +5,22 @@ import java.util.StringTokenizer;
 
 public class Tokenizer implements Iterator<String> {
 
+	private static final String DELIM = "- \t\n\r\f";
 	private String nextToken;
 	private int pos = 0;
-	private String separator = " ";
-	private boolean skipStopWords = false;
+	private final boolean skipStopWords;
 	private final StringTokenizer string;
 
 	public Tokenizer(String string) {
-		this.string = new StringTokenizer(string);
+		this(string, true, false);
 	}
 
 	public Tokenizer(String string, boolean skipStopWords) {
-		this(string);
+		this(string, skipStopWords, false);
+	}
+
+	public Tokenizer(String string, boolean skipStopWords, boolean returnDelims) {
+		this.string = new StringTokenizer(string, DELIM, returnDelims);
 		this.skipStopWords = skipStopWords;
 	}
 
@@ -53,13 +57,10 @@ public class Tokenizer implements Iterator<String> {
 		} else {
 			token = string.nextToken();
 		}
-		if (!StopWordList.isStopword(token)) {
+		if (!StopWordList.isStopword(token)
+				&& !token.matches("[" + DELIM + "]+")) {
 			pos++;
 		}
 		return token;
-	}
-
-	public String separator() {
-		return separator;
 	}
 }

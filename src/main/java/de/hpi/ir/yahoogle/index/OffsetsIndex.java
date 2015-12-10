@@ -66,8 +66,8 @@ public abstract class OffsetsIndex<K> extends Loadable {
 
 	public Set<K> keys() throws IOException {
 		Set<K> keys = new HashSet<>();
-		for (Entry<K, Long> entry : skiplist.entrySet()) {
-			file.seek(entry.getValue());
+		for (Long offset : skiplist.values()) {
+			file.seek(offset);
 			int size = file.readInt();
 			byte[] b = new byte[size];
 			file.read(b);

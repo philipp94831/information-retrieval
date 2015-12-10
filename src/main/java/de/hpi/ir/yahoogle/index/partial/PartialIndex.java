@@ -13,6 +13,7 @@ import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 public class PartialIndex extends Loadable implements PatentParserCallback {
 
 	private static final String BASE_NAME = ".index";
+	private static final boolean SKIP_STOPWORDS = true;
 	private PartialTokenDictionary dictionary;
 	private final String name;
 	private PartialPatentIndex patents;
@@ -28,7 +29,7 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		int startOffset = 0;
 		resume.setTitlePosition(startOffset + 1);
 		String title = patent.getInventionTitle();
-		Tokenizer tokenizer = new Tokenizer(title, true);
+		Tokenizer tokenizer = new Tokenizer(title, SKIP_STOPWORDS);
 		while (tokenizer.hasNext()) {
 			String token = Stemmer.stem(tokenizer.next());
 			Posting posting = new Posting();
@@ -39,7 +40,7 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		startOffset += tokenizer.getPosition() + 1;
 		resume.setAbstractPosition(startOffset + 1);
 		String patentAbstract = patent.getPatentAbstract();
-		tokenizer = new Tokenizer(patentAbstract, true);
+		tokenizer = new Tokenizer(patentAbstract, SKIP_STOPWORDS);
 		while (tokenizer.hasNext()) {
 			String token = Stemmer.stem(tokenizer.next());
 			Posting posting = new Posting();

@@ -9,3 +9,4 @@ res/patents.zip
 /target/
 *.iml
 .idea
+**dictionary.txt

@@ -79,7 +79,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	private static List<String> getTopWords(int topK, Collection<String> collection) {
 		Map<String, Integer> topwords = new HashMap<>();
 		for (String snippet : collection) {
-			Tokenizer tokenizer = new Tokenizer(snippet, true);
+			Tokenizer tokenizer = new Tokenizer(snippet);
 			while (tokenizer.hasNext()) {
 				String token = Stemmer.stem(tokenizer.next());
 				Integer count = topwords.getOrDefault(token, 0);

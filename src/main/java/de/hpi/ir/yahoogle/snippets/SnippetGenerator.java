@@ -41,7 +41,7 @@ public class SnippetGenerator {
 
 	public String generate(Result result, PatentResume resume) {
 		String patentAbstract = resume.getPatent().getPatentAbstract();
-		Tokenizer tokenizer = new Tokenizer(patentAbstract, true);
+		Tokenizer tokenizer = new Tokenizer(patentAbstract);
 		while (tokenizer.hasNext()) {
 			tokenizer.next();
 		}
@@ -55,14 +55,14 @@ public class SnippetGenerator {
 				bestWindow = window;
 			}
 		}
-		tokenizer = new Tokenizer(patentAbstract);
+		tokenizer = new Tokenizer(patentAbstract, false, true);
 		StringBuilder snippet = new StringBuilder();
 		while (tokenizer.hasNext()
 				&& start + tokenizer.getPosition() < bestWindow.getPosition()
 						+ MAX_WINDOW_LENGTH) {
 			if (start + tokenizer.getPosition() >= bestWindow.getPosition()) {
 				String token = tokenizer.next();
-				snippet.append(tokenizer.separator()).append(token);
+				snippet.append(token);
 			} else {
 				tokenizer.next();
 			}

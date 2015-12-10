@@ -1,5 +1,6 @@
 package de.hpi.ir.yahoogle.index;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
+import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
 import de.hpi.ir.yahoogle.rm.Model;
@@ -24,6 +26,8 @@ import de.hpi.ir.yahoogle.rm.Result;
 
 public class Index extends Loadable {
 
+	private static final String DICTIONARY_FILE = SearchEngineYahoogle
+			.getTeamDirectory() + "/dictionary.txt";
 	private TokenDictionary dictionary;
 	private PatentIndex patents;
 	private final String patentsFolder;
@@ -103,6 +107,7 @@ public class Index extends Loadable {
 		patents.load();
 		dictionary = new TokenDictionary();
 		dictionary.load();
+		// printDictionary();
 	}
 
 	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
@@ -136,7 +141,8 @@ public class Index extends Loadable {
 	@SuppressWarnings("unused")
 	private void printDictionary() {
 		try {
-			PrintWriter writer = new PrintWriter("dictionary.txt", "UTF-8");
+			new File(DICTIONARY_FILE).delete();
+			PrintWriter writer = new PrintWriter(DICTIONARY_FILE, "UTF-8");
 			dictionary.getTokens().forEach(writer::println);
 			writer.close();
 		} catch (FileNotFoundException e) {
