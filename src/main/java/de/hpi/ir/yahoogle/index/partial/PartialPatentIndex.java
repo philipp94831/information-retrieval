@@ -8,7 +8,6 @@ import java.util.TreeSet;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
-import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class PartialPatentIndex extends Loadable
@@ -63,14 +62,10 @@ public class PartialPatentIndex extends Loadable
 
 	public PatentResume read(long offset) throws IOException {
 		file.seek(offset);
-		byte[] bytes = new byte[2 * Integer.BYTES];
-		file.read(bytes);
-		ByteReader in = new ByteReader(bytes);
-		int size = in.readInt();
-		int docNumber = in.readInt();
+		int size = file.readInt();
 		byte[] b = new byte[size];
 		file.read(b);
-		return PatentResume.fromByteArray(docNumber, b);
+		return PatentResume.fromByteArray(b);
 	}
 
 	@Override
@@ -80,7 +75,6 @@ public class PartialPatentIndex extends Loadable
 			byte[] bytes = resume.toByteArray();
 			ByteWriter out = new ByteWriter();
 			out.writeInt(bytes.length);
-			out.writeInt(resume.getDocNumber());
 			out.write(bytes);
 			file.write(out.toByteArray());
 		}

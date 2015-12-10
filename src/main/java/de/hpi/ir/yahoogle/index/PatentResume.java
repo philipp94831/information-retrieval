@@ -19,8 +19,8 @@ import de.hpi.ir.yahoogle.parsing.PatentPart;
 public class PatentResume
 		implements PatentParserCallback, Comparable<PatentResume> {
 
-	public static PatentResume fromByteArray(int docNumber, byte[] bytes) {
-		return new PatentResume(docNumber, bytes);
+	public static PatentResume fromByteArray(byte[] bytes) {
+		return new PatentResume(bytes);
 	}
 
 	private int docNumber;
@@ -32,9 +32,9 @@ public class PatentResume
 	private long start;
 	private int wordCount;
 
-	public PatentResume(int docNumber, byte[] bytes) {
+	public PatentResume(byte[] bytes) {
 		ByteReader in = new ByteReader(bytes);
-		this.docNumber = docNumber;
+		this.docNumber = in.readInt();
 		this.fileName = in.readUTF();
 		this.start = in.readLong();
 		this.end = in.readLong();
@@ -134,6 +134,7 @@ public class PatentResume
 
 	public byte[] toByteArray() throws IOException {
 		ByteWriter out = new ByteWriter();
+		out.writeInt(docNumber);
 		out.writeUTF(fileName);
 		out.writeLong(start);
 		out.writeLong(end);

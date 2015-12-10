@@ -41,4 +41,14 @@ public class ByteReader implements AbstractReader {
 		in.get(b);
 		return new String(b, Charset.forName("UTF-8"));
 	}
+
+	public int remaining() {
+		return in.remaining();
+	}
+
+	public byte[] read(int length) {
+		byte[] bytes = new byte[length];
+		in.get(bytes);
+		return bytes;
+	}
 }
