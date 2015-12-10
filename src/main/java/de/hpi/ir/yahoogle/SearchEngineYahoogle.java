@@ -155,19 +155,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		index(directory);
 	}
 
-	private ArrayList<String> generateOutput(Iterable<Result> results) {
-		ArrayList<String> output = new ArrayList<String>();
-		for (Result result : results) {
-			int docNumber = result.getDocNumber();
-			output.add(String.format("%08d", docNumber) + "\t" + index
-					.getPatent(docNumber).getPatent().getInventionTitle());
-		}
-		return output;
-	}
-
-	public ArrayList<String> generateOutput(List<ModelResult> results2, Map<Integer, String> snippets) {
+	public ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets) {
 		ArrayList<String> results = new ArrayList<String>();
-		for (ModelResult result : results2) {
+		for (Result result : results2) {
 			int docNumber = result.getDocNumber();
 			results.add(String.format("%08d", docNumber) + "\t"
 					+ index.getPatent(docNumber).getPatent().getInventionTitle()
@@ -176,7 +166,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return results;
 	}
 
-	public Map<Integer, String> generateSnippets(List<? extends Result> results, List<String> phrases) {
+	public Map<Integer, String> generateSnippets(Collection<? extends Result> results, List<String> phrases) {
 		SnippetGenerator generator = new SnippetGenerator(phrases);
 		Map<Integer, String> snippets = new HashMap<Integer, String>();
 		for (Result result : results) {
@@ -240,19 +230,20 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		if (queryPlan.isEmpty()) {
 			return new ArrayList<String>();
 		}
-		if (queryPlan.size() == 1 && !queryPlan.get(0).contains("*")) {
+		if (queryPlan.size() == 1) {
 			return searchRelevant(topK, prf, queryPlan);
 		}
 		return searchBoolean(queryPlan);
 	}
 
 	private ArrayList<String> searchBoolean(List<String> queryPlan) {
-		Set<Result> docNumbers = new HashSet<Result>();
+		Map<Integer, Result> docNumbers = new HashMap<Integer, Result>();
 		Operator operator = Operator.OR;
 		if (queryPlan.get(0).toLowerCase().equals("not")) {
-			docNumbers = index.getAllDocNumbers().stream()
-					.map(d -> new Result(d)).collect(Collectors.toSet());
+			docNumbers.putAll(index.getAllDocNumbers().stream()
+					.collect(Collectors.toMap(d -> d, d -> new Result(d))));
 		}
+		List<String> allPhrases = new ArrayList<String>();
 		for (String phrase : queryPlan) {
 			switch (phrase.toLowerCase()) {
 			case "and":
@@ -272,19 +263,26 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				}
 				switch (operator) {
 				case AND:
-					docNumbers.retainAll(result);
-					break;
+					docNumbers.keySet().retainAll(result);
+					result.retainAll(docNumbers.keySet());
 				case OR:
-					docNumbers.addAll(result);
+					result.forEach(r -> docNumbers.merge(r.getDocNumber(), r,
+							(r1, r2) -> {
+								r1.merge(r2);
+								return r1;
+							}));
+					allPhrases.addAll(phrases);
 					break;
 				case NOT:
-					docNumbers.removeAll(result);
+					docNumbers.keySet().removeAll(result);
 					break;
 				}
 				break;
 			}
 		}
-		return generateOutput(docNumbers);
+		Map<Integer, String> snippets = generateSnippets(docNumbers.values(),
+				allPhrases);
+		return generateOutput(docNumbers.values(), snippets);
 	}
 
 	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {

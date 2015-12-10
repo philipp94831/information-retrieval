@@ -24,11 +24,6 @@ import de.hpi.ir.yahoogle.rm.Result;
 
 public class Index extends Loadable {
 
-	private static Set<Integer> getNotEmptyKeys(Map<Integer, Set<Integer>> result) {
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0)
-				.map(e -> e.getKey()).collect(Collectors.toSet());
-	}
-
 	private static void merge(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> newResult) {
 		for (Entry<Integer, Set<Integer>> entry : newResult.entrySet()) {
 			Set<Integer> l = result.get(entry.getKey());
@@ -59,8 +54,12 @@ public class Index extends Loadable {
 
 	public Set<Result> find(String phrase) {
 		Map<Integer, Set<Integer>> result = findWithPositions(phrase);
-		return getNotEmptyKeys(result).stream().map(d -> new Result(d))
-				.collect(Collectors.toSet());
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0)
+				.map(e -> {
+					Result r = new Result(e.getKey());
+					r.addPositions(phrase, e.getValue());
+					return r;
+				}).collect(Collectors.toSet());
 	}
 
 	private Map<Integer, Set<Integer>> findAll(String token) {

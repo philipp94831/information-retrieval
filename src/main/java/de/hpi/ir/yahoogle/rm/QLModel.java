@@ -2,7 +2,6 @@ package de.hpi.ir.yahoogle.rm;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ public class QLModel extends Model {
 
 	private final double lambda;
 	private final int lc;
-	private Map<PatentPart, Double> partWeights = new HashMap<PatentPart, Double>();
 
 	public QLModel(Index index) {
 		this(index, 0.2);
@@ -27,8 +25,6 @@ public class QLModel extends Model {
 		super(index);
 		this.lambda = lambda;
 		this.lc = index.wordCount();
-		partWeights.put(PatentPart.TITLE, 1.5);
-		partWeights.put(PatentPart.ABSTRACT, 1.0);
 	}
 
 	private double compute(double fi, int ld, int ci) {
@@ -46,8 +42,7 @@ public class QLModel extends Model {
 			String phrase = query.get(i);
 			Map<Integer, Set<Integer>> result = index.findWithPositions(phrase);
 			found.add(result);
-			cis[i] = result.entrySet().stream()
-					.mapToInt(e -> e.getValue().size()).sum();
+			cis[i] = result.values().stream().mapToInt(v -> v.size()).sum();
 		}
 		Set<Integer> all = found.stream().map(Map::keySet)
 				.flatMap(Collection::stream).collect(Collectors.toSet());
@@ -61,13 +56,23 @@ public class QLModel extends Model {
 						new HashSet<Integer>());
 				result.addPositions(query.get(i), list);
 				double fi = list.stream().mapToDouble(
-						pos -> partWeights.get(resume.getPartAtPosition(pos)))
-						.sum();
+						pos -> partWeight(resume.getPartAtPosition(pos))).sum();
 				score += compute(fi, ld, cis[i]);
 			}
 			result.setScore(score);
 			results.add(result);
 		}
 		return results;
+	}
+
+	private double partWeight(PatentPart part) {
+		switch (part) {
+		case TITLE:
+			return 1.5;
+		case ABSTRACT:
+			return 1.0;
+		default:
+			return 0.0;
+		}
 	}
 }
