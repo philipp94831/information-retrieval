@@ -7,8 +7,8 @@ import java.util.Set;
 
 public class Result implements Comparable<Result> {
 
-	private int docNumber;
-	private Map<String, Set<Integer>> positions = new HashMap<String, Set<Integer>>();
+	private final int docNumber;
+	private final Map<String, Set<Integer>> positions = new HashMap<>();
 
 	public Result(int docNumber) {
 		this.docNumber = docNumber;
@@ -28,7 +28,7 @@ public class Result implements Comparable<Result> {
 	}
 
 	public Set<Integer> getPositions(String phrase) {
-		return positions.getOrDefault(phrase, new HashSet<Integer>());
+		return positions.getOrDefault(phrase, new HashSet<>());
 	}
 
 	public void merge(Result r2) {

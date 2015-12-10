@@ -19,7 +19,7 @@ public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
 
-	protected static String fileName() {
+	private static String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
 				+ FILE_EXTENSION;
 	}
@@ -50,7 +50,7 @@ public class TokenDictionary extends Loadable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return new HashMap<Integer, Set<Integer>>();
+		return new HashMap<>();
 	}
 
 	public Set<String> getTokens() {
@@ -82,8 +82,9 @@ public class TokenDictionary extends Loadable {
 
 	public void merge(List<PartialTokenDictionary> indexes) throws IOException {
 		List<Iterator<BinaryPostingList>> iterators = indexes.stream()
-				.map(i -> i.iterator()).collect(Collectors.toList());
-		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<BinaryPostingList, Integer>();
+				.map(PartialTokenDictionary::iterator)
+				.collect(Collectors.toList());
+		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<>();
 		for (int i = 0; i < iterators.size(); i++) {
 			Iterator<BinaryPostingList> iterator = iterators.get(i);
 			candidates.put(iterator.next(), i);
@@ -119,7 +120,7 @@ public class TokenDictionary extends Loadable {
 		offsets.write();
 	}
 
-	public void writePostingList(BinaryPostingList postingList) throws IOException {
+	private void writePostingList(BinaryPostingList postingList) throws IOException {
 		long offset = file.length();
 		offsets.put(postingList.getToken(), offset);
 		byte[] bytes = postingList.getBytes();

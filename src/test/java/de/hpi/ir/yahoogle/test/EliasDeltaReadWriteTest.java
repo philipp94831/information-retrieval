@@ -16,7 +16,7 @@ public class EliasDeltaReadWriteTest {
 
 	@Test
 	public void testReadAndWriteInt() {
-		List<Integer> list = new ArrayList<Integer>(Arrays.asList(1, 2, 3));
+		List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3));
 		EliasDeltaWriter out = new EliasDeltaWriter();
 		try {
 			for (Integer i : list) {
@@ -24,7 +24,7 @@ public class EliasDeltaReadWriteTest {
 			}
 			byte[] bytes = out.toByteArray();
 			EliasDeltaReader in = new EliasDeltaReader(bytes, 0, bytes.length);
-			List<Integer> decoded = new ArrayList<Integer>();
+			List<Integer> decoded = new ArrayList<>();
 			while (in.hasLeft()) {
 				decoded.add(in.readInt());
 			}
@@ -40,7 +40,8 @@ public class EliasDeltaReadWriteTest {
 
 	@Test
 	public void testReadAndWriteShort() {
-		List<Short> list = new ArrayList<Short>(Arrays.asList((short) 1, (short) 2, (short) 3));
+		List<Short> list = new ArrayList<>(
+				Arrays.asList((short) 1, (short) 2, (short) 3));
 		EliasDeltaWriter out = new EliasDeltaWriter();
 		try {
 			for (Short i : list) {
@@ -48,9 +49,34 @@ public class EliasDeltaReadWriteTest {
 			}
 			byte[] bytes = out.toByteArray();
 			EliasDeltaReader in = new EliasDeltaReader(bytes, 0, bytes.length);
-			List<Short> decoded = new ArrayList<Short>();
+			List<Short> decoded = new ArrayList<>();
 			while (in.hasLeft()) {
 				decoded.add(in.readShort());
+			}
+			assertEquals(list.size(), decoded.size());
+			for (int i = 0; i < list.size(); i++) {
+				assertEquals(list.get(i), decoded.get(i));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void testReadAndWriteLong() {
+		List<Long> list = new ArrayList<>(
+				Arrays.asList((long) 1, (long) 2, (long) 3));
+		EliasDeltaWriter out = new EliasDeltaWriter();
+		try {
+			for (Long i : list) {
+				out.writeLong(i);
+			}
+			byte[] bytes = out.toByteArray();
+			EliasDeltaReader in = new EliasDeltaReader(bytes, 0, bytes.length);
+			List<Long> decoded = new ArrayList<>();
+			while (in.hasLeft()) {
+				decoded.add(in.readLong());
 			}
 			assertEquals(list.size(), decoded.size());
 			for (int i = 0; i < list.size(); i++) {

@@ -19,17 +19,13 @@ import de.hpi.ir.yahoogle.parsing.PatentPart;
 public class PatentResume
 		implements PatentParserCallback, Comparable<PatentResume> {
 
-	public static PatentResume fromByteArray(byte[] bytes) {
-		return new PatentResume(bytes);
-	}
-
-	private int docNumber;
-	private long end;
-	private String fileName;
-	private TreeMap<Integer, PatentPart> parts = new TreeMap<Integer, PatentPart>();
+	private final int docNumber;
+	private final long end;
+	private final String fileName;
+	private final TreeMap<Integer, PatentPart> parts = new TreeMap<>();
 	private Patent patent;
 	private String patentFolder;
-	private long start;
+	private final long start;
 	private int wordCount;
 
 	public PatentResume(byte[] bytes) {
@@ -97,10 +93,6 @@ public class PatentResume
 			fetchPatent();
 		}
 		return patent;
-	}
-
-	public String getPatentFolder() {
-		return patentFolder;
 	}
 
 	public int getPosition(PatentPart part) {

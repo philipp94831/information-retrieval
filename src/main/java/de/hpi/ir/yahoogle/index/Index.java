@@ -25,9 +25,8 @@ import de.hpi.ir.yahoogle.rm.Result;
 public class Index extends Loadable {
 
 	private TokenDictionary dictionary;
-	private int indexNumber;
 	private PatentIndex patents;
-	private String patentsFolder;
+	private final String patentsFolder;
 
 	public Index(String patentsFolder) {
 		this.patentsFolder = patentsFolder;
@@ -43,23 +42,25 @@ public class Index extends Loadable {
 
 	public List<Result> find(String phrase) {
 		Map<Integer, Set<Integer>> result = findWithPositions(phrase);
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> {
-			Result r = new Result(e.getKey());
-			r.addPositions(phrase, e.getValue());
-			return r;
-		}).collect(Collectors.toList());
+		return result.entrySet().stream().filter(e -> e.getValue().size() > 0)
+				.map(e -> {
+					Result r = new Result(e.getKey());
+					r.addPositions(phrase, e.getValue());
+					return r;
+				}).collect(Collectors.toList());
 	}
 
 	private Map<Integer, Set<Integer>> findAll(String token) {
 		boolean prefix = token.endsWith("*");
 		if (prefix) {
 			String pre = token.substring(0, token.length() - 1);
-			Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
+			Map<Integer, Set<Integer>> result = new HashMap<>();
 			for (String t : dictionary.getTokensForPrefix(pre)) {
-				dictionary.find(t).entrySet().forEach(e -> result.merge(e.getKey(), e.getValue(), (v1, v2) -> {
-					v1.addAll(v2);
-					return v1;
-				}));
+				dictionary.find(t).entrySet().forEach(e -> result
+						.merge(e.getKey(), e.getValue(), (v1, v2) -> {
+							v1.addAll(v2);
+							return v1;
+						}));
 			}
 			return result;
 		} else {
@@ -81,7 +82,8 @@ public class Index extends Loadable {
 			result = findAll(tokenizer.nextToken());
 		}
 		for (int i = 1; tokenizer.hasMoreTokens(); i++) {
-			Map<Integer, Set<Integer>> newResult = findAll(tokenizer.nextToken());
+			Map<Integer, Set<Integer>> newResult = findAll(
+					tokenizer.nextToken());
 			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;
@@ -89,12 +91,6 @@ public class Index extends Loadable {
 
 	public Set<Integer> getAllDocNumbers() {
 		return patents.getAllDocNumbers();
-	}
-
-	public PartialIndex getPartialIndex() throws IOException {
-		PartialIndex index = new PartialIndex(Integer.toString(indexNumber));
-		indexNumber++;
-		return index;
 	}
 
 	public PatentResume getPatent(int docNumber) {
@@ -109,13 +105,13 @@ public class Index extends Loadable {
 		dictionary.load();
 	}
 
-	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult,
-			int delta) {
+	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
 		for (Entry<Integer, Set<Integer>> entry : result.entrySet()) {
 			Set<Integer> newPos = nextResult.get(entry.getKey());
 			if (newPos != null) {
 				Set<Integer> oldPos = entry.getValue();
-				oldPos.retainAll(newPos.stream().map(p -> p - delta).collect(Collectors.toSet()));
+				oldPos.retainAll(newPos.stream().map(p -> p - delta)
+						.collect(Collectors.toSet()));
 				result.put(entry.getKey(), oldPos);
 			} else {
 				result.get(entry.getKey()).clear();
@@ -124,24 +120,24 @@ public class Index extends Loadable {
 	}
 
 	public void mergeIndices(List<String> names) throws IOException {
-		List<PartialIndex> indexes = new ArrayList<PartialIndex>();
+		List<PartialIndex> indexes = new ArrayList<>();
 		for (String name : names) {
 			PartialIndex index = new PartialIndex(name);
 			index.load();
 			indexes.add(index);
 		}
-		patents.merge(indexes.stream().map(i -> i.getPatents()).collect(Collectors.toList()));
-		dictionary.merge(indexes.stream().map(i -> i.getDictionary()).collect(Collectors.toList()));
-		indexes.forEach(e -> e.delete());
+		patents.merge(indexes.stream().map(PartialIndex::getPatents)
+				.collect(Collectors.toList()));
+		dictionary.merge(indexes.stream().map(PartialIndex::getDictionary)
+				.collect(Collectors.toList()));
+		indexes.forEach(PartialIndex::delete);
 	}
 
 	@SuppressWarnings("unused")
 	private void printDictionary() {
 		try {
 			PrintWriter writer = new PrintWriter("dictionary.txt", "UTF-8");
-			for (String token : dictionary.getTokens()) {
-				writer.println(token);
-			}
+			dictionary.getTokens().forEach(writer::println);
 			writer.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

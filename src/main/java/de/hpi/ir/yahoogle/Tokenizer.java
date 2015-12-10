@@ -9,7 +9,7 @@ public class Tokenizer implements Iterator<String> {
 	private int pos = 0;
 	private String separator = " ";
 	private boolean skipStopWords = false;
-	private StringTokenizer string;
+	private final StringTokenizer string;
 
 	public Tokenizer(String string) {
 		this.string = new StringTokenizer(string);

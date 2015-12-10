@@ -17,7 +17,7 @@ public class PartialTokenDictionary extends Loadable
 	private static final String BASE_NAME = ".dictionary";
 	private Map<String, PostingList> dictionary;
 	private RandomAccessFile file;
-	private String name;
+	private final String name;
 
 	public PartialTokenDictionary(String name) {
 		this.name = name;
@@ -33,7 +33,7 @@ public class PartialTokenDictionary extends Loadable
 	@Override
 	public void create() throws IOException {
 		deleteIfExists(fileName());
-		dictionary = new TreeMap<String, PostingList>();
+		dictionary = new TreeMap<>();
 	}
 
 	public long currentOffset() throws IOException {
@@ -52,10 +52,6 @@ public class PartialTokenDictionary extends Loadable
 
 	public long fileSize() throws IOException {
 		return file.length();
-	}
-
-	public Map<String, PostingList> getDict() {
-		return dictionary;
 	}
 
 	@Override

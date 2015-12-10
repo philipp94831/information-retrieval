@@ -21,7 +21,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	private ByteWriter currentBlock;
 	private int currentBlockSize;
 	protected RandomAccessFile file;
-	private String name;
+	private final String name;
 	protected TreeMap<K, Long> skiplist;
 
 	public OffsetsIndex(String name) {
@@ -33,7 +33,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	public void create() throws IOException {
 		deleteIfExists(fileName());
 		deleteIfExists(skipListFileName());
-		skiplist = new TreeMap<K, Long>();
+		skiplist = new TreeMap<>();
 		file = new RandomAccessFile(fileName(), "rw");
 	}
 
@@ -65,7 +65,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	}
 
 	public Set<K> keys() throws IOException {
-		Set<K> keys = new HashSet<K>();
+		Set<K> keys = new HashSet<>();
 		for (Entry<K, Long> entry : skiplist.entrySet()) {
 			file.seek(entry.getValue());
 			int size = file.readInt();

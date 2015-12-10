@@ -13,7 +13,7 @@ import org.codehaus.stax2.XMLStreamReader2;
 public class PatentParser {
 
 	private StringBuffer buf = new StringBuffer();
-	private PatentParserCallback callback;
+	private final PatentParserCallback callback;
 	private Patent currentPatent;
 	private String fileName;
 	private boolean inAbstract = false;
@@ -26,16 +26,16 @@ public class PatentParser {
 		this.callback = smallIndex;
 	}
 
-	public void characters(String ch) {
+	private void characters(String ch) {
 		if (inAbstract || inTitle || inDocNumber) {
 			buf.append(ch);
 		}
 	}
 
-	public void endDocument() {
+	private void endDocument() {
 	}
 
-	public void endElement(String qName) {
+	private void endElement(String qName) {
 		parents.pop();
 		if (isInAbstract(qName)) {
 			inAbstract = false;
@@ -59,10 +59,6 @@ public class PatentParser {
 			}
 			callback.callback(currentPatent);
 		}
-	}
-
-	public String getFileName() {
-		return fileName;
 	}
 
 	private boolean isInAbstract(String qName) {
@@ -122,11 +118,11 @@ public class PatentParser {
 		this.fileName = fileName;
 	}
 
-	public void startDocument() {
-		parents = new Stack<String>();
+	private void startDocument() {
+		parents = new Stack<>();
 	}
 
-	public void startElement(String qName) {
+	private void startElement(String qName) {
 		if (isInPatent(qName)) {
 			currentPatent = new Patent(fileName);
 			currentPatent.setStart(

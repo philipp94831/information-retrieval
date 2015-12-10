@@ -7,7 +7,7 @@ import java.nio.charset.Charset;
 
 public class ByteWriter implements AbstractWriter {
 
-	private ByteArrayOutputStream out;
+	private final ByteArrayOutputStream out;
 
 	public ByteWriter() {
 		out = new ByteArrayOutputStream();

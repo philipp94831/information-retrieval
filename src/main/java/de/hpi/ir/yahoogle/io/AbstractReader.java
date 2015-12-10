@@ -4,11 +4,11 @@ import java.io.IOException;
 
 public interface AbstractReader {
 
-	public abstract boolean hasLeft();
+	boolean hasLeft();
 
-	public abstract int readInt() throws IOException;
+	int readInt() throws IOException;
 
-	public abstract long readLong() throws IOException;
+	long readLong() throws IOException;
 
-	public abstract short readShort() throws IOException;
+	short readShort() throws IOException;
 }

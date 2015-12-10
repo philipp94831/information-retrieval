@@ -17,7 +17,7 @@ public class StringOffsetIndex extends OffsetsIndex<String> {
 	public List<String> getKeysForPrefix(String prefix) throws IOException {
 		Entry<String, Long> entry = skiplist.floorEntry(prefix);
 		file.seek(entry.getValue());
-		List<String> keys = new ArrayList<String>();
+		List<String> keys = new ArrayList<>();
 		while (true) {
 			int size = file.readInt();
 			byte[] b = new byte[size];

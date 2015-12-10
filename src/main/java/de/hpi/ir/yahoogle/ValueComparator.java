@@ -6,7 +6,7 @@ import java.util.Map;
 public class ValueComparator<K, T extends Comparable<T>>
 		implements Comparator<K> {
 
-	Map<K, T> base;
+	private final Map<K, T> base;
 
 	public ValueComparator(Map<K, T> base) {
 		this.base = base;

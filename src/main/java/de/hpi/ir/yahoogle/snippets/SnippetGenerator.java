@@ -12,8 +12,8 @@ import de.hpi.ir.yahoogle.rm.Result;
 
 public class SnippetGenerator {
 
-	protected static final int MAX_WINDOW_LENGTH = 10;
-	private List<String> phrases;
+	static final int MAX_WINDOW_LENGTH = 10;
+	private final List<String> phrases;
 
 	public SnippetGenerator(List<String> phrases) {
 		this.phrases = phrases;
@@ -22,7 +22,7 @@ public class SnippetGenerator {
 	private SnippetWindow buildWindow(Result result, int i) {
 		SnippetWindow window = new SnippetWindow(i);
 		for (String phrase : phrases) {
-			TreeSet<Integer> positions = new TreeSet<Integer>(
+			TreeSet<Integer> positions = new TreeSet<>(
 					result.getPositions(phrase));
 			int tokensInPhrase = new StringTokenizer(phrase).countTokens();
 			NavigableSet<Integer> matches = positions.tailSet(i, true)
@@ -62,7 +62,7 @@ public class SnippetGenerator {
 						+ MAX_WINDOW_LENGTH) {
 			if (start + tokenizer.getPosition() >= bestWindow.getPosition()) {
 				String token = tokenizer.next();
-				snippet.append(tokenizer.separator() + token);
+				snippet.append(tokenizer.separator()).append(token);
 			} else {
 				tokenizer.next();
 			}

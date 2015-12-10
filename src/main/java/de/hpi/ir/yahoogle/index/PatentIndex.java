@@ -20,20 +20,20 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class PatentIndex extends Loadable {
 
 	private static final String FILE_NAME = "patents";
-	protected static final long TOTAL_WORD_COUNT_OFFSET = 0L;
-	private static final int MAX_CACHE_SIZE = 100000;
 	private static final int MAX_BYTE_READ = 1024 * 128;
-	protected RandomAccessFile file;
+	private static final int MAX_CACHE_SIZE = 100000;
+	private static final long TOTAL_WORD_COUNT_OFFSET = 0L;
+	private final Map<Integer, PatentResume> cache = new HashMap<>();
+	private RandomAccessFile file;
 	private IntegerOffsetsIndex offsets;
-	private String patentsFolder;
+	private final String patentsFolder;
 	private int totalWordCount = 0;
-	private Map<Integer, PatentResume> cache = new HashMap<Integer, PatentResume>();
 
 	public PatentIndex(String patentsFolder) {
 		this.patentsFolder = patentsFolder;
 	}
 
-	public void add(PatentResume resume) {
+	private void add(PatentResume resume) {
 		totalWordCount += resume.getWordCount();
 		try {
 			byte[] bytes = resume.toByteArray();
@@ -59,26 +59,32 @@ public class PatentIndex extends Loadable {
 		offsets.create();
 	}
 
-	protected String fileName() {
+	private String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
 				+ FILE_EXTENSION;
 	}
 
+	private void freeCache() {
+		Set<Integer> toRemove = cache.keySet().stream()
+				.limit(MAX_CACHE_SIZE / 2).collect(Collectors.toSet());
+		cache.keySet().removeAll(toRemove);
+	}
+
 	public PatentResume get(Integer docNumber) {
 		PatentResume resume = cache.get(docNumber);
-		if(resume != null) {
+		if (resume != null) {
 			return resume;
 		}
-		if(cache.size() > MAX_CACHE_SIZE) {
+		if (cache.size() > MAX_CACHE_SIZE) {
 			freeCache();
 		}
 		try {
 			long offset = offsets.get(docNumber);
 			List<byte[]> bytes = read(offset);
-			for(byte[] b : bytes) {
-				resume = PatentResume.fromByteArray(b);
+			for (byte[] b : bytes) {
+				resume = new PatentResume(b);
 				resume.setPatentFolder(patentsFolder);
-				cache.put(resume.getDocNumber(), resume);				
+				cache.put(resume.getDocNumber(), resume);
 			}
 			return cache.get(docNumber);
 		} catch (IOException e) {
@@ -86,11 +92,6 @@ public class PatentIndex extends Loadable {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	private void freeCache() {
-		Set<Integer> toRemove = cache.keySet().stream().limit(MAX_CACHE_SIZE / 2).collect(Collectors.toSet());
-		cache.keySet().removeAll(toRemove);
 	}
 
 	public Set<Integer> getAllDocNumbers() {
@@ -118,8 +119,8 @@ public class PatentIndex extends Loadable {
 
 	public void merge(List<PartialPatentIndex> indexes) {
 		List<Iterator<PatentResume>> iterators = indexes.stream()
-				.map(i -> i.iterator()).collect(Collectors.toList());
-		TreeMap<PatentResume, Integer> candidates = new TreeMap<PatentResume, Integer>();
+				.map(PartialPatentIndex::iterator).collect(Collectors.toList());
+		TreeMap<PatentResume, Integer> candidates = new TreeMap<>();
 		for (int i = 0; i < iterators.size(); i++) {
 			Iterator<PatentResume> iterator = iterators.get(i);
 			candidates.put(iterator.next(), i);
@@ -134,23 +135,24 @@ public class PatentIndex extends Loadable {
 		}
 	}
 
-	public List<byte[]> read(long offset) throws IOException {
+	private List<byte[]> read(long offset) throws IOException {
 		file.seek(offset);
-		int size = Math.min((int) (file.length() - file.getFilePointer()), MAX_BYTE_READ);
+		int size = Math.min((int) (file.length() - file.getFilePointer()),
+				MAX_BYTE_READ);
 		byte[] large = new byte[size];
 		file.read(large);
 		ByteReader in = new ByteReader(large);
-		List<byte[]> list = new ArrayList<byte[]>();
-		while(true) {
-			if(in.remaining() < Integer.BYTES) {
+		List<byte[]> list = new ArrayList<>();
+		while (true) {
+			if (in.remaining() < Integer.BYTES) {
 				break;
 			}
 			int length = in.readInt();
-			if(in.remaining() < length) {
+			if (in.remaining() < length) {
 				break;
 			}
 			byte[] bytes = in.read(length);
-			list.add(bytes);		
+			list.add(bytes);
 		}
 		return list;
 	}

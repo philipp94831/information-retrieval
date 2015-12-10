@@ -5,7 +5,7 @@ import java.util.BitSet;
 
 public class BitReader {
 
-	private BitSet in;
+	private final BitSet in;
 	private int pos = 0;
 
 	public BitReader(byte[] bytes) {

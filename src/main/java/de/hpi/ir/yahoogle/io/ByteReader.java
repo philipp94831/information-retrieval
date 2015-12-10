@@ -5,7 +5,7 @@ import java.nio.charset.Charset;
 
 public class ByteReader implements AbstractReader {
 
-	private ByteBuffer in;
+	private final ByteBuffer in;
 
 	public ByteReader(byte[] b) {
 		in = ByteBuffer.wrap(b);
@@ -18,6 +18,12 @@ public class ByteReader implements AbstractReader {
 	@Override
 	public boolean hasLeft() {
 		return in.hasRemaining();
+	}
+
+	public byte[] read(int length) {
+		byte[] bytes = new byte[length];
+		in.get(bytes);
+		return bytes;
 	}
 
 	@Override
@@ -44,11 +50,5 @@ public class ByteReader implements AbstractReader {
 
 	public int remaining() {
 		return in.remaining();
-	}
-
-	public byte[] read(int length) {
-		byte[] bytes = new byte[length];
-		in.get(bytes);
-		return bytes;
 	}
 }

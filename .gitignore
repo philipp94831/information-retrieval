@@ -7,3 +7,5 @@ res/patents/
 res/patentfetcher.py
 res/patents.zip
 /target/
+*.iml
+.idea

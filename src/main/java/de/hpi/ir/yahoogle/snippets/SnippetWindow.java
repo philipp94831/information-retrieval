@@ -2,11 +2,11 @@ package de.hpi.ir.yahoogle.snippets;
 
 public class SnippetWindow implements Comparable<SnippetWindow> {
 
-	int distinctMatches = 0;
-	int leftMostPosition = SnippetGenerator.MAX_WINDOW_LENGTH;
-	int matches = 0;
-	int pos;
-	int rightMostPosition = 0;
+	private int distinctMatches = 0;
+	private int leftMostPosition = SnippetGenerator.MAX_WINDOW_LENGTH;
+	private int matches = 0;
+	private final int pos;
+	private int rightMostPosition = 0;
 
 	public SnippetWindow(int pos) {
 		this.pos = pos;
@@ -40,7 +40,7 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 		return -1;
 	}
 
-	public int getMiddleAlign() {
+	private int getMiddleAlign() {
 		int right = SnippetGenerator.MAX_WINDOW_LENGTH - rightMostPosition - 1;
 		return leftMostPosition * leftMostPosition + right * right;
 	}

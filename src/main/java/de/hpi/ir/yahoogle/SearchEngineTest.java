@@ -30,9 +30,9 @@ public class SearchEngineTest {
 	}
 
 	public static void main(String args[]) throws Exception {
-		initialize("patents/", false);
+		initialize("patents/", true);
 		System.out.println("==============================");
-		String[] queries = { "\"mobile device\"" };
+		String[] queries = { "mobile device" };
 		for (String query : queries) {
 			printResults(search(query, 10, 2), query);
 		}
@@ -51,9 +51,7 @@ public class SearchEngineTest {
 		if (results.size() == 0) {
 			System.out.println("No matches found");
 		}
-		for (String result : results) {
-			System.out.println(result);
-		}
+		results.forEach(System.out::println);
 		// System.out.println(results.size() + " Results returned");
 		System.out.println();
 	}

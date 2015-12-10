@@ -1,6 +1,5 @@
 package de.hpi.ir.yahoogle.io;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -14,8 +13,6 @@ public class ObjectWriter {
 			oout.writeObject(o);
 			oout.close();
 			fout.close();
-		} catch (FileNotFoundException e) {
-			return false;
 		} catch (IOException e) {
 			return false;
 		}

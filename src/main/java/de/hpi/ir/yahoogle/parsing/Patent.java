@@ -4,7 +4,7 @@ public class Patent {
 
 	private int docNumber;
 	private long end;
-	private String fileName;
+	private final String fileName;
 	private String inventionTitle;
 	private String patentAbstract;
 	private long start;

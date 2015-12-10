@@ -15,7 +15,7 @@ public class PartialPatentIndex extends Loadable
 
 	private static final String BASE_NAME = ".patents";
 	private RandomAccessFile file;
-	private String name;
+	private final String name;
 	private Set<PatentResume> patents;
 
 	public PartialPatentIndex(String name) {
@@ -29,7 +29,7 @@ public class PartialPatentIndex extends Loadable
 	@Override
 	public void create() throws IOException {
 		deleteIfExists(fileName());
-		patents = new TreeSet<PatentResume>();
+		patents = new TreeSet<>();
 	}
 
 	public long currentOffset() throws IOException {
@@ -65,7 +65,7 @@ public class PartialPatentIndex extends Loadable
 		int size = file.readInt();
 		byte[] b = new byte[size];
 		file.read(b);
-		return PatentResume.fromByteArray(b);
+		return new PatentResume(b);
 	}
 
 	@Override

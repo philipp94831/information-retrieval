@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class EliasDeltaWriter implements AbstractWriter {
 
-	private BitWriter out = new BitWriter();
+	private final BitWriter out = new BitWriter();
 
 	@Override
 	public byte[] toByteArray() {

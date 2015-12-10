@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class EliasDeltaReader implements AbstractReader {
 
-	private BitReader in;
+	private final BitReader in;
 
 	public EliasDeltaReader(byte[] bytes, int offset, int length) {
 		in = new BitReader(bytes, offset, length);

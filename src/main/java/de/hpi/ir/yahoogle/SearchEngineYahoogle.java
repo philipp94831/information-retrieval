@@ -51,7 +51,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	private static final int TOP_WORDS = 4;
 
 	private static List<String> extractPhrases(String partialQuery) {
-		List<String> phrases = new ArrayList<String>();
+		List<String> phrases = new ArrayList<>();
 		StringTokenizer tokenizer = new StringTokenizer(partialQuery);
 		StringBuffer buffer = new StringBuffer();
 		boolean inPhrase = false;
@@ -63,7 +63,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			if (token.endsWith(PHRASE_DELIMITER)) {
 				inPhrase = false;
 			}
-			buffer.append(" " + token.replaceAll(PHRASE_DELIMITER, ""));
+			buffer.append(" ").append(token.replaceAll(PHRASE_DELIMITER, ""));
 			if (!inPhrase) {
 				phrases.add(buffer.toString());
 				buffer = new StringBuffer();
@@ -76,8 +76,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return teamDirectory;
 	}
 
-	public static List<String> getTopWords(int topK, Collection<String> collection) {
-		Map<String, Integer> topwords = new HashMap<String, Integer>();
+	private static List<String> getTopWords(int topK, Collection<String> collection) {
+		Map<String, Integer> topwords = new HashMap<>();
 		for (String snippet : collection) {
 			Tokenizer tokenizer = new Tokenizer(snippet, true);
 			while (tokenizer.hasNext()) {
@@ -88,13 +88,13 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			}
 		}
 		TreeMap<String, Integer> sortedWords = sortByValueDescending(topwords);
-		List<String> topWords = new ArrayList<String>(sortedWords.keySet());
+		List<String> topWords = new ArrayList<>(sortedWords.keySet());
 		return topWords.subList(0, Math.min(topK, topWords.size()));
 	}
 
 	private static List<String> processQuery(String query) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
-		List<String> queryPlan = new ArrayList<String>();
+		List<String> queryPlan = new ArrayList<>();
 		StringBuffer phrase = new StringBuffer();
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
@@ -119,7 +119,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			default:
 				String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
 				if (!StopWordList.isStopword(cleanedToken)) {
-					phrase.append(" " + token);
+					phrase.append(" ").append(token);
 				}
 				break;
 			}
@@ -135,8 +135,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	private static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
-		ValueComparator<K, V> comp = new ValueComparator<K, V>(result);
-		TreeMap<K, V> sortedResults = new TreeMap<K, V>(comp);
+		ValueComparator<K, V> comp = new ValueComparator<>(result);
+		TreeMap<K, V> sortedResults = new TreeMap<>(comp);
 		sortedResults.putAll(result);
 		return sortedResults;
 	}
@@ -153,22 +153,24 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		index(directory);
 	}
 
-	public ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets) {
-		ArrayList<String> results = new ArrayList<String>();
+	private ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets) {
+		ArrayList<String> results = new ArrayList<>();
 		for (Result result : results2) {
 			int docNumber = result.getDocNumber();
 			results.add(String.format("%08d", docNumber) + "\t"
-					+ index.getPatent(docNumber).getPatent().getInventionTitle() + "\n" + snippets.get(docNumber));
+					+ index.getPatent(docNumber).getPatent().getInventionTitle()
+					+ "\n" + snippets.get(docNumber));
 		}
 		return results;
 	}
 
-	public Map<Integer, String> generateSnippets(Collection<? extends Result> results, List<String> phrases) {
+	private Map<Integer, String> generateSnippets(Collection<? extends Result> results, List<String> phrases) {
 		SnippetGenerator generator = new SnippetGenerator(phrases);
-		Map<Integer, String> snippets = new HashMap<Integer, String>();
+		Map<Integer, String> snippets = new HashMap<>();
 		for (Result result : results) {
 			int docNumber = result.getDocNumber();
-			String snippet = generator.generate(result, index.getPatent(docNumber));
+			String snippet = generator.generate(result,
+					index.getPatent(docNumber));
 			snippets.put(docNumber, snippet);
 		}
 		return snippets;
@@ -224,7 +226,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	ArrayList<String> search(String query, int topK, int prf) {
 		List<String> queryPlan = processQuery(query);
 		if (queryPlan.isEmpty()) {
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 		if (queryPlan.size() == 1) {
 			return searchRelevant(topK, prf, queryPlan);
@@ -233,12 +235,13 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan) {
-		Map<Integer, Result> docNumbers = new HashMap<Integer, Result>();
+		Map<Integer, Result> docNumbers = new HashMap<>();
 		Operator operator = Operator.OR;
 		if (queryPlan.get(0).toLowerCase().equals("not")) {
-			docNumbers.putAll(index.getAllDocNumbers().stream().collect(Collectors.toMap(d -> d, d -> new Result(d))));
+			docNumbers.putAll(index.getAllDocNumbers().stream()
+					.collect(Collectors.toMap(d -> d, Result::new)));
 		}
-		List<String> allPhrases = new ArrayList<String>();
+		List<String> allPhrases = new ArrayList<>();
 		for (String phrase : queryPlan) {
 			switch (phrase.toLowerCase()) {
 			case "and":
@@ -252,23 +255,24 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				break;
 			default:
 				List<String> phrases = extractPhrases(phrase);
-				Map<Integer, Result> result = new HashMap<Integer, Result>();
-				for (int i = 0; i < phrases.size(); i++) {
-					String p = phrases.get(i);
-					index.find(p).forEach(r -> result.merge(r.getDocNumber(), r, (v1, v2) -> {
-						v1.merge(v2);
-						return v1;
-					}));
+				Map<Integer, Result> result = new HashMap<>();
+				for (String p : phrases) {
+					index.find(p).forEach(
+							r -> result.merge(r.getDocNumber(), r, (v1, v2) -> {
+								v1.merge(v2);
+								return v1;
+							}));
 				}
 				switch (operator) {
 				case AND:
 					docNumbers.keySet().retainAll(result.keySet());
 					result.keySet().retainAll(docNumbers.keySet());
 				case OR:
-					result.values().forEach(r -> docNumbers.merge(r.getDocNumber(), r, (r1, r2) -> {
-						r1.merge(r2);
-						return r1;
-					}));
+					result.values().forEach(r -> docNumbers
+							.merge(r.getDocNumber(), r, (r1, r2) -> {
+								r1.merge(r2);
+								return r1;
+							}));
 					allPhrases.addAll(phrases);
 					break;
 				case NOT:
@@ -278,18 +282,20 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				break;
 			}
 		}
-		List<Result> r = docNumbers.values().stream().limit(topK).collect(Collectors.toList());
+		List<Result> r = docNumbers.values().stream().limit(topK)
+				.collect(Collectors.toList());
 		Map<Integer, String> snippets = generateSnippets(r, allPhrases);
 		return generateOutput(r, snippets);
 	}
 
 	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {
 		List<String> phrases = extractPhrases(queryPlan.get(0));
-		List<ModelResult> results = index.findRelevant(phrases, Math.max(topK, prf));
+		List<ModelResult> results = index.findRelevant(phrases,
+				Math.max(topK, prf));
 		Map<Integer, String> snippets = generateSnippets(results, phrases);
 		if (prf > 0) {
 			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());
-			List<String> newPhrases = new ArrayList<String>();
+			List<String> newPhrases = new ArrayList<>();
 			newPhrases.addAll(phrases);
 			newPhrases.addAll(topWords);
 			results = index.findRelevant(newPhrases, topK);

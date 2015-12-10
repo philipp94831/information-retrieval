@@ -4,7 +4,7 @@ import java.util.BitSet;
 
 public class BitWriter {
 
-	private BitSet out = new BitSet();
+	private final BitSet out = new BitSet();
 	private int pos = 0;
 
 	public byte[] toByteArray() {

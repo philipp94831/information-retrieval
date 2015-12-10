@@ -14,7 +14,7 @@ import de.hpi.ir.yahoogle.io.EliasDeltaReader;
 public class BinaryPostingList implements Comparable<BinaryPostingList> {
 
 	private byte[] bytes;
-	private String token;
+	private final String token;
 
 	public BinaryPostingList(String token, byte[] bytes) {
 		this.token = token;
@@ -39,7 +39,7 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 	}
 
 	public Map<Integer, Set<Integer>> getDocumentsWithPositions() throws IOException {
-		Map<Integer, Set<Integer>> result = new HashMap<Integer, Set<Integer>>();
+		Map<Integer, Set<Integer>> result = new HashMap<>();
 		int i = 0;
 		while (i < bytes.length) {
 			AbstractReader in = new ByteReader(bytes, i,
@@ -48,7 +48,7 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 			int docNumber = in.readInt();
 			short bsize = in.readShort();
 			in = new EliasDeltaReader(bytes, i, bsize);
-			Set<Integer> pos = new HashSet<Integer>();
+			Set<Integer> pos = new HashSet<>();
 			int oldPos = 0;
 			while (in.hasLeft()) {
 				short p = in.readShort();

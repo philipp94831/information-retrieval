@@ -35,14 +35,14 @@ public class QLModel extends Model {
 
 	@Override
 	public List<ModelResult> compute(List<String> query) {
-		List<ModelResult> results = new ArrayList<ModelResult>();
+		List<ModelResult> results = new ArrayList<>();
 		int[] cis = new int[query.size()];
-		List<Map<Integer, Set<Integer>>> found = new ArrayList<Map<Integer, Set<Integer>>>();
+		List<Map<Integer, Set<Integer>>> found = new ArrayList<>();
 		for (int i = 0; i < query.size(); i++) {
 			String phrase = query.get(i);
 			Map<Integer, Set<Integer>> result = index.findWithPositions(phrase);
 			found.add(result);
-			cis[i] = result.values().stream().mapToInt(v -> v.size()).sum();
+			cis[i] = result.values().stream().mapToInt(Set::size).sum();
 		}
 		Set<Integer> all = found.stream().map(Map::keySet)
 				.flatMap(Collection::stream).collect(Collectors.toSet());
@@ -53,7 +53,7 @@ public class QLModel extends Model {
 			int ld = resume.getWordCount();
 			for (int i = 0; i < query.size(); i++) {
 				Set<Integer> list = found.get(i).getOrDefault(docNumber,
-						new HashSet<Integer>());
+						new HashSet<>());
 				result.addPositions(query.get(i), list);
 				double fi = list.stream().mapToDouble(
 						pos -> partWeight(resume.getPartAtPosition(pos))).sum();
