@@ -25,10 +25,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -231,10 +229,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		if (queryPlan.size() == 1) {
 			return searchRelevant(topK, prf, queryPlan);
 		}
-		return searchBoolean(queryPlan);
+		return searchBoolean(topK, queryPlan);
 	}
 
-	private ArrayList<String> searchBoolean(List<String> queryPlan) {
+	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan) {
 		Map<Integer, Result> docNumbers = new HashMap<Integer, Result>();
 		Operator operator = Operator.OR;
 		if (queryPlan.get(0).toLowerCase().equals("not")) {
@@ -254,33 +252,35 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				break;
 			default:
 				List<String> phrases = extractPhrases(phrase);
-				Set<Result> result = new HashSet<Result>();
+				Map<Integer, Result> result = new HashMap<Integer, Result>();
 				for (int i = 0; i < phrases.size(); i++) {
-					result.addAll(index.find(phrases.get(i)));
+					String p = phrases.get(i);
+					index.find(p).forEach(r -> result.merge(r.getDocNumber(), r, (v1, v2) -> {
+						v1.merge(v2);
+						return v1;
+					}));
 				}
 				switch (operator) {
 				case AND:
-					docNumbers.keySet()
-							.retainAll(result.stream().map(Result::getDocNumber).collect(Collectors.toSet()));
-					result = result.stream().filter(r -> docNumbers.containsKey(r.getDocNumber()))
-							.collect(Collectors.toSet());
+					docNumbers.keySet().retainAll(result.keySet());
+					result.keySet().retainAll(docNumbers.keySet());
 				case OR:
-					result.forEach(r -> docNumbers.merge(r.getDocNumber(), r, (r1, r2) -> {
+					result.values().forEach(r -> docNumbers.merge(r.getDocNumber(), r, (r1, r2) -> {
 						r1.merge(r2);
 						return r1;
 					}));
 					allPhrases.addAll(phrases);
 					break;
 				case NOT:
-					docNumbers.keySet()
-							.removeAll(result.stream().map(Result::getDocNumber).collect(Collectors.toSet()));
+					docNumbers.keySet().removeAll(result.keySet());
 					break;
 				}
 				break;
 			}
 		}
-		Map<Integer, String> snippets = generateSnippets(docNumbers.values(), allPhrases);
-		return generateOutput(docNumbers.values(), snippets);
+		List<Result> r = docNumbers.values().stream().limit(topK).collect(Collectors.toList());
+		Map<Integer, String> snippets = generateSnippets(r, allPhrases);
+		return generateOutput(r, snippets);
 	}
 
 	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {

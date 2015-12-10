@@ -41,13 +41,13 @@ public class Index extends Loadable {
 		dictionary.create();
 	}
 
-	public Set<Result> find(String phrase) {
+	public List<Result> find(String phrase) {
 		Map<Integer, Set<Integer>> result = findWithPositions(phrase);
 		return result.entrySet().stream().filter(e -> e.getValue().size() > 0).map(e -> {
 			Result r = new Result(e.getKey());
 			r.addPositions(phrase, e.getValue());
 			return r;
-		}).collect(Collectors.toSet());
+		}).collect(Collectors.toList());
 	}
 
 	private Map<Integer, Set<Integer>> findAll(String token) {
