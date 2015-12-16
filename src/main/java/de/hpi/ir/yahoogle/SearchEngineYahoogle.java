@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLStreamException;
@@ -47,6 +48,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// i.e.
 															// SearchEngineMyTeamName
 
+	private final static Logger LOGGER = Logger
+			.getLogger(SearchEngineYahoogle.class.getName());
 	private static final String PHRASE_DELIMITER = "\"";
 	private static final int TOP_WORDS = 4;
 
@@ -153,6 +156,12 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		index(directory);
 	}
 
+	@Override
+	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	private ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets) {
 		ArrayList<String> results = new ArrayList<>();
 		for (Result result : results2) {
@@ -196,11 +205,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			index.mergeIndices(factory.getNames());
 			index.write();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error indexing files");
 		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error parsing XML");
 		}
 	}
 
@@ -216,8 +223,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			index.load();
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error loading Index from disk");
 		}
 		return false;
 	}
@@ -304,11 +310,5 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			snippets = generateSnippets(results, phrases);
 		}
 		return generateOutput(results, snippets);
-	}
-
-	@Override
-	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

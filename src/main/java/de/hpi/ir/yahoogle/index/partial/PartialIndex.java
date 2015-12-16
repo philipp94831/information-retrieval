@@ -1,6 +1,7 @@
 package de.hpi.ir.yahoogle.index.partial;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
@@ -13,6 +14,8 @@ import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 public class PartialIndex extends Loadable implements PatentParserCallback {
 
 	private static final String BASE_NAME = ".index";
+	private final static Logger LOGGER = Logger
+			.getLogger(PartialIndex.class.getName());
 	private static final boolean SKIP_STOPWORDS = true;
 	private PartialTokenDictionary dictionary;
 	private final String name;
@@ -66,8 +69,7 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 			patents.delete();
 			dictionary.delete();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.warning("Could not delete partial index " + name);
 		}
 	}
 

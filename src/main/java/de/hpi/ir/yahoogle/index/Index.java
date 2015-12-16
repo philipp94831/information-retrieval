@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
@@ -28,6 +29,8 @@ public class Index extends Loadable {
 
 	private static final String DICTIONARY_FILE = SearchEngineYahoogle
 			.getTeamDirectory() + "/dictionary.txt";
+	private final static Logger LOGGER = Logger
+			.getLogger(Index.class.getName());
 	private TokenDictionary dictionary;
 	private PatentIndex patents;
 	private final String patentsFolder;
@@ -145,11 +148,9 @@ public class Index extends Loadable {
 			dictionary.getTokens().forEach(writer::println);
 			writer.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.warning("File for printing dictionary not found");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.warning("Unsupported encoding when printing dictionary");
 		}
 	}
 

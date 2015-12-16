@@ -5,9 +5,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 class StopWordList {
 
+	private final static Logger LOGGER = Logger
+			.getLogger(StopWordList.class.getName());
 	private static final Set<String> stopwords = new HashSet<>();
 	private static final String STOPWORDS_FILE = SearchEngineYahoogle
 			.getTeamDirectory() + "/stopwords.txt";
@@ -24,8 +27,7 @@ class StopWordList {
 			br.close();
 			fr.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error reading stopword list");
 		}
 	}
 

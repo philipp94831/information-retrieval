@@ -2,11 +2,14 @@ package de.hpi.ir.yahoogle.index.partial;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 import de.hpi.ir.yahoogle.index.BinaryPostingList;
 
 public class PostingListIterator implements Iterator<BinaryPostingList> {
 
+	private final static Logger LOGGER = Logger
+			.getLogger(PostingListIterator.class.getName());
 	private final PartialTokenDictionary index;
 	private long nextPosition;
 
@@ -19,8 +22,7 @@ public class PostingListIterator implements Iterator<BinaryPostingList> {
 		try {
 			return nextPosition < index.fileSize();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error checking file size of partial index");
 		}
 		return false;
 	}
@@ -32,8 +34,7 @@ public class PostingListIterator implements Iterator<BinaryPostingList> {
 			nextPosition = index.currentOffset();
 			return postingList;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error retrieving next posting list");
 		}
 		return null;
 	}

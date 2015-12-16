@@ -35,7 +35,7 @@ public class PatentParser {
 	private void endDocument() {
 	}
 
-	private void endElement(String qName) {
+	private void endElement(String qName) throws XMLStreamException {
 		parents.pop();
 		if (isInAbstract(qName)) {
 			inAbstract = false;
@@ -50,13 +50,8 @@ public class PatentParser {
 			currentPatent.setDocNumber(Integer.parseInt(buf.toString()));
 		}
 		if (isInPatent(qName)) {
-			try {
-				currentPatent.setEnd(xmlStreamReader.getLocationInfo()
-						.getEndingByteOffset());
-			} catch (XMLStreamException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			currentPatent.setEnd(
+					xmlStreamReader.getLocationInfo().getEndingByteOffset());
 			callback.callback(currentPatent);
 		}
 	}

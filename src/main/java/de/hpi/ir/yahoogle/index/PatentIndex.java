@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
@@ -20,6 +21,8 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class PatentIndex extends Loadable {
 
 	private static final String FILE_NAME = "patents";
+	private final static Logger LOGGER = Logger
+			.getLogger(PatentIndex.class.getName());
 	private static final int MAX_BYTE_READ = 1024 * 128;
 	private static final int MAX_CACHE_SIZE = 100000;
 	private static final long TOTAL_WORD_COUNT_OFFSET = 0L;
@@ -33,20 +36,15 @@ public class PatentIndex extends Loadable {
 		this.patentsFolder = patentsFolder;
 	}
 
-	private void add(PatentResume resume) {
+	private void add(PatentResume resume) throws IOException {
 		totalWordCount += resume.getWordCount();
-		try {
-			byte[] bytes = resume.toByteArray();
-			long offset = file.getFilePointer();
-			offsets.put(resume.getDocNumber(), offset);
-			ByteWriter out = new ByteWriter();
-			out.writeInt(bytes.length);
-			out.write(bytes);
-			file.write(out.toByteArray());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		byte[] bytes = resume.toByteArray();
+		long offset = file.getFilePointer();
+		offsets.put(resume.getDocNumber(), offset);
+		ByteWriter out = new ByteWriter();
+		out.writeInt(bytes.length);
+		out.write(bytes);
+		file.write(out.toByteArray());
 	}
 
 	@Override
@@ -88,8 +86,7 @@ public class PatentIndex extends Loadable {
 			}
 			return cache.get(docNumber);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error loading patent " + docNumber + " from disk");
 		}
 		return null;
 	}
@@ -98,8 +95,7 @@ public class PatentIndex extends Loadable {
 		try {
 			return offsets.keys();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error retrieving all docnumbers");
 		}
 		return null;
 	}
@@ -117,7 +113,7 @@ public class PatentIndex extends Loadable {
 		offsets.load();
 	}
 
-	public void merge(List<PartialPatentIndex> indexes) {
+	public void merge(List<PartialPatentIndex> indexes) throws IOException {
 		List<Iterator<PatentResume>> iterators = indexes.stream()
 				.map(PartialPatentIndex::iterator).collect(Collectors.toList());
 		TreeMap<PatentResume, Integer> candidates = new TreeMap<>();

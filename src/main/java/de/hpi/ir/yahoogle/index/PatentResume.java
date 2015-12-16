@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -19,6 +20,8 @@ import de.hpi.ir.yahoogle.parsing.PatentPart;
 public class PatentResume
 		implements PatentParserCallback, Comparable<PatentResume> {
 
+	private final static Logger LOGGER = Logger
+			.getLogger(PatentResume.class.getName());
 	private final int docNumber;
 	private final long end;
 	private final String fileName;
@@ -68,11 +71,11 @@ public class PatentResume
 			InputStream in = new ByteArrayInputStream(bytes);
 			parser.parse(in);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error accessing patent " + docNumber + " in file "
+					+ fileName);
 		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error parsing XML for patent " + docNumber
+					+ " in file " + fileName);
 		}
 	}
 

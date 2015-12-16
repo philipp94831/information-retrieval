@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
@@ -18,6 +19,8 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
+	private final static Logger LOGGER = Logger
+			.getLogger(TokenDictionary.class.getName());
 
 	private static String fileName() {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
@@ -47,8 +50,7 @@ public class TokenDictionary extends Loadable {
 				return postingList.getDocumentsWithPositions();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error reading posting list for token " + token);
 		}
 		return new HashMap<>();
 	}
@@ -57,8 +59,7 @@ public class TokenDictionary extends Loadable {
 		try {
 			return offsets.keys();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error retrieving all tokens");
 		}
 		return null;
 	}
@@ -67,8 +68,7 @@ public class TokenDictionary extends Loadable {
 		try {
 			return offsets.getKeysForPrefix(prefix);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error retrieving tokens for prefix " + prefix);
 		}
 		return null;
 	}

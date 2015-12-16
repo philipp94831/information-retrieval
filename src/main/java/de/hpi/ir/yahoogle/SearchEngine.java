@@ -6,7 +6,6 @@ package de.hpi.ir.yahoogle;
  * @dataset: US patent grants : ipg files from http://www.google.com/googlebooks/uspto-patents-grants-text.html
  * @course: Information Retrieval and Web Search, Hasso-Plattner Institut, 2015
  */
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -20,37 +19,40 @@ import java.util.ArrayList;
 */
 public abstract class SearchEngine {
 
-        // paths
-		protected static String baseDirectory = "";  /************* Define your baseDirectory here !! ******************/
-        protected static String teamDirectory; // don't change this
-        
-        
-        protected int topK; // how many patents to return
-        protected int prf; // whether to use prf and how many patents to consider (defined in the query with the symbol '#')
-        
-		public SearchEngine() {
-		
-            // the baseDirectory is already defined
-            teamDirectory = baseDirectory + getClass().getSimpleName(); // creates SearchEngineMyTeamName directory
-            new File(teamDirectory).mkdirs();
-		}
+	// paths
+	protected static String baseDirectory = "";
+	/************* Define your baseDirectory here !! ******************/
+	protected static String teamDirectory; // don't change this
+	protected int prf; // whether to use prf and how many patents to consider
+						// (defined in the query with the symbol '#')
+	protected int topK; // how many patents to return
 
-        // contruct your patent index and save it in a file in the teamDirectory
-        abstract void index(String directory);
-        
-        // load the index's seeklist from the teamDirectory
-		abstract boolean loadIndex(String directory);
-        
-        // contruct a compressed version of the index and save it in a file in the teamDirectory
-        abstract void compressIndex(String directory);
+	public SearchEngine() {
+		// the baseDirectory is already defined
+		teamDirectory = baseDirectory + getClass().getSimpleName(); // creates
+																	// SearchEngineMyTeamName
+																	// directory
+		new File(teamDirectory).mkdirs();
+	}
 
-        // load the seeklist for the compressed index from the teamDirectory
-        abstract boolean loadCompressedIndex(String directory);
+	// contruct a compressed version of the index and save it in a file in the
+	// teamDirectory
+	abstract void compressIndex(String directory);
 
-        // search the index for a given query and return the relevant patent titles (with your improved visualization) in an ArrayList of Strings
-        abstract ArrayList<String> search(String query, int topK, int prf);
+	// compute the NDCG metric using your ranking and the google ranking for a
+	// given query
+	abstract Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p);
 
-		// compute the NDCG metric using your ranking and the google ranking for a given query 
-        abstract Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p);
-        
+	// contruct your patent index and save it in a file in the teamDirectory
+	abstract void index(String directory);
+
+	// load the seeklist for the compressed index from the teamDirectory
+	abstract boolean loadCompressedIndex(String directory);
+
+	// load the index's seeklist from the teamDirectory
+	abstract boolean loadIndex(String directory);
+
+	// search the index for a given query and return the relevant patent titles
+	// (with your improved visualization) in an ArrayList of Strings
+	abstract ArrayList<String> search(String query, int topK, int prf);
 }
