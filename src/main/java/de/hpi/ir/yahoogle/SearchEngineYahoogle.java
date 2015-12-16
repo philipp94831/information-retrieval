@@ -305,4 +305,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		}
 		return generateOutput(results, snippets);
 	}
+
+	@Override
+	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

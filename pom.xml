@@ -49,5 +49,10 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/src/main/resources/snowball.jar</systemPath>
 		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.8.3</version>
+		</dependency>
 	</dependencies>
 </project>
