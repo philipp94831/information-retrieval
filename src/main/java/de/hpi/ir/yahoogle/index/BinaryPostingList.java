@@ -42,16 +42,15 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 		Map<Integer, Set<Integer>> result = new HashMap<>();
 		int i = 0;
 		while (i < bytes.length) {
-			AbstractReader in = new ByteReader(bytes, i,
-					Integer.BYTES + Short.BYTES);
-			i += Integer.BYTES + Short.BYTES;
+			AbstractReader in = new ByteReader(bytes, i, 2 * Integer.BYTES);
+			i += 2 * Integer.BYTES;
 			int docNumber = in.readInt();
-			short bsize = in.readShort();
+			int bsize = in.readInt();
 			in = new EliasDeltaReader(bytes, i, bsize);
 			Set<Integer> pos = new HashSet<>();
 			int oldPos = 0;
 			while (in.hasLeft()) {
-				short p = in.readShort();
+				int p = in.readInt();
 				pos.add(oldPos + p);
 				oldPos += p;
 			}

@@ -194,7 +194,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				PartialIndex partialIndex = factory.getPartialIndex();
 				partialIndex.create();
 				PatentParser handler = new PatentParser(partialIndex);
-				System.out.println(patentFile.getName());
+				LOGGER.info(patentFile.getName());
 				FileInputStream stream = new FileInputStream(patentFile);
 				handler.setFileName(patentFile.getName());
 				handler.parse(stream);

@@ -36,14 +36,6 @@ public class SearchEngineTest {
 		for (String query : queries) {
 			printResults(search(query, 10, 2), query);
 		}
-		// long start = System.currentTimeMillis();
-		// myEngine.index(String directory)
-		// long time = System.currentTimeMillis() - start;
-		// System.out.print("Indexing Time:\t" + time + "\tms\n");
-		// myEngine.loadIndex(String directory)
-		// String query = "";
-		// ArrayList <String> results = new ArrayList <> ();
-		// results = myEngine.search(String query, int topK, int prf)
 	}
 
 	private static void printResults(ArrayList<String> results, String query) {

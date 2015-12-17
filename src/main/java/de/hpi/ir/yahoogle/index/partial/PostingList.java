@@ -57,13 +57,13 @@ class PostingList implements Comparable<PostingList>, Iterable<DocumentPosting> 
 			AbstractWriter positions = new EliasDeltaWriter();
 			int oldPos = 0;
 			for (Posting posting : entry) {
-				short dp = (short) (posting.getPosition() - oldPos);
-				positions.writeShort(dp);
+				int dp = (posting.getPosition() - oldPos);
+				positions.writeInt(dp);
 				oldPos = posting.getPosition();
 			}
 			byte[] encoded = positions.toByteArray();
 			block.writeInt(entry.getDocNumber()); // docNumber
-			block.writeShort((short) encoded.length); // size of block
+			block.writeInt(encoded.length); // size of block
 			block.write(encoded);
 		}
 		return block.toByteArray();
