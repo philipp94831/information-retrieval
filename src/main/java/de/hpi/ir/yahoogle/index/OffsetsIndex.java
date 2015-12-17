@@ -38,7 +38,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	}
 
 	private void createNewBlock() {
-		currentBlock = new ByteWriter();
+		currentBlock = new ByteWriter(BLOCK_SIZE);
 		currentBlockSize = 0;
 	}
 

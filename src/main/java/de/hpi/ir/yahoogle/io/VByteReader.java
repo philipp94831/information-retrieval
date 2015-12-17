@@ -28,13 +28,13 @@ public class VByteReader implements AbstractReader {
 	@Override
 	public long readLong() throws IOException {
 		long l = 0;
-		while(true) {
+		while (true) {
 			byte b = in.get();
 			if ((b & 0xff) < 128) {
-                l = 128 * l + b;
-            } else {
-                return (128 * l + ((b - 128) & 0xff));
-            }
+				l = 128 * l + b;
+			} else {
+				return (128 * l + ((b - 128) & 0xff));
+			}
 		}
 	}
 

@@ -27,6 +27,7 @@ public class TokenDictionary extends Loadable {
 				+ FILE_EXTENSION;
 	}
 
+	private long currentOffset;
 	private RandomAccessFile file;
 	private StringOffsetIndex offsets;
 
@@ -43,16 +44,27 @@ public class TokenDictionary extends Loadable {
 			Long offset = offsets.get(token);
 			if (offset != null) {
 				file.seek(offset);
-				int size = file.readInt();
-				byte[] b = new byte[size];
-				file.readFully(b);
-				BinaryPostingList postingList = new BinaryPostingList(token, b);
-				return postingList.getDocumentsWithPositions();
+				int count = file.readInt();
+				Map<Integer, Set<Integer>> result = new HashMap<>();
+				for (int i = 0; i < count; i++) {
+					int size = file.readInt();
+					byte[] b = new byte[size];
+					file.readFully(b);
+					BinaryPostingList postingList = new BinaryPostingList(token,
+							b);
+					result.putAll(postingList.getDocumentsWithPositions());
+				}
+				return result;
 			}
 		} catch (IOException e) {
 			LOGGER.severe("Error reading posting list for token " + token);
 		}
 		return new HashMap<>();
+	}
+
+	private void finishPostingList(int count) throws IOException {
+		file.seek(currentOffset);
+		file.writeInt(count);
 	}
 
 	public Set<String> getTokens() {
@@ -90,6 +102,7 @@ public class TokenDictionary extends Loadable {
 			candidates.put(iterator.next(), i);
 		}
 		BinaryPostingList currentPostings = null;
+		int count = 0;
 		while (!candidates.isEmpty()) {
 			Entry<BinaryPostingList, Integer> entry = candidates
 					.pollFirstEntry();
@@ -101,17 +114,37 @@ public class TokenDictionary extends Loadable {
 			BinaryPostingList postingList = entry.getKey();
 			String token = postingList.getToken();
 			if (currentPostings == null) {
+				startPostingList(token);
+				count = 1;
 				currentPostings = postingList;
 				continue;
 			}
 			if (!token.equals(currentPostings.getToken())) {
 				writePostingList(currentPostings);
+				finishPostingList(count);
+				startPostingList(token);
+				count = 1;
 				currentPostings = postingList;
 			} else {
-				currentPostings.append(postingList.getBytes());
+				byte[] newBytes = postingList.getBytes();
+				if (currentPostings.hasSpaceLeft(newBytes)) {
+					currentPostings.append(newBytes);
+				} else {
+					writePostingList(currentPostings);
+					count++;
+					currentPostings = postingList;
+				}
 			}
 		}
 		writePostingList(currentPostings);
+		finishPostingList(count);
+	}
+
+	private void startPostingList(String token) throws IOException {
+		currentOffset = file.length();
+		offsets.put(token, currentOffset);
+		file.seek(currentOffset);
+		file.writeInt(0);
 	}
 
 	@Override
@@ -121,10 +154,7 @@ public class TokenDictionary extends Loadable {
 	}
 
 	private void writePostingList(BinaryPostingList postingList) throws IOException {
-		long offset = file.length();
-		offsets.put(postingList.getToken(), offset);
 		byte[] bytes = postingList.getBytes();
-		file.seek(offset);
 		ByteWriter out = new ByteWriter();
 		out.writeInt(bytes.length);
 		out.write(bytes);

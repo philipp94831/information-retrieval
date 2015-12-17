@@ -13,6 +13,7 @@ import de.hpi.ir.yahoogle.io.VByteReader;
 
 public class BinaryPostingList implements Comparable<BinaryPostingList> {
 
+	private static final int MAX_SIZE = 16 * 1024 * 1024;
 	private byte[] bytes;
 	private final String token;
 
@@ -21,10 +22,10 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 		this.bytes = bytes;
 	}
 
-	public void append(byte[] bytes2) throws IOException {
-		ByteWriter out = new ByteWriter();
+	public void append(byte[] newBytes) throws IOException {
+		ByteWriter out = new ByteWriter(MAX_SIZE);
 		out.write(bytes);
-		out.write(bytes2);
+		out.write(newBytes);
 		bytes = out.toByteArray();
 	}
 
@@ -62,5 +63,9 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 
 	public String getToken() {
 		return token;
+	}
+
+	public boolean hasSpaceLeft(byte[] newBytes) {
+		return bytes.length + newBytes.length <= MAX_SIZE;
 	}
 }

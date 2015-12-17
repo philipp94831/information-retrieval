@@ -15,6 +15,7 @@ import java.util.ArrayList;
  */
 public class SearchEngineTest {
 
+	private static final boolean CREATE_INDEX = true;
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 
 	private static void initialize(String directory, boolean create) {
@@ -30,11 +31,11 @@ public class SearchEngineTest {
 	}
 
 	public static void main(String args[]) throws Exception {
-		initialize("patents/", true);
+		initialize("patents/", CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "mobile device" };
+		String[] queries = { "can" };
 		for (String query : queries) {
-			printResults(search(query, 10, 2), query);
+			printResults(search(query, 10, 0), query);
 		}
 	}
 
