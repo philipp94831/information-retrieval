@@ -6,7 +6,7 @@ import java.util.TreeMap;
 
 import de.hpi.ir.yahoogle.io.AbstractWriter;
 import de.hpi.ir.yahoogle.io.ByteWriter;
-import de.hpi.ir.yahoogle.io.EliasDeltaWriter;
+import de.hpi.ir.yahoogle.io.VByteWriter;
 
 class PostingList implements Comparable<PostingList>, Iterable<DocumentPosting> {
 
@@ -54,7 +54,7 @@ class PostingList implements Comparable<PostingList>, Iterable<DocumentPosting> 
 	public byte[] toByteArray() throws IOException {
 		ByteWriter block = new ByteWriter();
 		for (DocumentPosting entry : documents.values()) {
-			AbstractWriter positions = new EliasDeltaWriter();
+			AbstractWriter positions = new VByteWriter();
 			int oldPos = 0;
 			for (Posting posting : entry) {
 				int dp = (posting.getPosition() - oldPos);

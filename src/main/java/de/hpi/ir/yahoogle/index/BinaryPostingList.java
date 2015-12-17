@@ -9,7 +9,7 @@ import java.util.Set;
 import de.hpi.ir.yahoogle.io.AbstractReader;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
-import de.hpi.ir.yahoogle.io.EliasDeltaReader;
+import de.hpi.ir.yahoogle.io.VByteReader;
 
 public class BinaryPostingList implements Comparable<BinaryPostingList> {
 
@@ -46,7 +46,7 @@ public class BinaryPostingList implements Comparable<BinaryPostingList> {
 			i += 2 * Integer.BYTES;
 			int docNumber = in.readInt();
 			int bsize = in.readInt();
-			in = new EliasDeltaReader(bytes, i, bsize);
+			in = new VByteReader(bytes, i, bsize);
 			Set<Integer> pos = new HashSet<>();
 			int oldPos = 0;
 			while (in.hasLeft()) {

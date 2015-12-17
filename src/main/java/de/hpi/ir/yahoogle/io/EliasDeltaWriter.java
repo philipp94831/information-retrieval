@@ -13,7 +13,7 @@ public class EliasDeltaWriter implements AbstractWriter {
 
 	@Override
 	public void writeInt(int i) throws IOException {
-		writeLong((long) i);
+		writeLong(i);
 	}
 
 	@Override
@@ -41,6 +41,6 @@ public class EliasDeltaWriter implements AbstractWriter {
 
 	@Override
 	public void writeShort(short s) throws IOException {
-		writeLong((long) s);
+		writeLong(s);
 	}
 }
