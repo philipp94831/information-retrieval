@@ -48,7 +48,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// i.e.
 															// SearchEngineMyTeamName
 
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineYahoogle.class.getName());
 	private static final String PHRASE_DELIMITER = "\"";
 	private static final int TOP_WORDS = 4;

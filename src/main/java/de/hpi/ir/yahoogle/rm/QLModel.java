@@ -68,8 +68,10 @@ public class QLModel extends Model {
 	private double partWeight(PatentPart part) {
 		switch (part) {
 		case TITLE:
-			return 1.5;
+			return 5.0;
 		case ABSTRACT:
+			return 1.5;
+		case DESCRIPTION:
 			return 1.0;
 		default:
 			return 0.0;

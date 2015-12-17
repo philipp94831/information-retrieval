@@ -29,7 +29,7 @@ public class Index extends Loadable {
 
 	private static final String DICTIONARY_FILE = SearchEngineYahoogle
 			.getTeamDirectory() + "/dictionary.txt";
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(Index.class.getName());
 	private TokenDictionary dictionary;
 	private PatentIndex patents;

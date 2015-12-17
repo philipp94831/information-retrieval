@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 class StopWordList {
 
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(StopWordList.class.getName());
 	private static final Set<String> stopwords = new HashSet<>();
 	private static final String STOPWORDS_FILE = SearchEngineYahoogle

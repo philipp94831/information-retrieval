@@ -17,10 +17,9 @@ import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 
-public class PatentResume
-		implements PatentParserCallback, Comparable<PatentResume> {
+public class PatentResume implements PatentParserCallback, Comparable<PatentResume> {
 
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(PatentResume.class.getName());
 	private final int docNumber;
 	private final long end;
@@ -38,8 +37,9 @@ public class PatentResume
 		this.start = in.readLong();
 		this.end = in.readLong();
 		this.wordCount = in.readInt();
-		this.setTitlePosition(in.readInt());
-		this.setAbstractPosition(in.readInt());
+		for (PatentPart part : PatentPart.values()) {
+			this.setPosition(part, in.readInt());
+		}
 	}
 
 	public PatentResume(Patent patent) {
@@ -111,16 +111,12 @@ public class PatentResume
 		return wordCount;
 	}
 
-	public void setAbstractPosition(int pos) {
-		parts.put(pos, PatentPart.ABSTRACT);
-	}
-
 	public void setPatentFolder(String patentFolder) {
 		this.patentFolder = patentFolder;
 	}
 
-	public void setTitlePosition(int pos) {
-		parts.put(pos, PatentPart.TITLE);
+	public void setPosition(PatentPart part, int pos) {
+		parts.put(pos, part);
 	}
 
 	public void setWordCount(int wordCount) {
@@ -134,8 +130,9 @@ public class PatentResume
 		out.writeLong(start);
 		out.writeLong(end);
 		out.writeInt(wordCount);
-		out.writeInt(getPosition(PatentPart.TITLE));
-		out.writeInt(getPosition(PatentPart.ABSTRACT));
+		for (PatentPart part : PatentPart.values()) {
+			out.writeInt(getPosition(part));
+		}
 		return out.toByteArray();
 	}
 }

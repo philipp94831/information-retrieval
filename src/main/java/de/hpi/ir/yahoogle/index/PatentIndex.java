@@ -21,7 +21,7 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class PatentIndex extends Loadable {
 
 	private static final String FILE_NAME = "patents";
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(PatentIndex.class.getName());
 	private static final int MAX_BYTE_READ = 1024 * 128;
 	private static final int MAX_CACHE_SIZE = 100000;

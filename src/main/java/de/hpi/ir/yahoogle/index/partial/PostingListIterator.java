@@ -8,7 +8,7 @@ import de.hpi.ir.yahoogle.index.BinaryPostingList;
 
 public class PostingListIterator implements Iterator<BinaryPostingList> {
 
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(PostingListIterator.class.getName());
 	private final PartialTokenDictionary index;
 	private long nextPosition;

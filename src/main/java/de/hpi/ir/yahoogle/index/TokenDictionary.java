@@ -19,7 +19,7 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(TokenDictionary.class.getName());
 
 	private static String fileName() {

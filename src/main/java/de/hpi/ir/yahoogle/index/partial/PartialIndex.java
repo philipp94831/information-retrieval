@@ -1,6 +1,7 @@
 package de.hpi.ir.yahoogle.index.partial;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
@@ -10,16 +11,20 @@ import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.parsing.Patent;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
+import de.hpi.ir.yahoogle.parsing.PatentPart;
 
 public class PartialIndex extends Loadable implements PatentParserCallback {
 
 	private static final String BASE_NAME = ".index";
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(PartialIndex.class.getName());
 	private static final boolean SKIP_STOPWORDS = true;
 	private PartialTokenDictionary dictionary;
 	private final String name;
 	private PartialPatentIndex patents;
+	private PatentResume resume;
+	private int startOffset;
+	private int wordCount;
 
 	public PartialIndex(String name) {
 		this.name = name;
@@ -27,30 +32,12 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 
 	@Override
 	public void callback(Patent patent) {
-		PatentResume resume = new PatentResume(patent);
-		int wordCount = 0;
-		int startOffset = 0;
-		resume.setTitlePosition(startOffset + 1);
-		String title = patent.getInventionTitle();
-		Tokenizer tokenizer = new Tokenizer(title, SKIP_STOPWORDS);
-		while (tokenizer.hasNext()) {
-			String token = Stemmer.stem(tokenizer.next());
-			Posting posting = new Posting();
-			posting.setPosition(startOffset + tokenizer.getPosition());
-			dictionary.add(token, patent.getDocNumber(), posting);
-		}
-		wordCount += tokenizer.getPosition();
-		startOffset += tokenizer.getPosition() + 1;
-		resume.setAbstractPosition(startOffset + 1);
-		String patentAbstract = patent.getPatentAbstract();
-		tokenizer = new Tokenizer(patentAbstract, SKIP_STOPWORDS);
-		while (tokenizer.hasNext()) {
-			String token = Stemmer.stem(tokenizer.next());
-			Posting posting = new Posting();
-			posting.setPosition(startOffset + tokenizer.getPosition());
-			dictionary.add(token, patent.getDocNumber(), posting);
-		}
-		wordCount += tokenizer.getPosition();
+		resume = new PatentResume(patent);
+		wordCount = 0;
+		startOffset = 0;
+		indexTitle(patent);
+		indexAbstract(patent);
+		indexDescriptions(patent);
 		resume.setWordCount(wordCount);
 		patents.add(resume);
 	}
@@ -84,6 +71,50 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 
 	public PartialPatentIndex getPatents() {
 		return patents;
+	}
+
+	private void indexAbstract(Patent patent) {
+		resume.setPosition(PatentPart.ABSTRACT, startOffset + 1);
+		String patentAbstract = patent.getPatentAbstract();
+		Tokenizer tokenizer = new Tokenizer(patentAbstract, SKIP_STOPWORDS);
+		while (tokenizer.hasNext()) {
+			String token = Stemmer.stem(tokenizer.next());
+			Posting posting = new Posting();
+			posting.setPosition(startOffset + tokenizer.getPosition());
+			dictionary.add(token, resume.getDocNumber(), posting);
+		}
+		wordCount += tokenizer.getPosition();
+		startOffset += tokenizer.getPosition() + 1;
+	}
+
+	private void indexDescriptions(Patent patent) {
+		resume.setPosition(PatentPart.DESCRIPTION, startOffset + 1);
+		List<String> descriptions = patent.getDescriptions();
+		for (String description : descriptions) {
+			Tokenizer tokenizer = new Tokenizer(description, SKIP_STOPWORDS);
+			while (tokenizer.hasNext()) {
+				String token = Stemmer.stem(tokenizer.next());
+				Posting posting = new Posting();
+				posting.setPosition(startOffset + tokenizer.getPosition());
+				dictionary.add(token, resume.getDocNumber(), posting);
+			}
+			wordCount += tokenizer.getPosition();
+			startOffset += tokenizer.getPosition() + 1;
+		}
+	}
+
+	private void indexTitle(Patent patent) {
+		resume.setPosition(PatentPart.TITLE, startOffset + 1);
+		String title = patent.getInventionTitle();
+		Tokenizer tokenizer = new Tokenizer(title, SKIP_STOPWORDS);
+		while (tokenizer.hasNext()) {
+			String token = Stemmer.stem(tokenizer.next());
+			Posting posting = new Posting();
+			posting.setPosition(startOffset + tokenizer.getPosition());
+			dictionary.add(token, resume.getDocNumber(), posting);
+		}
+		wordCount += tokenizer.getPosition();
+		startOffset += tokenizer.getPosition() + 1;
 	}
 
 	@Override

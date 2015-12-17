@@ -12,11 +12,12 @@ import org.codehaus.stax2.XMLStreamReader2;
 
 public class PatentParser {
 
-	private StringBuffer buf = new StringBuffer();
+	private StringBuilder buf = new StringBuilder();
 	private final PatentParserCallback callback;
 	private Patent currentPatent;
 	private String fileName;
 	private boolean inAbstract = false;
+	private boolean inDescription = false;
 	private boolean inDocNumber = false;
 	private boolean inTitle = false;
 	private Stack<String> parents;
@@ -27,7 +28,7 @@ public class PatentParser {
 	}
 
 	private void characters(String ch) {
-		if (inAbstract || inTitle || inDocNumber) {
+		if (inAbstract || inTitle || inDocNumber || inDescription) {
 			buf.append(ch);
 		}
 	}
@@ -40,6 +41,10 @@ public class PatentParser {
 		if (isInAbstract(qName)) {
 			inAbstract = false;
 			currentPatent.setPatentAbstract(buf.toString());
+		}
+		if (isInDescription(qName)) {
+			inDescription = false;
+			currentPatent.addDescription(buf.toString());
 		}
 		if (isInTitle(qName)) {
 			inTitle = false;
@@ -58,6 +63,10 @@ public class PatentParser {
 
 	private boolean isInAbstract(String qName) {
 		return qName.equals("p") && parents.peek().equals("abstract");
+	}
+
+	private boolean isInDescription(String qName) {
+		return qName.equals("p") && parents.peek().equals("description");
 	}
 
 	private boolean isInDocNumber(String qName) {
@@ -125,15 +134,19 @@ public class PatentParser {
 		}
 		if (isInAbstract(qName)) {
 			inAbstract = true;
-			buf = new StringBuffer();
+			buf = new StringBuilder();
+		}
+		if (isInDescription(qName)) {
+			inDescription = true;
+			buf = new StringBuilder();
 		}
 		if (isInDocNumber(qName)) {
 			inDocNumber = true;
-			buf = new StringBuffer();
+			buf = new StringBuilder();
 		}
 		if (isInTitle(qName)) {
 			inTitle = true;
-			buf = new StringBuffer();
+			buf = new StringBuilder();
 		}
 		parents.push(qName);
 	}

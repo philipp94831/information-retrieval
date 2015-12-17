@@ -8,7 +8,7 @@ import de.hpi.ir.yahoogle.index.PatentResume;
 
 public class PatentResumeIterator implements Iterator<PatentResume> {
 
-	private final static Logger LOGGER = Logger
+	private static final Logger LOGGER = Logger
 			.getLogger(PatentResumeIterator.class.getName());
 	private final PartialPatentIndex index;
 	private long nextPosition;

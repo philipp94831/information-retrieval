@@ -1,7 +1,11 @@
 package de.hpi.ir.yahoogle.parsing;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Patent {
 
+	private List<String> descriptions = new ArrayList<>();
 	private int docNumber;
 	private long end;
 	private final String fileName;
@@ -11,6 +15,14 @@ public class Patent {
 
 	public Patent(String fileName) {
 		this.fileName = fileName;
+	}
+
+	public void addDescription(String string) {
+		descriptions.add(string);
+	}
+
+	public List<String> getDescriptions() {
+		return descriptions;
 	}
 
 	public int getDocNumber() {
