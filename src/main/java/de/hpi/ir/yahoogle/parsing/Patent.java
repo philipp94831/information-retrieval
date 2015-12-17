@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Patent {
 
+	private List<String> claims = new ArrayList<>();
 	private List<String> descriptions = new ArrayList<>();
 	private int docNumber;
 	private long end;
@@ -17,8 +18,16 @@ public class Patent {
 		this.fileName = fileName;
 	}
 
+	public void addClaim(String string) {
+		claims.add(string);
+	}
+
 	public void addDescription(String string) {
 		descriptions.add(string);
+	}
+
+	public List<String> getClaims() {
+		return claims;
 	}
 
 	public List<String> getDescriptions() {

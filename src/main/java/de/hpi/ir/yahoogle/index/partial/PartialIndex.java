@@ -35,9 +35,10 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		resume = new PatentResume(patent);
 		wordCount = 0;
 		startOffset = 0;
-		indexTitle(patent);
-		indexAbstract(patent);
-		indexDescriptions(patent);
+		indexTitle(patent.getInventionTitle());
+		indexAbstract(patent.getPatentAbstract());
+		indexDescriptions(patent.getDescriptions());
+		indexClaims(patent.getClaims());
 		resume.setWordCount(wordCount);
 		patents.add(resume);
 	}
@@ -73,9 +74,8 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		return patents;
 	}
 
-	private void indexAbstract(Patent patent) {
+	private void indexAbstract(String patentAbstract) {
 		resume.setPosition(PatentPart.ABSTRACT, startOffset + 1);
-		String patentAbstract = patent.getPatentAbstract();
 		Tokenizer tokenizer = new Tokenizer(patentAbstract, SKIP_STOPWORDS);
 		while (tokenizer.hasNext()) {
 			String token = Stemmer.stem(tokenizer.next());
@@ -87,9 +87,23 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		startOffset += tokenizer.getPosition() + 1;
 	}
 
-	private void indexDescriptions(Patent patent) {
+	private void indexClaims(List<String> claims) {
+		resume.setPosition(PatentPart.CLAIM, startOffset + 1);
+		for (String claim : claims) {
+			Tokenizer tokenizer = new Tokenizer(claim, SKIP_STOPWORDS);
+			while (tokenizer.hasNext()) {
+				String token = Stemmer.stem(tokenizer.next());
+				Posting posting = new Posting();
+				posting.setPosition(startOffset + tokenizer.getPosition());
+				dictionary.add(token, resume.getDocNumber(), posting);
+			}
+			wordCount += tokenizer.getPosition();
+			startOffset += tokenizer.getPosition() + 1;
+		}
+	}
+
+	private void indexDescriptions(List<String> descriptions) {
 		resume.setPosition(PatentPart.DESCRIPTION, startOffset + 1);
-		List<String> descriptions = patent.getDescriptions();
 		for (String description : descriptions) {
 			Tokenizer tokenizer = new Tokenizer(description, SKIP_STOPWORDS);
 			while (tokenizer.hasNext()) {
@@ -103,9 +117,8 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		}
 	}
 
-	private void indexTitle(Patent patent) {
+	private void indexTitle(String title) {
 		resume.setPosition(PatentPart.TITLE, startOffset + 1);
-		String title = patent.getInventionTitle();
 		Tokenizer tokenizer = new Tokenizer(title, SKIP_STOPWORDS);
 		while (tokenizer.hasNext()) {
 			String token = Stemmer.stem(tokenizer.next());

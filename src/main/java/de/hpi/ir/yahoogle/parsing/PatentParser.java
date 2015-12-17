@@ -16,10 +16,7 @@ public class PatentParser {
 	private final PatentParserCallback callback;
 	private Patent currentPatent;
 	private String fileName;
-	private boolean inAbstract = false;
-	private boolean inDescription = false;
-	private boolean inDocNumber = false;
-	private boolean inTitle = false;
+	private boolean inText = false;
 	private Stack<String> parents;
 	private XMLStreamReader2 xmlStreamReader;
 
@@ -28,7 +25,7 @@ public class PatentParser {
 	}
 
 	private void characters(String ch) {
-		if (inAbstract || inTitle || inDocNumber || inDescription) {
+		if (inText) {
 			buf.append(ch);
 		}
 	}
@@ -39,20 +36,24 @@ public class PatentParser {
 	private void endElement(String qName) throws XMLStreamException {
 		parents.pop();
 		if (isInAbstract(qName)) {
-			inAbstract = false;
+			inText = false;
 			currentPatent.setPatentAbstract(buf.toString());
 		}
 		if (isInDescription(qName)) {
-			inDescription = false;
+			inText = false;
 			currentPatent.addDescription(buf.toString());
 		}
 		if (isInTitle(qName)) {
-			inTitle = false;
+			inText = false;
 			currentPatent.setInventionTitle(buf.toString());
 		}
 		if (isInDocNumber(qName)) {
-			inDocNumber = false;
+			inText = false;
 			currentPatent.setDocNumber(Integer.parseInt(buf.toString()));
+		}
+		if (isInClaim(qName)) {
+			inText = false;
+			currentPatent.addClaim(buf.toString());
 		}
 		if (isInPatent(qName)) {
 			currentPatent.setEnd(
@@ -63,6 +64,10 @@ public class PatentParser {
 
 	private boolean isInAbstract(String qName) {
 		return qName.equals("p") && parents.peek().equals("abstract");
+	}
+
+	private boolean isInClaim(String qName) {
+		return qName.equals("claim") && parents.peek().equals("claims");
 	}
 
 	private boolean isInDescription(String qName) {
@@ -132,20 +137,10 @@ public class PatentParser {
 			currentPatent.setStart(
 					xmlStreamReader.getLocationInfo().getStartingByteOffset());
 		}
-		if (isInAbstract(qName)) {
-			inAbstract = true;
-			buf = new StringBuilder();
-		}
-		if (isInDescription(qName)) {
-			inDescription = true;
-			buf = new StringBuilder();
-		}
-		if (isInDocNumber(qName)) {
-			inDocNumber = true;
-			buf = new StringBuilder();
-		}
-		if (isInTitle(qName)) {
-			inTitle = true;
+		if (isInAbstract(qName) || isInDescription(qName)
+				|| isInDocNumber(qName) || isInTitle(qName)
+				|| isInClaim(qName)) {
+			inText = true;
 			buf = new StringBuilder();
 		}
 		parents.push(qName);

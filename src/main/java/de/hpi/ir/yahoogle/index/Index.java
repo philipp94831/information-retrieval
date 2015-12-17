@@ -31,6 +31,7 @@ public class Index extends Loadable {
 			.getTeamDirectory() + "/dictionary.txt";
 	private static final Logger LOGGER = Logger
 			.getLogger(Index.class.getName());
+	private static final boolean PRINT_DICTIONARY = false;
 	private TokenDictionary dictionary;
 	private PatentIndex patents;
 	private final String patentsFolder;
@@ -109,7 +110,9 @@ public class Index extends Loadable {
 		patents.load();
 		dictionary = new TokenDictionary();
 		dictionary.load();
-		// printDictionary();
+		if (PRINT_DICTIONARY) {
+			printDictionary();
+		}
 	}
 
 	private void matchNextPhraseToken(Map<Integer, Set<Integer>> result, Map<Integer, Set<Integer>> nextResult, int delta) {
@@ -140,7 +143,6 @@ public class Index extends Loadable {
 		indexes.forEach(PartialIndex::delete);
 	}
 
-	@SuppressWarnings("unused")
 	private void printDictionary() {
 		try {
 			new File(DICTIONARY_FILE).delete();

@@ -70,9 +70,11 @@ public class QLModel extends Model {
 		case TITLE:
 			return 5.0;
 		case ABSTRACT:
-			return 1.5;
+			return 2.0;
 		case DESCRIPTION:
 			return 1.0;
+		case CLAIM:
+			return 1.2;
 		default:
 			return 0.0;
 		}
