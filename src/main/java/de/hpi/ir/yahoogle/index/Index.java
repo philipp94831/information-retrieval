@@ -1,6 +1,5 @@
 package de.hpi.ir.yahoogle.index;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -31,7 +30,7 @@ public class Index extends Loadable {
 			.getTeamDirectory() + "/dictionary.txt";
 	private static final Logger LOGGER = Logger
 			.getLogger(Index.class.getName());
-	private static final boolean PRINT_DICTIONARY = false;
+	private static final boolean PRINT_DICTIONARY = true;
 	private TokenDictionary dictionary;
 	private PatentIndex patents;
 	private final String patentsFolder;
@@ -145,7 +144,7 @@ public class Index extends Loadable {
 
 	private void printDictionary() {
 		try {
-			new File(DICTIONARY_FILE).delete();
+			deleteIfExists(DICTIONARY_FILE);
 			PrintWriter writer = new PrintWriter(DICTIONARY_FILE, "UTF-8");
 			dictionary.getTokens().forEach(writer::println);
 			writer.close();

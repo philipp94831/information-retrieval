@@ -8,7 +8,7 @@ public class Tokenizer implements Iterator<String> {
 	private static final String DELIM = "- \t\n\r\f";
 	private String nextToken;
 	private int pos = 0;
-	private boolean returnDelims;
+	private final boolean returnDelims;
 	private final boolean skipStopWords;
 	private final String string;
 	private StringTokenizer tokenizer;
