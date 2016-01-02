@@ -33,9 +33,9 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "can" };
+		String[] queries = { "digital signature" };
 		for (String query : queries) {
-			printResults(search(query, 10, 0), query);
+			printResults(search(query, 5), query);
 		}
 	}
 
@@ -49,10 +49,10 @@ public class SearchEngineTest {
 		System.out.println();
 	}
 
-	private static ArrayList<String> search(String query, int topK, int prf) {
+	private static ArrayList<String> search(String query, int topK) {
 		// System.out.println("Searching...");
 		long startTime = System.nanoTime();
-		ArrayList<String> results = myEngine.search(query, topK, prf);
+		ArrayList<String> results = myEngine.search(query, topK, 0);
 		long time = (System.nanoTime() - startTime) / 1000000;
 		System.out.println("Time for search: " + time + "ms");
 		return results;

@@ -158,17 +158,43 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
-		// TODO Auto-generated method stub
-		return null;
+		double originalDcg = 0.0;
+		double goldDcg = 0.0;
+		for(int i = 0; i < p; i++) {
+			String original = ranking.get(i);
+			int goldRank = goldRanking.indexOf(original) + 1;
+			double originalGain = computeGain(goldRank);
+			double goldGain = computeGain(i + 1);
+			if(goldRank == 0) {
+				originalGain = 1;
+			}
+			if(i == 0) {
+				originalDcg = originalGain;
+				goldDcg = goldGain;
+			} else {
+				originalDcg += originalGain * Math.log(2) / Math.log(i + 1);
+				goldDcg += goldGain * Math.log(2) / Math.log(i + 1);
+			}
+		}
+		return originalDcg / goldDcg;
 	}
 
-	private ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets) {
+	private double computeGain(int goldRank) {
+		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
+	}
+
+	private ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets, String query) {
 		ArrayList<String> results = new ArrayList<>();
+		ArrayList<String> goldRanking = new WebFile().getGoogleRanking(query);
+		ArrayList<String> originalRanking = new ArrayList<>(results2.stream().map(r -> index.getPatent(r.getDocNumber()).getPatent().getInventionTitle()).collect(Collectors.toList()));
+		int i = 1;
 		for (Result result : results2) {
 			int docNumber = result.getDocNumber();
+			double ndcg = computeNdcg(goldRanking, originalRanking, i);
 			results.add(String.format("%08d", docNumber) + "\t"
-					+ index.getPatent(docNumber).getPatent().getInventionTitle()
+					+ index.getPatent(docNumber).getPatent().getInventionTitle() + " (" + ndcg + ")"
 					+ "\n" + snippets.get(docNumber));
+			i++;
 		}
 		return results;
 	}
@@ -230,17 +256,23 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	@Override
 	ArrayList<String> search(String query, int topK, int prf) {
+		String[] parts = query.split("#");
+		query = parts[0];
 		List<String> queryPlan = processQuery(query);
 		if (queryPlan.isEmpty()) {
 			return new ArrayList<>();
 		}
 		if (queryPlan.size() == 1) {
-			return searchRelevant(topK, prf, queryPlan);
+			prf = 0;
+			if(parts.length > 1) {
+				prf = Integer.parseInt(parts[1].trim());
+			}
+			return searchRelevant(topK, prf, queryPlan, query);
 		}
-		return searchBoolean(topK, queryPlan);
+		return searchBoolean(topK, queryPlan, query);
 	}
 
-	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan) {
+	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan, String query) {
 		Map<Integer, Result> docNumbers = new HashMap<>();
 		Operator operator = Operator.OR;
 		if (queryPlan.get(0).equalsIgnoreCase("not")) {
@@ -293,10 +325,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		List<Result> r = docNumbers.values().stream().limit(topK)
 				.collect(Collectors.toList());
 		Map<Integer, String> snippets = generateSnippets(r, allPhrases);
-		return generateOutput(r, snippets);
+		return generateOutput(r, snippets, query);
 	}
 
-	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan) {
+	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan, String query) {
 		List<String> phrases = extractPhrases(queryPlan.get(0));
 		List<ModelResult> results = index.findRelevant(phrases,
 				Math.max(topK, prf));
@@ -309,6 +341,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			results = index.findRelevant(newPhrases, topK);
 			snippets = generateSnippets(results, phrases);
 		}
-		return generateOutput(results, snippets);
+		return generateOutput(results, snippets, query);
 	}
 }
