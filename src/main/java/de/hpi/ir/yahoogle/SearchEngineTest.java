@@ -33,7 +33,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "digital signature" };
+		String[] queries = { "add-on module", "digital signature", "data processing", "\"a scanning\"" };
 		for (String query : queries) {
 			printResults(search(query, 5), query);
 		}

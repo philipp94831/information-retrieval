@@ -166,7 +166,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			double originalGain = computeGain(goldRank);
 			double goldGain = computeGain(i + 1);
 			if(goldRank == 0) {
-				originalGain = 1;
+				originalGain = 0;
 			}
 			if(i == 0) {
 				originalDcg = originalGain;
