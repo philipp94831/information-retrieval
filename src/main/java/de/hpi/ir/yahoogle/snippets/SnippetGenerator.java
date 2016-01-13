@@ -33,7 +33,7 @@ public class SnippetGenerator {
 				window.checkLeftMost(left);
 				window.checkRightMost(right);
 			}
-			window.addMatches(matches.size());
+			window.addMatches(matches);
 		}
 		return window;
 	}
@@ -59,13 +59,19 @@ public class SnippetGenerator {
 		while (tokenizer.hasNext()
 				&& start + tokenizer.getPosition() < bestWindow.getPosition()
 						+ MAX_WINDOW_LENGTH) {
-			if (start + tokenizer.getPosition() >= bestWindow.getPosition()) {
+			int position = start + tokenizer.getPosition();
+			if (position >= bestWindow.getPosition()) {
 				String token = tokenizer.next();
 				snippet.append(token);
 			} else {
 				tokenizer.next();
 			}
 		}
-		return snippet.toString().trim();
+		String finalSnippet = snippet.toString().trim();
+		for(String phrase : phrases) {
+			phrase = phrase.trim();
+			finalSnippet = finalSnippet.replaceAll(phrase, "{" + phrase + "}");
+		}
+		return finalSnippet;
 	}
 }

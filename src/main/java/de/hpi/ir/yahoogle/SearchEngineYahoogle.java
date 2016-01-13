@@ -186,7 +186,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	private ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets, String query) {
 		ArrayList<String> results = new ArrayList<>();
 		ArrayList<String> goldRanking = new WebFile().getGoogleRanking(query);
-		ArrayList<String> originalRanking = new ArrayList<>(results2.stream().map(r -> index.getPatent(r.getDocNumber()).getPatent().getInventionTitle()).collect(Collectors.toList()));
+		ArrayList<String> originalRanking = new ArrayList<>(results2.stream().map(r -> Integer.toString(r.getDocNumber())).collect(Collectors.toList()));
 		int i = 1;
 		for (Result result : results2) {
 			int docNumber = result.getDocNumber();

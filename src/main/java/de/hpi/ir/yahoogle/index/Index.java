@@ -30,7 +30,7 @@ public class Index extends Loadable {
 			.getTeamDirectory() + "/dictionary.txt";
 	private static final Logger LOGGER = Logger
 			.getLogger(Index.class.getName());
-	private static final boolean PRINT_DICTIONARY = true;
+	private static final boolean PRINT_DICTIONARY = false;
 	private TokenDictionary dictionary;
 	private PatentIndex patents;
 	private final String patentsFolder;

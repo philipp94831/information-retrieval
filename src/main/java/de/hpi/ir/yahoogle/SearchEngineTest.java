@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = true;
+	private static final boolean CREATE_INDEX = false;
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 
 	private static void initialize(String directory, boolean create) {
@@ -33,7 +33,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "add-on module", "digital signature", "data processing", "\"a scanning\"" };
+		String[] queries = { "add-on module" };
 		for (String query : queries) {
 			printResults(search(query, 5), query);
 		}
