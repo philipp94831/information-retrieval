@@ -12,6 +12,7 @@ public class Tokenizer implements Iterator<String> {
 	private final boolean skipStopWords;
 	private final String string;
 	private StringTokenizer tokenizer;
+	private boolean realToken;
 
 	public Tokenizer(String string) {
 		this(string, true, false);
@@ -70,6 +71,7 @@ public class Tokenizer implements Iterator<String> {
 	@Override
 	public String next() {
 		String token;
+		realToken = false;
 		if (skipStopWords) {
 			token = nextToken;
 		} else {
@@ -77,8 +79,13 @@ public class Tokenizer implements Iterator<String> {
 		}
 		if (!StopWordList.isStopword(token)
 				&& !token.matches("[" + DELIM + "]+")) {
+			realToken = true;
 			pos++;
 		}
 		return token;
+	}
+	
+	public boolean isRealToken() {
+		return realToken;
 	}
 }

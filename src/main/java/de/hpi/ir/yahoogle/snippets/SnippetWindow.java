@@ -1,6 +1,7 @@
 package de.hpi.ir.yahoogle.snippets;
 
-import java.util.NavigableSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SnippetWindow implements Comparable<SnippetWindow> {
 
@@ -9,7 +10,7 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 	private int numberOfMatches = 0;
 	private final int pos;
 	private int rightMostPosition = 0;
-	private NavigableSet<Integer> matches;
+	private List<Integer> matches = new ArrayList<>();
 
 	public SnippetWindow(int pos) {
 		this.pos = pos;
@@ -19,12 +20,12 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 		distinctMatches++;
 	}
 	
-	public NavigableSet<Integer> getMatches() {
+	public List<Integer> getMatches() {
 		return matches;
 	}
 
-	public void addMatches(NavigableSet<Integer> matches) {
-		this.matches = matches;
+	public void addMatches(List<Integer> matches) {
+		this.matches.addAll(matches);
 		this.numberOfMatches += matches.size();
 	}
 

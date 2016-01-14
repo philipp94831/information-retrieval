@@ -33,9 +33,9 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "add-on module" };
+		String[] queries = { "\"graph editor\"", "\"social trend\"", "fossil hydrocarbons", "physiological AND saline", "tires NOT pressure" };
 		for (String query : queries) {
-			printResults(search(query, 5), query);
+			printResults(search(query, 20), query);
 		}
 	}
 

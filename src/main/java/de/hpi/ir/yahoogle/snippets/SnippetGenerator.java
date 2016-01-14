@@ -3,6 +3,7 @@ package de.hpi.ir.yahoogle.snippets;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.PatentResume;
@@ -33,7 +34,10 @@ public class SnippetGenerator {
 				window.checkLeftMost(left);
 				window.checkRightMost(right);
 			}
-			window.addMatches(matches);
+			for(int j = 0; j < tokensInPhrase; j++) {
+				int _j = j;
+				window.addMatches(matches.stream().map(k -> k + _j).collect(Collectors.toList()));
+			}
 		}
 		return window;
 	}
@@ -62,16 +66,15 @@ public class SnippetGenerator {
 			int position = start + tokenizer.getPosition();
 			if (position >= bestWindow.getPosition()) {
 				String token = tokenizer.next();
+				if(tokenizer.isRealToken() && bestWindow.getMatches().contains(position)) {
+					token = "{" + token + "}";
+				}
 				snippet.append(token);
 			} else {
 				tokenizer.next();
 			}
 		}
 		String finalSnippet = snippet.toString().trim();
-		for(String phrase : phrases) {
-			phrase = phrase.trim();
-			finalSnippet = finalSnippet.replaceAll(phrase, "{" + phrase + "}");
-		}
 		return finalSnippet;
 	}
 }
