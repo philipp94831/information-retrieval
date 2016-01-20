@@ -77,4 +77,9 @@ public class Patent {
 	public void setStart(long start) {
 		this.start = start;
 	}
+
+	public List<Integer> getCitations() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>();
+	}
 }

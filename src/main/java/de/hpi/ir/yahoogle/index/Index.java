@@ -33,6 +33,7 @@ public class Index extends Loadable {
 	private static final boolean PRINT_DICTIONARY = false;
 	private TokenDictionary dictionary;
 	private PatentIndex patents;
+	private CitationIndex citations;
 	private final String patentsFolder;
 
 	public Index(String patentsFolder) {
@@ -45,6 +46,8 @@ public class Index extends Loadable {
 		patents.create();
 		dictionary = new TokenDictionary();
 		dictionary.create();
+		citations = new CitationIndex();
+		citations.create();
 	}
 
 	public List<Result> find(String phrase) {
@@ -109,6 +112,8 @@ public class Index extends Loadable {
 		patents.load();
 		dictionary = new TokenDictionary();
 		dictionary.load();
+		citations = new CitationIndex();
+		citations.load();
 		if (PRINT_DICTIONARY) {
 			printDictionary();
 		}
@@ -139,6 +144,8 @@ public class Index extends Loadable {
 				.collect(Collectors.toList()));
 		dictionary.merge(indexes.stream().map(PartialIndex::getDictionary)
 				.collect(Collectors.toList()));
+		citations.merge(indexes.stream().map(PartialIndex::getCitations)
+				.collect(Collectors.toList()));
 		indexes.forEach(PartialIndex::delete);
 	}
 
@@ -163,5 +170,6 @@ public class Index extends Loadable {
 	public void write() throws IOException {
 		patents.write();
 		dictionary.write();
+		citations.write();
 	}
 }

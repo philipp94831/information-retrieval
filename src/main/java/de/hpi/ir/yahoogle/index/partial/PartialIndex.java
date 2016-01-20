@@ -22,6 +22,7 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 	private PartialTokenDictionary dictionary;
 	private final String name;
 	private PartialPatentIndex patents;
+	private PartialCitationIndex citations;
 	private PatentResume resume;
 	private int startOffset;
 	private int wordCount;
@@ -39,8 +40,15 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		indexAbstract(patent.getPatentAbstract());
 		indexDescriptions(patent.getDescriptions());
 		indexClaims(patent.getClaims());
+		indexCitations(patent.getCitations());
 		resume.setWordCount(wordCount);
 		patents.add(resume);
+	}
+
+	private void indexCitations(List<Integer> cited) {
+		for(Integer citation : cited) {
+			citations.add(citation, resume.getDocNumber());
+		}
 	}
 
 	@Override
@@ -48,6 +56,8 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		deleteIfExists(fileName());
 		patents = new PartialPatentIndex(name);
 		patents.create();
+		citations = new PartialCitationIndex(name);
+		citations.create();
 		dictionary = new PartialTokenDictionary(name);
 		dictionary.create();
 	}
@@ -56,6 +66,7 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		try {
 			patents.delete();
 			dictionary.delete();
+			citations.delete();
 		} catch (IOException e) {
 			LOGGER.warning("Could not delete partial index " + name);
 		}
@@ -72,6 +83,10 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 
 	public PartialPatentIndex getPatents() {
 		return patents;
+	}
+
+	public PartialCitationIndex getCitations() {
+		return citations;
 	}
 
 	private void indexAbstract(String patentAbstract) {
@@ -134,6 +149,8 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 	public void load() throws IOException {
 		patents = new PartialPatentIndex(name);
 		patents.load();
+		citations = new PartialCitationIndex(name);
+		citations.load();
 		dictionary = new PartialTokenDictionary(name);
 		dictionary.load();
 	}
@@ -142,5 +159,6 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 	public void write() throws IOException {
 		patents.write();
 		dictionary.write();
+		citations.write();
 	}
 }

@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = false;
+	private static final boolean CREATE_INDEX = true;
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 
 	private static void initialize(String directory, boolean create) {
