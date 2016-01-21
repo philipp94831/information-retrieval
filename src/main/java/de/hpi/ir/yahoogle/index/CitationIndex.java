@@ -44,6 +44,7 @@ public class CitationIndex extends Loadable {
 				file.seek(offset);
 				int size = file.readInt();
 				byte[] b = new byte[size];
+				file.read(b);
 				BinaryCitationList postingList = new BinaryCitationList(docNumber, b);
 				return postingList.getDocNumbers();
 			}

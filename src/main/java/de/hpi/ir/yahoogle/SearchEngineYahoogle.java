@@ -25,8 +25,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -192,7 +194,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			int docNumber = result.getDocNumber();
 			double ndcg = computeNdcg(goldRanking, originalRanking, i);
 			results.add(String.format("%08d", docNumber) + "\t"
-					+ index.getPatent(docNumber).getPatent().getInventionTitle() + " (" + ndcg + ")"
+					+ index.getPatent(docNumber).getPatent().getInventionTitle() + "\t" + ndcg
 					+ "\n" + snippets.get(docNumber));
 			i++;
 		}
@@ -258,6 +260,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	ArrayList<String> search(String query, int topK, int prf) {
 		String[] parts = query.split("#");
 		query = parts[0];
+		if(query.startsWith("LinkTo:")) {
+			return searchLinks(query);
+		}
 		List<String> queryPlan = processQuery(query);
 		if (queryPlan.isEmpty()) {
 			return new ArrayList<>();
@@ -270,6 +275,52 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			return searchRelevant(topK, prf, queryPlan, query);
 		}
 		return searchBoolean(topK, queryPlan, query);
+	}
+
+	private ArrayList<String> searchLinks(String query) {
+		query = query.replaceAll("LinkTo:", "");
+		List<String> queryPlan = processQuery(query);
+		Set<Integer> results = new HashSet<>();
+		Operator operator = Operator.OR;
+		for(String phrase : queryPlan) {
+			switch (phrase.toLowerCase()) {
+			case "and":
+				operator = Operator.AND;
+				break;
+			case "or":
+				operator = Operator.OR;
+				break;
+			case "not":
+				operator = Operator.NOT;
+				break;
+			default:
+				List<Integer> intermediate = index.findLinks(phrase);
+				switch (operator) {
+				case AND:
+					results.retainAll(intermediate);
+					break;
+				case OR:
+					results.addAll(intermediate);
+					break;
+				case NOT:
+					results.removeAll(intermediate);
+					break;
+				default:
+					break;
+				}
+				break;
+			}
+		}
+		return generateSmallOutput(results);
+	}
+
+	private ArrayList<String> generateSmallOutput(Set<Integer> docNumbers) {
+		ArrayList<String> results = new ArrayList<>();
+		for (Integer docNumber : docNumbers) {
+			results.add(String.format("%08d", docNumber) + "\t"
+					+ index.getPatent(docNumber).getPatent().getInventionTitle());
+		}
+		return results;
 	}
 
 	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan, String query) {

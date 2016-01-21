@@ -33,7 +33,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize("patents/", CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "\"graph editor\"", "\"social trend\"", "fossil hydrocarbons", "physiological AND saline", "tires NOT pressure" };
+		String[] queries = { "LinkTo:07920906", "LinkTo:07904949", "LinkTo:08078787", "LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142" };
 		for (String query : queries) {
 			printResults(search(query, 20), query);
 		}

@@ -172,4 +172,8 @@ public class Index extends Loadable {
 		dictionary.write();
 		citations.write();
 	}
+
+	public List<Integer> findLinks(String phrase) {
+		return citations.find(Integer.parseInt(phrase.trim()));
+	}
 }
