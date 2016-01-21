@@ -7,6 +7,7 @@ public class Patent {
 
 	private final List<String> claims = new ArrayList<>();
 	private final List<String> descriptions = new ArrayList<>();
+	private final List<Integer> citations = new ArrayList<>();
 	private int docNumber;
 	private long end;
 	private final String fileName;
@@ -20,6 +21,10 @@ public class Patent {
 
 	public void addClaim(String string) {
 		claims.add(string);
+	}
+
+	public void addCitation(int citation) {
+		citations.add(citation);
 	}
 
 	public void addDescription(String string) {
@@ -79,7 +84,6 @@ public class Patent {
 	}
 
 	public List<Integer> getCitations() {
-		// TODO Auto-generated method stub
-		return new ArrayList<>();
+		return citations;
 	}
 }

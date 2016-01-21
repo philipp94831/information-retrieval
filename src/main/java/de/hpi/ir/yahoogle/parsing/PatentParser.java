@@ -19,6 +19,7 @@ public class PatentParser {
 	private boolean inText = false;
 	private Stack<String> parents;
 	private XMLStreamReader2 xmlStreamReader;
+	private Citation citation;
 
 	public PatentParser(PatentParserCallback smallIndex) {
 		this.callback = smallIndex;
@@ -55,6 +56,24 @@ public class PatentParser {
 			inText = false;
 			currentPatent.addClaim(buf.toString());
 		}
+		if(isInCitation(qName) && citation.isValid()) {
+			currentPatent.addCitation(citation.getDocNumber());
+		}
+		if (isInCitationCountry(qName)) {
+			inText = false;
+			citation.setCountry(buf.toString());
+		}
+		if (isInCitationDocNumber(qName)) {
+			inText = false;
+			String docNumber = buf.toString();
+			if(docNumber.matches("\\d+") && Long.parseLong(docNumber) <= Integer.MAX_VALUE) {
+				citation.setDocNumber(Integer.parseInt(docNumber));
+			}
+		}
+		if (isInCitationDate(qName)) {
+			inText = false;
+			citation.setDate(Integer.parseInt(buf.toString()));
+		}
 		if (isInPatent(qName)) {
 			currentPatent.setEnd(
 					xmlStreamReader.getLocationInfo().getEndingByteOffset());
@@ -72,6 +91,25 @@ public class PatentParser {
 
 	private boolean isInDescription(String qName) {
 		return qName.equals("p") && parents.peek().equals("description");
+	}
+
+	private boolean isInCitation(String qName) {
+		return qName.equals("document-id") && parents.peek().equals("patcit");
+	}
+
+	private boolean isInCitationCountry(String qName) {
+		return qName.equals("country") && parents.peek().equals("document-id") && parents
+				.elementAt(parents.size() - 2).equals("patcit");
+	}
+
+	private boolean isInCitationDocNumber(String qName) {
+		return qName.equals("doc-number") && parents.peek().equals("document-id") && parents
+				.elementAt(parents.size() - 2).equals("patcit");
+	}
+
+	private boolean isInCitationDate(String qName) {
+		return qName.equals("date") && parents.peek().equals("document-id") && parents
+				.elementAt(parents.size() - 2).equals("patcit");
 	}
 
 	private boolean isInDocNumber(String qName) {
@@ -139,9 +177,12 @@ public class PatentParser {
 		}
 		if (isInAbstract(qName) || isInDescription(qName)
 				|| isInDocNumber(qName) || isInTitle(qName)
-				|| isInClaim(qName)) {
+				|| isInClaim(qName) || isInCitationDate(qName) || isInCitationCountry(qName) || isInCitationDocNumber(qName)) {
 			inText = true;
 			buf = new StringBuilder();
+		}
+		if(isInCitation(qName)) {
+			citation = new Citation();
 		}
 		parents.push(qName);
 	}
