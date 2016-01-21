@@ -10,10 +10,9 @@ import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.parsing.Patent;
-import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 
-public class PartialIndex extends Loadable implements PatentParserCallback {
+public class PartialIndex extends Loadable {
 
 	private static final String BASE_NAME = ".index";
 	private static final Logger LOGGER = Logger
@@ -31,8 +30,7 @@ public class PartialIndex extends Loadable implements PatentParserCallback {
 		this.name = name;
 	}
 
-	@Override
-	public void callback(Patent patent) {
+	public void add(Patent patent) {
 		resume = new PatentResume(patent);
 		wordCount = 0;
 		startOffset = 0;

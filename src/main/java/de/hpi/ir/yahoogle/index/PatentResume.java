@@ -50,7 +50,7 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 	}
 
 	@Override
-	public void callback(Patent patent) {
+	public void receivePatent(Patent patent) {
 		this.patent = patent;
 	}
 

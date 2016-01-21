@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 
 import de.hpi.ir.yahoogle.index.Index;
-import de.hpi.ir.yahoogle.index.partial.PartialIndex;
 import de.hpi.ir.yahoogle.index.partial.PartialIndexFactory;
 import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.rm.ModelResult;
@@ -218,16 +217,15 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		try {
 			PartialIndexFactory factory = new PartialIndexFactory();
 			File patents = new File(directory);
+			factory.start();
+			PatentParser handler = new PatentParser(factory);
 			for (File patentFile : patents.listFiles()) {
-				PartialIndex partialIndex = factory.getPartialIndex();
-				partialIndex.create();
-				PatentParser handler = new PatentParser(partialIndex);
 				LOGGER.info(patentFile.getName());
 				FileInputStream stream = new FileInputStream(patentFile);
 				handler.setFileName(patentFile.getName());
 				handler.parse(stream);
-				partialIndex.write();
 			}
+			factory.finish();
 			index = new Index(directory);
 			index.create();
 			index.mergeIndices(factory.getNames());

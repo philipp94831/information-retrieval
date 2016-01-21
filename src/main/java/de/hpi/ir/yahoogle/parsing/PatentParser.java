@@ -77,7 +77,7 @@ public class PatentParser {
 		if (isInPatent(qName)) {
 			currentPatent.setEnd(
 					xmlStreamReader.getLocationInfo().getEndingByteOffset());
-			callback.callback(currentPatent);
+			callback.receivePatent(currentPatent);
 		}
 	}
 
