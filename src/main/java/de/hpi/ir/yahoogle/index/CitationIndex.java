@@ -62,6 +62,7 @@ public class CitationIndex extends Loadable {
 	}
 
 	public void merge(List<PartialCitationIndex> indexes) throws IOException {
+		LOGGER.info("Merging citation indices");
 		List<CitationListIterator> iterators = indexes.stream()
 				.map(PartialCitationIndex::iterator)
 				.collect(Collectors.toList());

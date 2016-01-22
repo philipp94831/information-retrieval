@@ -14,10 +14,10 @@ public class PartialIndexFactory implements PatentParserCallback {
 			.getLogger(PartialIndexFactory.class.getName());
 	private int indexNumber;
 	private final List<String> names = new ArrayList<>();
-	private static final int MAX_PATENTS = 10000;
+	private static final long MAX_PATENTS = Runtime.getRuntime().maxMemory() / (530 * 1000);
 	private int patentsAdded;
 	private PartialIndex currentIndex;
-	private final String name;	
+	private final String name;
 	
 	public PartialIndexFactory() {
 		this("default");
@@ -56,6 +56,7 @@ public class PartialIndexFactory implements PatentParserCallback {
 	public void start() throws IOException {
 		currentIndex = createPartialIndex();
 		currentIndex.create();
+		patentsAdded = 0;
 	}
 
 	public void finish() throws IOException {

@@ -259,7 +259,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		String[] parts = query.split("#");
 		query = parts[0];
 		if(query.startsWith("LinkTo:")) {
-			return searchLinks(query);
+			return searchLinks(query, topK);
 		}
 		List<String> queryPlan = processQuery(query);
 		if (queryPlan.isEmpty()) {
@@ -275,7 +275,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return searchBoolean(topK, queryPlan, query);
 	}
 
-	private ArrayList<String> searchLinks(String query) {
+	private ArrayList<String> searchLinks(String query, int topK) {
 		query = query.replaceAll("LinkTo:", "");
 		List<String> queryPlan = processQuery(query);
 		Set<Integer> results = new HashSet<>();
@@ -309,12 +309,14 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				break;
 			}
 		}
-		return generateSmallOutput(results);
+		List<Integer> r = results.stream().limit(topK)
+				.collect(Collectors.toList());
+		return generateSmallOutput(r);
 	}
 
-	private ArrayList<String> generateSmallOutput(Set<Integer> docNumbers) {
+	private ArrayList<String> generateSmallOutput(List<Integer> r) {
 		ArrayList<String> results = new ArrayList<>();
-		for (Integer docNumber : docNumbers) {
+		for (Integer docNumber : r) {
 			results.add(String.format("%08d", docNumber) + "\t"
 					+ index.getPatent(docNumber).getPatent().getInventionTitle());
 		}

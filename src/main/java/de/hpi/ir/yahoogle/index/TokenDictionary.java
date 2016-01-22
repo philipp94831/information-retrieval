@@ -93,6 +93,7 @@ public class TokenDictionary extends Loadable {
 	}
 
 	public void merge(List<PartialTokenDictionary> indexes) throws IOException {
+		LOGGER.info("Merging token dictionaries");
 		List<Iterator<BinaryPostingList>> iterators = indexes.stream()
 				.map(PartialTokenDictionary::iterator)
 				.collect(Collectors.toList());

@@ -114,6 +114,7 @@ public class PatentIndex extends Loadable {
 	}
 
 	public void merge(List<PartialPatentIndex> indexes) throws IOException {
+		LOGGER.info("Merging patent indices");
 		List<Iterator<PatentResume>> iterators = indexes.stream()
 				.map(PartialPatentIndex::iterator).collect(Collectors.toList());
 		TreeMap<PatentResume, Integer> candidates = new TreeMap<>();

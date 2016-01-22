@@ -147,6 +147,7 @@ public class Index extends Loadable {
 		citations.merge(indexes.stream().map(PartialIndex::getCitations)
 				.collect(Collectors.toList()));
 		indexes.forEach(PartialIndex::delete);
+		LOGGER.info("finished merging");
 	}
 
 	private void printDictionary() {
