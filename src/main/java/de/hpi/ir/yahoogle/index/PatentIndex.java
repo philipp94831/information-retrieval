@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -26,6 +27,7 @@ public class PatentIndex extends Loadable {
 	private static final int MAX_BYTE_READ = 1024 * 128;
 	private static final int MAX_CACHE_SIZE = 100000;
 	private static final long TOTAL_WORD_COUNT_OFFSET = 0L;
+	private static final int WARM_UP_ITERATIONS = 1000;
 	private final Map<Integer, PatentResume> cache = new HashMap<>();
 	private RandomAccessFile file;
 	private IntegerOffsetsIndex offsets;
@@ -160,5 +162,20 @@ public class PatentIndex extends Loadable {
 		file.writeInt(totalWordCount);
 		file.close();
 		offsets.write();
+	}
+
+	public void warmUp() {
+		try {
+			Set<Integer> docNumbers = offsets.keys();
+			Integer[] a = new Integer[docNumbers.size()];
+			a = docNumbers.toArray(a);
+			Random rand = new Random();
+			for(int i = 0; i < WARM_UP_ITERATIONS; i++) {
+				get(a[rand.nextInt(a.length)]);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

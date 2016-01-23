@@ -67,7 +67,7 @@ public class SnippetGenerator {
 			if (position >= bestWindow.getPosition()) {
 				String token = tokenizer.next();
 				if(tokenizer.isRealToken() && bestWindow.getMatches().contains(position)) {
-					token = "{" + token + "}";
+					//token = "{" + token + "}";
 				}
 				snippet.append(token);
 			} else {

@@ -161,4 +161,9 @@ public class TokenDictionary extends Loadable {
 		out.write(bytes);
 		file.write(out.toByteArray());
 	}
+
+	public void warmUp() {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -5,9 +5,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import de.hpi.ir.yahoogle.ValueComparator;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
@@ -44,8 +47,15 @@ public class QLModel extends Model {
 			found.add(result);
 			cis[i] = result.values().stream().mapToInt(Set::size).sum();
 		}
-		Set<Integer> all = found.stream().map(Map::keySet)
-				.flatMap(Collection::stream).collect(Collectors.toSet());
+		Map<Integer, Integer> totalHits = found.stream().map(Map::entrySet)
+				.flatMap(Collection::stream)
+				.collect(Collectors.groupingBy(e -> e.getKey(), Collectors
+						.reducing(0, e -> e.getValue().size(), Integer::sum)));
+		TreeMap<Integer, Integer> sorted = ValueComparator.sortByValueDescending(totalHits);
+		int minHits = new ArrayList<>(sorted.entrySet()).get(Math.min(topK * 10, sorted.size() - 1)).getValue();
+		Set<Integer> all = totalHits.entrySet().stream()
+				.filter(e -> e.getValue() >= minHits).map(Entry::getKey)
+				.collect(Collectors.toSet());
 		for (Integer docNumber : all) {
 			ModelResult result = new ModelResult(docNumber);
 			double score = 0.0;

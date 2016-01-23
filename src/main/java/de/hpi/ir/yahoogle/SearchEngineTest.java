@@ -15,25 +15,26 @@ import java.util.ArrayList;
  */
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = true;
+	private static final boolean CREATE_INDEX = false;
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 
-	private static void initialize(String directory, boolean create) {
+	private static void initialize(boolean create) {
 		long startTime = System.nanoTime();
 		if (create) {
 			System.out.println("Indexing...");
-			myEngine.index(directory);
+			myEngine.index();
 		}
 		System.out.println("Loading index...");
-		myEngine.loadIndex(directory);
+		myEngine.loadIndex();
 		long time = (System.nanoTime() - startTime) / 1000000;
 		System.out.println("Time for index creation: " + time + "ms");
 	}
 
 	public static void main(String args[]) throws Exception {
-		initialize("patents/", CREATE_INDEX);
+		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "LinkTo:07920906", "LinkTo:07904949", "LinkTo:08078787", "LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142" };
+		String[] queries = { "\"graph editor\"", "\"social trend\"", "fossil hydrocarbons", "physiological AND saline", "tires NOT pressure" };
+//		String[] queries = { "LinkTo:07920906", "LinkTo:07904949", "LinkTo:08078787", "LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142" };
 		for (String query : queries) {
 			printResults(search(query, 20), query);
 		}
@@ -52,7 +53,7 @@ public class SearchEngineTest {
 	private static ArrayList<String> search(String query, int topK) {
 		// System.out.println("Searching...");
 		long startTime = System.nanoTime();
-		ArrayList<String> results = myEngine.search(query, topK, 0);
+		ArrayList<String> results = myEngine.search(query, topK);
 		long time = (System.nanoTime() - startTime) / 1000000;
 		System.out.println("Time for search: " + time + "ms");
 		return results;

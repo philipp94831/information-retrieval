@@ -80,6 +80,7 @@ public class Index extends Loadable {
 
 	public List<ModelResult> findRelevant(List<String> phrases, int topK) {
 		Model model = new QLModel(this);
+		model.setTopK(topK);
 		List<ModelResult> results = model.compute(phrases);
 		Collections.sort(results, new ModelResultComparator());
 		return results.subList(0, Math.min(topK, results.size()));
@@ -131,6 +132,14 @@ public class Index extends Loadable {
 				result.get(entry.getKey()).clear();
 			}
 		}
+		filterEmptyPositionLists(result);
+	}
+
+	private void filterEmptyPositionLists(Map<Integer, Set<Integer>> result) {
+		result.keySet()
+				.removeAll(result.entrySet().stream()
+						.filter(e -> e.getValue().size() == 0)
+						.map(Entry::getKey).collect(Collectors.toList()));
 	}
 
 	public void mergeIndices(List<String> names) throws IOException {
@@ -161,6 +170,12 @@ public class Index extends Loadable {
 		} catch (UnsupportedEncodingException e) {
 			LOGGER.warning("Unsupported encoding when printing dictionary");
 		}
+	}
+
+	public void warmUp() {
+		patents.warmUp();
+		citations.warmUp();
+		dictionary.warmUp();
 	}
 
 	public int wordCount() {

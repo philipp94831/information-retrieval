@@ -91,7 +91,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				topwords.put(token, count);
 			}
 		}
-		TreeMap<String, Integer> sortedWords = sortByValueDescending(topwords);
+		TreeMap<String, Integer> sortedWords = ValueComparator.sortByValueDescending(topwords);
 		List<String> topWords = new ArrayList<>(sortedWords.keySet());
 		return topWords.subList(0, Math.min(topK, topWords.size()));
 	}
@@ -138,13 +138,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return queryPlan;
 	}
 
-	private static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
-		ValueComparator<K, V> comp = new ValueComparator<>(result);
-		TreeMap<K, V> sortedResults = new TreeMap<>(comp);
-		sortedResults.putAll(result);
-		return sortedResults;
-	}
-
 	private Index index;
 
 	public SearchEngineYahoogle() {
@@ -153,8 +146,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
-	void compressIndex(String directory) {
-		index(directory);
+	void compressIndex() {
+		index();
 	}
 
 	@Override
@@ -213,10 +206,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
-	void index(String directory) {
+	void index() {
 		try {
 			PartialIndexFactory factory = new PartialIndexFactory();
-			File patents = new File(directory);
+			File patents = new File(dataDirectory);
 			factory.start();
 			PatentParser handler = new PatentParser(factory);
 			for (File patentFile : patents.listFiles()) {
@@ -226,7 +219,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				handler.parse(stream);
 			}
 			factory.finish();
-			index = new Index(directory);
+			index = new Index(dataDirectory);
 			index.create();
 			index.mergeIndices(factory.getNames());
 			index.write();
@@ -238,15 +231,16 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
-	boolean loadCompressedIndex(String directory) {
-		return loadIndex(directory);
+	boolean loadCompressedIndex() {
+		return loadIndex();
 	}
 
 	@Override
-	boolean loadIndex(String directory) {
-		index = new Index(directory);
+	boolean loadIndex() {
+		index = new Index(dataDirectory);
 		try {
 			index.load();
+			index.warmUp();
 			return true;
 		} catch (IOException e) {
 			LOGGER.severe("Error loading Index from disk");
@@ -255,7 +249,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
-	ArrayList<String> search(String query, int topK, int prf) {
+	ArrayList<String> search(String query, int topK) {
 		String[] parts = query.split("#");
 		query = parts[0];
 		if(query.startsWith("LinkTo:")) {
