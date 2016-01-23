@@ -33,12 +33,12 @@ public class QLModel extends Model {
 	private double compute(double fi, int ld, int ci) {
 		double first = (1 - lambda) * fi / ld;
 		double second = lambda * ci / lc;
-		return Math.log(first + second);
+		return Math.log(first + second + 1);
 	}
 
 	@Override
-	public List<ModelResult> compute(List<String> query) {
-		List<ModelResult> results = new ArrayList<>();
+	public List<Result> compute(List<String> query) {
+		List<Result> results = new ArrayList<>();
 		int[] cis = new int[query.size()];
 		List<Map<Integer, Set<Integer>>> found = new ArrayList<>();
 		for (int i = 0; i < query.size(); i++) {
@@ -51,13 +51,16 @@ public class QLModel extends Model {
 				.flatMap(Collection::stream)
 				.collect(Collectors.groupingBy(e -> e.getKey(), Collectors
 						.reducing(0, e -> e.getValue().size(), Integer::sum)));
+		if(totalHits.isEmpty()) {
+			return results;
+		}
 		TreeMap<Integer, Integer> sorted = ValueComparator.sortByValueDescending(totalHits);
-		int minHits = new ArrayList<>(sorted.entrySet()).get(Math.min(topK * 10, sorted.size() - 1)).getValue();
+		int minHits = new ArrayList<>(sorted.entrySet()).get(Math.min(topK, sorted.size() - 1)).getValue();
 		Set<Integer> all = totalHits.entrySet().stream()
 				.filter(e -> e.getValue() >= minHits).map(Entry::getKey)
 				.collect(Collectors.toSet());
 		for (Integer docNumber : all) {
-			ModelResult result = new ModelResult(docNumber);
+			QLResult result = new QLResult(docNumber);
 			double score = 0.0;
 			PatentResume resume = index.getPatent(docNumber);
 			int ld = resume.getWordCount();

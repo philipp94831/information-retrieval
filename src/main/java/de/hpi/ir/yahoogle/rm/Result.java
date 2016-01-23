@@ -5,10 +5,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class Result implements Comparable<Result> {
+public abstract class Result implements Comparable<Result> {
 
 	private final int docNumber;
 	private final Map<String, Set<Integer>> positions = new HashMap<>();
+
+	protected double score;
 
 	public Result(int docNumber) {
 		this.docNumber = docNumber;
@@ -31,13 +33,19 @@ public class Result implements Comparable<Result> {
 		return positions.getOrDefault(phrase, new HashSet<>());
 	}
 
-	public void merge(Result r2) {
-		if (this.compareTo(r2) == 0) {
-			r2.positions.entrySet().forEach(
-					e -> positions.merge(e.getKey(), e.getValue(), (v1, v2) -> {
-						v1.addAll(v2);
-						return v1;
-					}));
-		}
+	public Result merge(Result r2) {
+		r2.positions.entrySet().forEach(
+				e -> positions.merge(e.getKey(), e.getValue(), (v1, v2) -> {
+					v1.addAll(v2);
+					return v1;
+				}));
+		score += r2.score;
+		return this;
 	}
+
+	public void setScore(double score) {
+		this.score = score;
+	}
+	
+	public abstract int compareScore(Result o2);
 }

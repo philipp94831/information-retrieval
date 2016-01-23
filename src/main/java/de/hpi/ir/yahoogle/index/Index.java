@@ -19,8 +19,7 @@ import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
 import de.hpi.ir.yahoogle.rm.Model;
-import de.hpi.ir.yahoogle.rm.ModelResult;
-import de.hpi.ir.yahoogle.rm.ModelResultComparator;
+import de.hpi.ir.yahoogle.rm.ResultComparator;
 import de.hpi.ir.yahoogle.rm.QLModel;
 import de.hpi.ir.yahoogle.rm.Result;
 
@@ -50,16 +49,6 @@ public class Index extends Loadable {
 		citations.create();
 	}
 
-	public List<Result> find(String phrase) {
-		Map<Integer, Set<Integer>> result = findWithPositions(phrase);
-		return result.entrySet().stream().filter(e -> e.getValue().size() > 0)
-				.map(e -> {
-					Result r = new Result(e.getKey());
-					r.addPositions(phrase, e.getValue());
-					return r;
-				}).collect(Collectors.toList());
-	}
-
 	private Map<Integer, Set<Integer>> findAll(String token) {
 		boolean prefix = token.endsWith("*");
 		if (prefix) {
@@ -78,12 +67,21 @@ public class Index extends Loadable {
 		}
 	}
 
-	public List<ModelResult> findRelevant(List<String> phrases, int topK) {
+	public List<Result> find(List<String> phrases) {
+		return find(phrases, -1);
+	}
+
+	public List<Result> find(List<String> phrases, int topK) {
 		Model model = new QLModel(this);
-		model.setTopK(topK);
-		List<ModelResult> results = model.compute(phrases);
-		Collections.sort(results, new ModelResultComparator());
-		return results.subList(0, Math.min(topK, results.size()));
+		if(topK > 0) {
+			model.setTopK(topK * 10);
+		}
+		List<Result> results = model.compute(phrases);
+		Collections.sort(results, new ResultComparator());
+		if(topK > 0) {
+			results = results.subList(0, Math.min(topK, results.size()));
+		}
+		return results;
 	}
 
 	public Map<Integer, Set<Integer>> findWithPositions(String phrase) {
