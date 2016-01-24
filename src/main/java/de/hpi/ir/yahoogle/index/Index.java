@@ -45,7 +45,7 @@ public class Index extends Loadable {
 		citations.create();
 	}
 
-	private void filterEmptyPositionLists(Map<Integer, Set<Integer>> result) {
+	private static void filterEmptyPositionLists(Map<Integer, Set<Integer>> result) {
 		result.keySet()
 				.removeAll(result.entrySet().stream()
 						.filter(e -> e.getValue().size() == 0)
@@ -79,12 +79,13 @@ public class Index extends Loadable {
 		}
 	}
 
-	public List<Integer> findLinks(String phrase) {
+	private List<Integer> findLinks(String phrase) {
 		return citations.find(Integer.parseInt(phrase.trim()));
 	}
 
 	public Set<Integer> findLinks(List<String> phrases) {
-		return phrases.stream().map(this::findLinks).flatMap(Collection::stream).collect(Collectors.toSet());
+		return phrases.stream().map(this::findLinks).flatMap(Collection::stream)
+				.collect(Collectors.toSet());
 	}
 
 	public Map<Integer, Set<Integer>> findPositions(String phrase) {

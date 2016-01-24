@@ -61,6 +61,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			.getLogger(SearchEngineYahoogle.class.getName());
 	private static final int TOP_WORDS = 4;
 
+	private static double computeGain(int goldRank) {
+		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
+	}
+
 	public static String getTeamDirectory() {
 		return teamDirectory;
 	}
@@ -99,10 +103,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		index();
 	}
 
-	private double computeGain(int goldRank) {
-		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
-	}
-
 	@Override
 	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
 		double originalDcg = 0.0;
@@ -110,11 +110,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		for (int i = 0; i < p; i++) {
 			String original = ranking.get(i);
 			int goldRank = goldRanking.indexOf(original) + 1;
-			double originalGain = computeGain(goldRank);
+			double originalGain = goldRank == 0 ? 0 : computeGain(goldRank);
 			double goldGain = computeGain(i + 1);
-			if (goldRank == 0) {
-				originalGain = 0;
-			}
 			if (i == 0) {
 				originalDcg = originalGain;
 				goldDcg = goldGain;
