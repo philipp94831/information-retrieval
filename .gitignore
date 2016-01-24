@@ -10,3 +10,4 @@ res/patents.zip
 *.iml
 .idea
 **dictionary.txt
+patents/ipg*.xml

@@ -74,7 +74,7 @@ public class Index extends Loadable {
 	public List<Result> find(List<String> phrases, int topK) {
 		Model model = new QLModel(this);
 		if(topK > 0) {
-			model.setTopK(topK * 10);
+//			model.setTopK(topK * 10);
 		}
 		List<Result> results = model.compute(phrases);
 		Collections.sort(results, new ResultComparator());

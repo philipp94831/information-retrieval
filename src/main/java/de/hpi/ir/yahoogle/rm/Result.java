@@ -39,6 +39,7 @@ public abstract class Result implements Comparable<Result> {
 					v1.addAll(v2);
 					return v1;
 				}));
+		//FIXME actually, this is not correct
 		score += r2.score;
 		return this;
 	}

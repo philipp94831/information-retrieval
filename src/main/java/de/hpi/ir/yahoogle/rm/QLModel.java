@@ -33,7 +33,7 @@ public class QLModel extends Model {
 	private double compute(double fi, int ld, int ci) {
 		double first = (1 - lambda) * fi / ld;
 		double second = lambda * ci / lc;
-		return Math.log(first + second + 1);
+		return Math.log(first + second);
 	}
 
 	@Override
