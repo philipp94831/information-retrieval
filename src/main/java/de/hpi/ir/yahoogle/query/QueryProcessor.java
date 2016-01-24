@@ -73,4 +73,16 @@ public class QueryProcessor {
 		}
 		return phrases;
 	}
+
+	public static boolean isEmptyQuery(String query) {
+		return generateQueryPlan(query).isEmpty();
+	}
+
+	public static boolean isBooleanQuery(String query) {
+		return generateQueryPlan(query).size() == 1;
+	}
+
+	public static boolean isLinkQuery(String query) {
+		return query.startsWith("LinkTo:");
+	}
 }

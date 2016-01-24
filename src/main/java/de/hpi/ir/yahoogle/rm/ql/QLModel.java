@@ -14,6 +14,7 @@ import de.hpi.ir.yahoogle.ValueComparator;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
+import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
 
 public class QLModel extends Model<QLResult> {
@@ -37,7 +38,6 @@ public class QLModel extends Model<QLResult> {
 		return Math.log(first + second);
 	}
 
-	@Override
 	public List<QLResult> compute(List<String> query) {
 		List<QLResult> results = new ArrayList<>();
 		int[] cis = new int[query.size()];
@@ -94,5 +94,11 @@ public class QLModel extends Model<QLResult> {
 		default:
 			return 0.0;
 		}
+	}
+
+	@Override
+	public List<QLResult> compute(String query) {
+		List<String> phrases = QueryProcessor.extractPhrases(query);
+		return compute(phrases);
 	}
 }

@@ -24,8 +24,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,8 +40,11 @@ import de.hpi.ir.yahoogle.index.partial.PartialIndexFactory;
 import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.rm.bool.BooleanLinkModel;
+import de.hpi.ir.yahoogle.rm.bool.BooleanModel;
+import de.hpi.ir.yahoogle.rm.bool.BooleanResult;
+import de.hpi.ir.yahoogle.rm.ql.QLModel;
 import de.hpi.ir.yahoogle.rm.ql.QLResult;
-import de.hpi.ir.yahoogle.rm.ql.QLResultComparator;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
@@ -73,6 +76,11 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				.sortByValueDescending(topwords);
 		List<String> topWords = new ArrayList<>(sortedWords.keySet());
 		return topWords.subList(0, Math.min(topK, topWords.size()));
+	}
+
+	private static String toGoogleQuery(String query) {
+		return query.toLowerCase().replaceAll("\\snot\\s", " -")
+				.replaceAll("^not\\s", "-");
 	}
 
 	private Index index;
@@ -181,14 +189,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		}
 	}
 
-	private boolean isBooleanQuery(List<String> queryPlan) {
-		return queryPlan.size() == 1;
-	}
-
-	private boolean isLinkQuery(String query) {
-		return query.startsWith("LinkTo:");
-	}
-
 	@Override
 	boolean loadCompressedIndex() {
 		return loadIndex();
@@ -219,127 +219,71 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	ArrayList<String> search(String query, int topK) {
 		String[] parts = query.split("#");
 		query = parts[0];
-		if (isLinkQuery(query)) {
+		if (QueryProcessor.isLinkQuery(query)) {
 			return searchLinks(topK, query);
 		}
-		List<String> queryPlan = QueryProcessor.generateQueryPlan(query);
-		if (queryPlan.isEmpty()) {
+		if (QueryProcessor.isEmptyQuery(query)) {
 			return new ArrayList<>();
 		}
-		if (isBooleanQuery(queryPlan)) {
+		if (QueryProcessor.isBooleanQuery(query)) {
 			int prf = parsePrf(parts);
 			return searchRelevant(topK, prf, query);
 		}
-		return searchBoolean(topK, queryPlan, query);
+		return searchBoolean(topK, query);
 	}
 
-	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan, String query) {
-		Set<Integer> booleanResult = new HashSet<>();
-		Operator operator = Operator.OR;
-		if (queryPlan.get(0).equalsIgnoreCase("not")) {
-			booleanResult.addAll(index.getAllDocNumbers());
-		}
-		List<String> allPhrases = new ArrayList<>();
-		for (String phrase : queryPlan) {
-			switch (phrase.toLowerCase()) {
-			case "and":
-				operator = Operator.AND;
-				break;
-			case "or":
-				operator = Operator.OR;
-				break;
-			case "not":
-				operator = Operator.NOT;
-				break;
-			default:
-				List<String> phrases = QueryProcessor.extractPhrases(phrase);
-				Set<Integer> result = index.find(phrases);
-				switch (operator) {
-				case AND:
-					booleanResult.retainAll(result);
-					allPhrases.addAll(phrases);
-					break;
-				case OR:
-					booleanResult.addAll(result);
-					allPhrases.addAll(phrases);
-					break;
-				case NOT:
-					booleanResult.removeAll(result);
-					break;
-				default:
-					break;
-				}
-				break;
-			}
-		}
+	private ArrayList<String> searchBoolean(int topK, String query) {
+		BooleanModel model = new BooleanModel(index);
+		Set<Integer> booleanResult = model.compute(query).stream().map(Result::getDocNumber).collect(Collectors.toSet());
 		Map<Integer, QLResult> result = new HashMap<>();
-		index.findRelevant(allPhrases)
+		searchRelevant(String.join(" ", model.getPhrases()))
 				.forEach(r -> result.put(r.getDocNumber(), r));
 		result.keySet().retainAll(booleanResult);
 		List<QLResult> r = result.values().stream()
-				.sorted(new QLResultComparator()).limit(topK)
+				.sorted().limit(topK)
 				.collect(Collectors.toList());
-		Map<Integer, String> snippets = generateSnippets(r, allPhrases);
+		Map<Integer, String> snippets = generateSnippets(r, model.getPhrases());
 		return generateOutput(r, snippets, query);
 	}
 
 	private ArrayList<String> searchLinks(int topK, String query) {
 		query = query.replaceAll("LinkTo:", "");
-		List<String> queryPlan = QueryProcessor.generateQueryPlan(query);
-		Set<Integer> results = new HashSet<>();
-		Operator operator = Operator.OR;
-		for (String phrase : queryPlan) {
-			switch (phrase.toLowerCase()) {
-			case "and":
-				operator = Operator.AND;
-				break;
-			case "or":
-				operator = Operator.OR;
-				break;
-			case "not":
-				operator = Operator.NOT;
-				break;
-			default:
-				List<Integer> intermediate = index.findLinks(phrase);
-				switch (operator) {
-				case AND:
-					results.retainAll(intermediate);
-					break;
-				case OR:
-					results.addAll(intermediate);
-					break;
-				case NOT:
-					results.removeAll(intermediate);
-					break;
-				default:
-					break;
-				}
-				break;
-			}
-		}
-		List<Integer> r = results.stream().limit(topK)
+		BooleanLinkModel model = new BooleanLinkModel(index);
+		Set<BooleanResult> booleanResult = model.compute(query);
+		List<Integer> result = booleanResult.stream().map(Result::getDocNumber).limit(topK)
 				.collect(Collectors.toList());
-		return generateSlimOutput(r);
+		return generateSlimOutput(result);
 	}
 
 	private ArrayList<String> searchRelevant(int topK, int prf, String query) {
+		List<QLResult> results = searchRelevant(Math.max(topK, prf), query);
 		List<String> phrases = QueryProcessor.extractPhrases(query);
-		List<QLResult> results = index.findRelevant(phrases,
-				Math.max(topK, prf));
 		Map<Integer, String> snippets = generateSnippets(results, phrases);
 		if (prf > 0) {
 			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());
 			List<String> newPhrases = new ArrayList<>();
 			newPhrases.addAll(phrases);
 			newPhrases.addAll(topWords);
-			results = index.findRelevant(newPhrases, topK);
+			results = searchRelevant(topK, String.join(" ", newPhrases));
 			snippets = generateSnippets(results, phrases);
 		}
 		return generateOutput(results, snippets, query);
 	}
 
-	private String toGoogleQuery(String query) {
-		return query.toLowerCase().replaceAll("\\snot\\s", " -")
-				.replaceAll("^not\\s", "-");
+	private List<QLResult> searchRelevant(int topK, String query) {
+		QLModel model = new QLModel(index);
+		if (topK > 0) {
+			// model.setTopK(topK * 10);
+		}
+		List<QLResult> results = model.compute(query);
+		Collections.sort(results);
+		if (topK > 0) {
+			results = results.subList(0, Math.min(topK, results.size()));
+		}
+		return results;
+	}
+
+	private List<QLResult> searchRelevant(String query) {
+		return searchRelevant(-1, query);
 	}
 }

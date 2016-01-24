@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +18,6 @@ import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
-import de.hpi.ir.yahoogle.rm.ql.QLModel;
-import de.hpi.ir.yahoogle.rm.ql.QLResult;
-import de.hpi.ir.yahoogle.rm.ql.QLResultComparator;
 
 public class Index extends Loadable {
 
@@ -86,6 +83,10 @@ public class Index extends Loadable {
 		return citations.find(Integer.parseInt(phrase.trim()));
 	}
 
+	public Set<Integer> findLinks(List<String> phrases) {
+		return phrases.stream().map(this::findLinks).flatMap(Collection::stream).collect(Collectors.toSet());
+	}
+
 	public Map<Integer, Set<Integer>> findPositions(String phrase) {
 		Tokenizer tokenizer = new Tokenizer(phrase);
 		Map<Integer, Set<Integer>> result = null;
@@ -97,23 +98,6 @@ public class Index extends Loadable {
 			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;
-	}
-
-	public List<QLResult> findRelevant(List<String> phrases) {
-		return findRelevant(phrases, -1);
-	}
-
-	public List<QLResult> findRelevant(List<String> phrases, int topK) {
-		QLModel model = new QLModel(this);
-		if (topK > 0) {
-			// model.setTopK(topK * 10);
-		}
-		List<QLResult> results = model.compute(phrases);
-		Collections.sort(results, new QLResultComparator());
-		if (topK > 0) {
-			results = results.subList(0, Math.min(topK, results.size()));
-		}
-		return results;
 	}
 
 	public Set<Integer> getAllDocNumbers() {
