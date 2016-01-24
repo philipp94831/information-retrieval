@@ -11,3 +11,4 @@ res/patents.zip
 .idea
 **dictionary.txt
 patents/ipg*.xml
+**.log
