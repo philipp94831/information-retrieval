@@ -18,9 +18,9 @@ import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
-import de.hpi.ir.yahoogle.rm.QLResultComparator;
-import de.hpi.ir.yahoogle.rm.QLModel;
-import de.hpi.ir.yahoogle.rm.QLResult;
+import de.hpi.ir.yahoogle.rm.ql.QLModel;
+import de.hpi.ir.yahoogle.rm.ql.QLResult;
+import de.hpi.ir.yahoogle.rm.ql.QLResultComparator;
 
 public class Index extends Loadable {
 

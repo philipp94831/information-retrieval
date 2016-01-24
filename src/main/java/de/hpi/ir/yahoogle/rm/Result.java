@@ -10,7 +10,7 @@ public class Result implements Comparable<Result> {
 	private final int docNumber;
 	private final Map<String, Set<Integer>> positions = new HashMap<>();
 
-	Result(int docNumber) {
+	protected Result(int docNumber) {
 		this.docNumber = docNumber;
 	}
 

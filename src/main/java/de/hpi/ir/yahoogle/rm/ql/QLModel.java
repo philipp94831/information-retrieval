@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.rm;
+package de.hpi.ir.yahoogle.rm.ql;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,8 +14,9 @@ import de.hpi.ir.yahoogle.ValueComparator;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
+import de.hpi.ir.yahoogle.rm.Model;
 
-public class QLModel extends Model {
+public class QLModel extends Model<QLResult> {
 
 	private final double lambda;
 	private final int lc;

@@ -1,5 +1,5 @@
 package de.hpi.ir.yahoogle;
 
-public enum Operator {
+enum Operator {
 	AND, NOT, OR
 }

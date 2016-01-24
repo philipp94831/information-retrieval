@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -39,9 +38,10 @@ import javax.xml.stream.XMLStreamException;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PartialIndexFactory;
 import de.hpi.ir.yahoogle.parsing.PatentParser;
+import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Result;
-import de.hpi.ir.yahoogle.rm.QLResultComparator;
-import de.hpi.ir.yahoogle.rm.QLResult;
+import de.hpi.ir.yahoogle.rm.ql.QLResult;
+import de.hpi.ir.yahoogle.rm.ql.QLResultComparator;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
@@ -52,30 +52,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineYahoogle.class.getName());
-	private static final String PHRASE_DELIMITER = "\"";
 	private static final int TOP_WORDS = 4;
-
-	private static List<String> extractPhrases(String partialQuery) {
-		List<String> phrases = new ArrayList<>();
-		StringTokenizer tokenizer = new StringTokenizer(partialQuery);
-		StringBuilder buffer = new StringBuilder();
-		boolean inPhrase = false;
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			if (token.startsWith(PHRASE_DELIMITER)) {
-				inPhrase = true;
-			}
-			if (token.endsWith(PHRASE_DELIMITER)) {
-				inPhrase = false;
-			}
-			buffer.append(" ").append(token.replaceAll(PHRASE_DELIMITER, ""));
-			if (!inPhrase) {
-				phrases.add(buffer.toString().trim());
-				buffer = new StringBuilder();
-			}
-		}
-		return phrases;
-	}
 
 	public static String getTeamDirectory() {
 		return teamDirectory;
@@ -96,48 +73,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				.sortByValueDescending(topwords);
 		List<String> topWords = new ArrayList<>(sortedWords.keySet());
 		return topWords.subList(0, Math.min(topK, topWords.size()));
-	}
-
-	private static List<String> processQuery(String query) {
-		StringTokenizer tokenizer = new StringTokenizer(query);
-		List<String> queryPlan = new ArrayList<>();
-		StringBuilder phrase = new StringBuilder();
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			boolean checkEmpty = false;
-			switch (token.toLowerCase()) {
-			case "and":
-			case "or":
-				checkEmpty = true;
-			case "not":
-				if (phrase.length() > 0) {
-					queryPlan.add(phrase.toString().trim());
-					phrase = new StringBuilder();
-				} else {
-					if (!queryPlan.isEmpty()) {
-						queryPlan.remove(queryPlan.size() - 1);
-					}
-				}
-				if (!(checkEmpty && queryPlan.isEmpty())) {
-					queryPlan.add(token.trim());
-				}
-				break;
-			default:
-				String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
-				if (!StopWordList.isStopword(cleanedToken)) {
-					phrase.append(" ").append(token);
-				}
-				break;
-			}
-		}
-		if (phrase.length() > 0) {
-			queryPlan.add(phrase.toString().trim());
-		} else {
-			if (!queryPlan.isEmpty()) {
-				queryPlan.remove(queryPlan.size() - 1);
-			}
-		}
-		return queryPlan;
 	}
 
 	private Index index;
@@ -287,7 +222,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		if (isLinkQuery(query)) {
 			return searchLinks(topK, query);
 		}
-		List<String> queryPlan = processQuery(query);
+		List<String> queryPlan = QueryProcessor.generateQueryPlan(query);
 		if (queryPlan.isEmpty()) {
 			return new ArrayList<>();
 		}
@@ -317,7 +252,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 				operator = Operator.NOT;
 				break;
 			default:
-				List<String> phrases = extractPhrases(phrase);
+				List<String> phrases = QueryProcessor.extractPhrases(phrase);
 				Set<Integer> result = index.find(phrases);
 				switch (operator) {
 				case AND:
@@ -350,7 +285,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 
 	private ArrayList<String> searchLinks(int topK, String query) {
 		query = query.replaceAll("LinkTo:", "");
-		List<String> queryPlan = processQuery(query);
+		List<String> queryPlan = QueryProcessor.generateQueryPlan(query);
 		Set<Integer> results = new HashSet<>();
 		Operator operator = Operator.OR;
 		for (String phrase : queryPlan) {
@@ -388,7 +323,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	private ArrayList<String> searchRelevant(int topK, int prf, String query) {
-		List<String> phrases = extractPhrases(query);
+		List<String> phrases = QueryProcessor.extractPhrases(query);
 		List<QLResult> results = index.findRelevant(phrases,
 				Math.max(topK, prf));
 		Map<Integer, String> snippets = generateSnippets(results, phrases);

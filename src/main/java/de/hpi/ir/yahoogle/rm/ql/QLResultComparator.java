@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.rm;
+package de.hpi.ir.yahoogle.rm.ql;
 
 import java.util.Comparator;
 

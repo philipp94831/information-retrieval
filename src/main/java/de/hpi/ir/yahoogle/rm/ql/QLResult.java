@@ -1,4 +1,6 @@
-package de.hpi.ir.yahoogle.rm;
+package de.hpi.ir.yahoogle.rm.ql;
+
+import de.hpi.ir.yahoogle.rm.Result;
 
 public class QLResult extends Result {
 
