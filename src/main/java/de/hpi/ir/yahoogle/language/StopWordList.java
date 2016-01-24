@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.language;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 
 public class StopWordList {
 

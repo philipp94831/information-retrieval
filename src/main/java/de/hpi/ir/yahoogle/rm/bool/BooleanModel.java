@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.hpi.ir.yahoogle.Operator;
 import de.hpi.ir.yahoogle.index.Index;
+import de.hpi.ir.yahoogle.query.Operator;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
 
-public class BooleanModel extends Model<BooleanResult> {
-
-	private ArrayList<String> allPhrases;
+public abstract class BooleanModel extends Model<BooleanResult> {
 
 	public BooleanModel(Index index) {
 		super(index);
@@ -27,7 +25,7 @@ public class BooleanModel extends Model<BooleanResult> {
 		if (queryPlan.get(0).equalsIgnoreCase("not")) {
 			booleanResult.addAll(index.getAllDocNumbers());
 		}
-		allPhrases = new ArrayList<>();
+		phrases = new ArrayList<>();
 		for (String phrase : queryPlan) {
 			switch (phrase.toLowerCase()) {
 			case "and":
@@ -40,16 +38,16 @@ public class BooleanModel extends Model<BooleanResult> {
 				operator = Operator.NOT;
 				break;
 			default:
-				List<String> phrases = QueryProcessor.extractPhrases(phrase);
-				Set<Integer> result = find(phrases);
+				List<String> newPhrases = QueryProcessor.extractPhrases(phrase);
+				Set<Integer> result = find(newPhrases);
 				switch (operator) {
 				case AND:
 					booleanResult.retainAll(result);
-					allPhrases.addAll(phrases);
+					phrases.addAll(newPhrases);
 					break;
 				case OR:
 					booleanResult.addAll(result);
-					allPhrases.addAll(phrases);
+					phrases.addAll(newPhrases);
 					break;
 				case NOT:
 					booleanResult.removeAll(result);
@@ -63,11 +61,5 @@ public class BooleanModel extends Model<BooleanResult> {
 		return booleanResult.stream().map(BooleanResult::new).collect(Collectors.toSet());
 	}
 
-	protected Set<Integer> find(List<String> phrases) {
-		return index.find(phrases);
-	}
-
-	public List<String> getPhrases() {
-		return allPhrases;
-	}
+	protected abstract Set<Integer> find(List<String> phrases);
 }

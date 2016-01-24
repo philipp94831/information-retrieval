@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.Tokenizer;
+import de.hpi.ir.yahoogle.language.Tokenizer;
 
 public class TokenizerTest {
 

@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.language;
 
 import java.util.Iterator;
 import java.util.StringTokenizer;

@@ -10,12 +10,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import de.hpi.ir.yahoogle.ValueComparator;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
+import de.hpi.ir.yahoogle.util.ValueComparator;
 
 public class QLModel extends Model<QLResult> {
 
@@ -98,7 +98,7 @@ public class QLModel extends Model<QLResult> {
 
 	@Override
 	public List<QLResult> compute(String query) {
-		List<String> phrases = QueryProcessor.extractPhrases(query);
+		phrases = QueryProcessor.extractPhrases(query);
 		return compute(phrases);
 	}
 }

@@ -37,15 +37,19 @@ import javax.xml.stream.XMLStreamException;
 
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PartialIndexFactory;
+import de.hpi.ir.yahoogle.language.Stemmer;
+import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Result;
 import de.hpi.ir.yahoogle.rm.bool.BooleanLinkModel;
 import de.hpi.ir.yahoogle.rm.bool.BooleanModel;
 import de.hpi.ir.yahoogle.rm.bool.BooleanResult;
+import de.hpi.ir.yahoogle.rm.bool.BooleanTokenModel;
 import de.hpi.ir.yahoogle.rm.ql.QLModel;
 import de.hpi.ir.yahoogle.rm.ql.QLResult;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
+import de.hpi.ir.yahoogle.util.ValueComparator;
 
 public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// with your search
@@ -142,11 +146,12 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return results;
 	}
 
-	private ArrayList<String> generateSlimOutput(List<Integer> r) {
+	private ArrayList<String> generateSlimOutput(Collection<? extends Result> r) {
 		ArrayList<String> results = new ArrayList<>();
-		for (Integer docNumber : r) {
-			results.add(String.format("%08d", docNumber) + "\t" + index
-					.getPatent(docNumber).getPatent().getInventionTitle());
+		for (Result result : r) {
+			results.add(String.format("%08d", result.getDocNumber()) + "\t"
+					+ index.getPatent(result.getDocNumber()).getPatent()
+							.getInventionTitle());
 		}
 		return results;
 	}
@@ -164,7 +169,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	@Override
-	void index() {
+	public void index() {
 		try {
 			PartialIndexFactory factory = new PartialIndexFactory();
 			File patents = new File(dataDirectory);
@@ -225,7 +230,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		if (QueryProcessor.isEmptyQuery(query)) {
 			return new ArrayList<>();
 		}
-		if (QueryProcessor.isBooleanQuery(query)) {
+		if (QueryProcessor.isRelevanceQuery(query)) {
 			int prf = parsePrf(parts);
 			return searchRelevant(topK, prf, query);
 		}
@@ -233,14 +238,14 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	private ArrayList<String> searchBoolean(int topK, String query) {
-		BooleanModel model = new BooleanModel(index);
-		Set<Integer> booleanResult = model.compute(query).stream().map(Result::getDocNumber).collect(Collectors.toSet());
+		BooleanModel model = new BooleanTokenModel(index);
+		Set<Integer> booleanResult = model.compute(query).stream()
+				.map(Result::getDocNumber).collect(Collectors.toSet());
 		Map<Integer, QLResult> result = new HashMap<>();
 		searchRelevant(String.join(" ", model.getPhrases()))
 				.forEach(r -> result.put(r.getDocNumber(), r));
 		result.keySet().retainAll(booleanResult);
-		List<QLResult> r = result.values().stream()
-				.sorted().limit(topK)
+		List<QLResult> r = result.values().stream().sorted().limit(topK)
 				.collect(Collectors.toList());
 		Map<Integer, String> snippets = generateSnippets(r, model.getPhrases());
 		return generateOutput(r, snippets, query);
@@ -250,7 +255,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		query = query.replaceAll("LinkTo:", "");
 		BooleanLinkModel model = new BooleanLinkModel(index);
 		Set<BooleanResult> booleanResult = model.compute(query);
-		List<Integer> result = booleanResult.stream().map(Result::getDocNumber).limit(topK)
+		List<BooleanResult> result = booleanResult.stream().limit(topK)
 				.collect(Collectors.toList());
 		return generateSlimOutput(result);
 	}

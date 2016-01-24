@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.util;
 
 import java.util.Comparator;
 import java.util.Map;

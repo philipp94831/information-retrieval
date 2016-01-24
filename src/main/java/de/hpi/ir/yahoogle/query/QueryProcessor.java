@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import de.hpi.ir.yahoogle.StopWordList;
+import de.hpi.ir.yahoogle.language.StopWordList;
 
 public class QueryProcessor {
 	
@@ -78,7 +78,7 @@ public class QueryProcessor {
 		return generateQueryPlan(query).isEmpty();
 	}
 
-	public static boolean isBooleanQuery(String query) {
+	public static boolean isRelevanceQuery(String query) {
 		return generateQueryPlan(query).size() == 1;
 	}
 

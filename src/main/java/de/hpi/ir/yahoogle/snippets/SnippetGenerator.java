@@ -5,8 +5,8 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.PatentResume;
+import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 import de.hpi.ir.yahoogle.rm.Result;
 

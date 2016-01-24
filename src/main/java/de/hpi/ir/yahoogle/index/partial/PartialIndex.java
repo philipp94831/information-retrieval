@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.Stemmer;
-import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
+import de.hpi.ir.yahoogle.language.Stemmer;
+import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.parsing.Patent;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 

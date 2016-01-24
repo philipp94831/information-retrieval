@@ -15,9 +15,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.Stemmer;
-import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
+import de.hpi.ir.yahoogle.language.Stemmer;
+import de.hpi.ir.yahoogle.language.Tokenizer;
 
 public class Index extends Loadable {
 

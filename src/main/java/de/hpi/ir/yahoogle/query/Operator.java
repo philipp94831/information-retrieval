@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir.yahoogle.query;
 
 public enum Operator {
 	AND, NOT, OR
