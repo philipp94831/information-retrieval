@@ -17,7 +17,8 @@ import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 
-public class PatentResume implements PatentParserCallback, Comparable<PatentResume> {
+public class PatentResume
+		implements PatentParserCallback, Comparable<PatentResume> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(PatentResume.class.getName());
@@ -47,11 +48,6 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 		this.fileName = patent.getFileName();
 		this.start = patent.getStart();
 		this.end = patent.getEnd();
-	}
-
-	@Override
-	public void receivePatent(Patent patent) {
-		this.patent = patent;
 	}
 
 	@Override
@@ -109,6 +105,11 @@ public class PatentResume implements PatentParserCallback, Comparable<PatentResu
 
 	public int getWordCount() {
 		return wordCount;
+	}
+
+	@Override
+	public void receivePatent(Patent patent) {
+		this.patent = patent;
 	}
 
 	public void setPatentFolder(String patentFolder) {

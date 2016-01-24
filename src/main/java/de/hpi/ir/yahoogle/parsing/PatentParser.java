@@ -14,12 +14,12 @@ public class PatentParser {
 
 	private StringBuilder buf = new StringBuilder();
 	private final PatentParserCallback callback;
+	private Citation citation;
 	private Patent currentPatent;
 	private String fileName;
 	private boolean inText = false;
 	private Stack<String> parents;
 	private XMLStreamReader2 xmlStreamReader;
-	private Citation citation;
 
 	public PatentParser(PatentParserCallback smallIndex) {
 		this.callback = smallIndex;
@@ -56,7 +56,7 @@ public class PatentParser {
 			inText = false;
 			currentPatent.addClaim(buf.toString());
 		}
-		if(isInCitation(qName) && citation.isValid()) {
+		if (isInCitation(qName) && citation.isValid()) {
 			currentPatent.addCitation(citation.getDocNumber());
 		}
 		if (isInCitationCountry(qName)) {
@@ -66,7 +66,8 @@ public class PatentParser {
 		if (isInCitationDocNumber(qName)) {
 			inText = false;
 			String docNumber = buf.toString();
-			if(docNumber.matches("\\d+") && Long.parseLong(docNumber) <= Integer.MAX_VALUE) {
+			if (docNumber.matches("\\d+")
+					&& Long.parseLong(docNumber) <= Integer.MAX_VALUE) {
 				citation.setDocNumber(Integer.parseInt(docNumber));
 			}
 		}
@@ -85,31 +86,32 @@ public class PatentParser {
 		return qName.equals("p") && parents.peek().equals("abstract");
 	}
 
+	private boolean isInCitation(String qName) {
+		return qName.equals("document-id") && parents.peek().equals("patcit");
+	}
+
+	private boolean isInCitationCountry(String qName) {
+		return qName.equals("country") && parents.peek().equals("document-id")
+				&& parents.elementAt(parents.size() - 2).equals("patcit");
+	}
+
+	private boolean isInCitationDate(String qName) {
+		return qName.equals("date") && parents.peek().equals("document-id")
+				&& parents.elementAt(parents.size() - 2).equals("patcit");
+	}
+
+	private boolean isInCitationDocNumber(String qName) {
+		return qName.equals("doc-number")
+				&& parents.peek().equals("document-id")
+				&& parents.elementAt(parents.size() - 2).equals("patcit");
+	}
+
 	private boolean isInClaim(String qName) {
 		return qName.equals("claim") && parents.peek().equals("claims");
 	}
 
 	private boolean isInDescription(String qName) {
 		return qName.equals("p") && parents.peek().equals("description");
-	}
-
-	private boolean isInCitation(String qName) {
-		return qName.equals("document-id") && parents.peek().equals("patcit");
-	}
-
-	private boolean isInCitationCountry(String qName) {
-		return qName.equals("country") && parents.peek().equals("document-id") && parents
-				.elementAt(parents.size() - 2).equals("patcit");
-	}
-
-	private boolean isInCitationDocNumber(String qName) {
-		return qName.equals("doc-number") && parents.peek().equals("document-id") && parents
-				.elementAt(parents.size() - 2).equals("patcit");
-	}
-
-	private boolean isInCitationDate(String qName) {
-		return qName.equals("date") && parents.peek().equals("document-id") && parents
-				.elementAt(parents.size() - 2).equals("patcit");
 	}
 
 	private boolean isInDocNumber(String qName) {
@@ -176,12 +178,13 @@ public class PatentParser {
 					xmlStreamReader.getLocationInfo().getStartingByteOffset());
 		}
 		if (isInAbstract(qName) || isInDescription(qName)
-				|| isInDocNumber(qName) || isInTitle(qName)
-				|| isInClaim(qName) || isInCitationDate(qName) || isInCitationCountry(qName) || isInCitationDocNumber(qName)) {
+				|| isInDocNumber(qName) || isInTitle(qName) || isInClaim(qName)
+				|| isInCitationDate(qName) || isInCitationCountry(qName)
+				|| isInCitationDocNumber(qName)) {
 			inText = true;
 			buf = new StringBuilder();
 		}
-		if(isInCitation(qName)) {
+		if (isInCitation(qName)) {
 			citation = new Citation();
 		}
 		parents.push(qName);

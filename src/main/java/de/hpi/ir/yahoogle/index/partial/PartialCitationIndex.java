@@ -12,7 +12,8 @@ import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class PartialCitationIndex extends Loadable implements Iterable<BinaryCitationList> {
+public class PartialCitationIndex extends Loadable
+		implements Iterable<BinaryCitationList> {
 
 	private static final String BASE_NAME = ".citations";
 	private Map<Integer, CitationList> citations;

@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Patent {
 
+	private final List<Integer> citations = new ArrayList<>();
 	private final List<String> claims = new ArrayList<>();
 	private final List<String> descriptions = new ArrayList<>();
-	private final List<Integer> citations = new ArrayList<>();
 	private int docNumber;
 	private long end;
 	private final String fileName;
@@ -19,16 +19,20 @@ public class Patent {
 		this.fileName = fileName;
 	}
 
-	public void addClaim(String string) {
-		claims.add(string);
-	}
-
 	public void addCitation(int citation) {
 		citations.add(citation);
 	}
 
+	public void addClaim(String string) {
+		claims.add(string);
+	}
+
 	public void addDescription(String string) {
 		descriptions.add(string);
+	}
+
+	public List<Integer> getCitations() {
+		return citations;
 	}
 
 	public List<String> getClaims() {
@@ -81,9 +85,5 @@ public class Patent {
 
 	public void setStart(long start) {
 		this.start = start;
-	}
-
-	public List<Integer> getCitations() {
-		return citations;
 	}
 }

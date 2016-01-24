@@ -7,10 +7,10 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 
 	private int distinctMatches = 0;
 	private int leftMostPosition = SnippetGenerator.MAX_WINDOW_LENGTH;
+	private final List<Integer> matches = new ArrayList<>();
 	private int numberOfMatches = 0;
 	private final int pos;
 	private int rightMostPosition = 0;
-	private List<Integer> matches = new ArrayList<>();
 
 	public SnippetWindow(int pos) {
 		this.pos = pos;
@@ -18,10 +18,6 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 
 	public void addDistinctMatch() {
 		distinctMatches++;
-	}
-	
-	public List<Integer> getMatches() {
-		return matches;
 	}
 
 	public void addMatches(List<Integer> matches) {
@@ -42,11 +38,17 @@ public class SnippetWindow implements Comparable<SnippetWindow> {
 	public int compareTo(SnippetWindow o) {
 		if ((distinctMatches < o.distinctMatches)
 				|| (distinctMatches == o.distinctMatches)
-						&& ((numberOfMatches < o.numberOfMatches) || (numberOfMatches == o.numberOfMatches)
-								&& (getMiddleAlign() > o.getMiddleAlign()))) {
+						&& ((numberOfMatches < o.numberOfMatches)
+								|| (numberOfMatches == o.numberOfMatches)
+										&& (getMiddleAlign() > o
+												.getMiddleAlign()))) {
 			return 1;
 		}
 		return -1;
+	}
+
+	public List<Integer> getMatches() {
+		return matches;
 	}
 
 	private int getMiddleAlign() {

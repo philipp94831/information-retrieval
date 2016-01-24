@@ -5,14 +5,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class Result implements Comparable<Result> {
+public class Result implements Comparable<Result> {
 
 	private final int docNumber;
 	private final Map<String, Set<Integer>> positions = new HashMap<>();
 
-	protected double score;
-
-	public Result(int docNumber) {
+	Result(int docNumber) {
 		this.docNumber = docNumber;
 	}
 
@@ -39,14 +37,6 @@ public abstract class Result implements Comparable<Result> {
 					v1.addAll(v2);
 					return v1;
 				}));
-		//FIXME actually, this is not correct
-		score += r2.score;
 		return this;
 	}
-
-	public void setScore(double score) {
-		this.score = score;
-	}
-	
-	public abstract int compareScore(Result o2);
 }

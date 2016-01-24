@@ -148,6 +148,9 @@ public class TokenDictionary extends Loadable {
 		file.writeInt(0);
 	}
 
+	public void warmUp() {
+	}
+
 	@Override
 	public void write() throws IOException {
 		file.close();
@@ -160,10 +163,5 @@ public class TokenDictionary extends Loadable {
 		out.writeInt(bytes.length);
 		out.write(bytes);
 		file.write(out.toByteArray());
-	}
-
-	public void warmUp() {
-		// TODO Auto-generated method stub
-		
 	}
 }

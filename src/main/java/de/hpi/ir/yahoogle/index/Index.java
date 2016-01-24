@@ -18,10 +18,9 @@ import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.Stemmer;
 import de.hpi.ir.yahoogle.Tokenizer;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
-import de.hpi.ir.yahoogle.rm.Model;
-import de.hpi.ir.yahoogle.rm.ResultComparator;
+import de.hpi.ir.yahoogle.rm.QLResultComparator;
 import de.hpi.ir.yahoogle.rm.QLModel;
-import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.rm.QLResult;
 
 public class Index extends Loadable {
 
@@ -30,9 +29,9 @@ public class Index extends Loadable {
 	private static final Logger LOGGER = Logger
 			.getLogger(Index.class.getName());
 	private static final boolean PRINT_DICTIONARY = false;
+	private CitationIndex citations;
 	private TokenDictionary dictionary;
 	private PatentIndex patents;
-	private CitationIndex citations;
 	private final String patentsFolder;
 
 	public Index(String patentsFolder) {
@@ -47,6 +46,22 @@ public class Index extends Loadable {
 		dictionary.create();
 		citations = new CitationIndex();
 		citations.create();
+	}
+
+	private void filterEmptyPositionLists(Map<Integer, Set<Integer>> result) {
+		result.keySet()
+				.removeAll(result.entrySet().stream()
+						.filter(e -> e.getValue().size() == 0)
+						.map(Entry::getKey).collect(Collectors.toList()));
+	}
+
+	public Set<Integer> find(List<String> phrases) {
+		return phrases.stream().map(this::find).flatMap(Set::stream)
+				.collect(Collectors.toSet());
+	}
+
+	private Set<Integer> find(String phrase) {
+		return findPositions(phrase).keySet();
 	}
 
 	private Map<Integer, Set<Integer>> findAll(String token) {
@@ -67,24 +82,11 @@ public class Index extends Loadable {
 		}
 	}
 
-	public List<Result> find(List<String> phrases) {
-		return find(phrases, -1);
+	public List<Integer> findLinks(String phrase) {
+		return citations.find(Integer.parseInt(phrase.trim()));
 	}
 
-	public List<Result> find(List<String> phrases, int topK) {
-		Model model = new QLModel(this);
-		if(topK > 0) {
-//			model.setTopK(topK * 10);
-		}
-		List<Result> results = model.compute(phrases);
-		Collections.sort(results, new ResultComparator());
-		if(topK > 0) {
-			results = results.subList(0, Math.min(topK, results.size()));
-		}
-		return results;
-	}
-
-	public Map<Integer, Set<Integer>> findWithPositions(String phrase) {
+	public Map<Integer, Set<Integer>> findPositions(String phrase) {
 		Tokenizer tokenizer = new Tokenizer(phrase);
 		Map<Integer, Set<Integer>> result = null;
 		if (tokenizer.hasNext()) {
@@ -95,6 +97,23 @@ public class Index extends Loadable {
 			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;
+	}
+
+	public List<QLResult> findRelevant(List<String> phrases) {
+		return findRelevant(phrases, -1);
+	}
+
+	public List<QLResult> findRelevant(List<String> phrases, int topK) {
+		QLModel model = new QLModel(this);
+		if (topK > 0) {
+			// model.setTopK(topK * 10);
+		}
+		List<QLResult> results = model.compute(phrases);
+		Collections.sort(results, new QLResultComparator());
+		if (topK > 0) {
+			results = results.subList(0, Math.min(topK, results.size()));
+		}
+		return results;
 	}
 
 	public Set<Integer> getAllDocNumbers() {
@@ -131,13 +150,6 @@ public class Index extends Loadable {
 			}
 		}
 		filterEmptyPositionLists(result);
-	}
-
-	private void filterEmptyPositionLists(Map<Integer, Set<Integer>> result) {
-		result.keySet()
-				.removeAll(result.entrySet().stream()
-						.filter(e -> e.getValue().size() == 0)
-						.map(Entry::getKey).collect(Collectors.toList()));
 	}
 
 	public void mergeIndices(List<String> names) throws IOException {
@@ -185,9 +197,5 @@ public class Index extends Loadable {
 		patents.write();
 		dictionary.write();
 		citations.write();
-	}
-
-	public List<Integer> findLinks(String phrase) {
-		return citations.find(Integer.parseInt(phrase.trim()));
 	}
 }

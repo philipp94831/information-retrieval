@@ -34,9 +34,10 @@ public class SnippetGenerator {
 				window.checkLeftMost(left);
 				window.checkRightMost(right);
 			}
-			for(int j = 0; j < tokensInPhrase; j++) {
+			for (int j = 0; j < tokensInPhrase; j++) {
 				int _j = j;
-				window.addMatches(matches.stream().map(k -> k + _j).collect(Collectors.toList()));
+				window.addMatches(matches.stream().map(k -> k + _j)
+						.collect(Collectors.toList()));
 			}
 		}
 		return window;
@@ -66,15 +67,15 @@ public class SnippetGenerator {
 			int position = start + tokenizer.getPosition();
 			if (position >= bestWindow.getPosition()) {
 				String token = tokenizer.next();
-				if(tokenizer.isRealToken() && bestWindow.getMatches().contains(position)) {
-					//token = "{" + token + "}";
+				if (tokenizer.isRealToken()
+						&& bestWindow.getMatches().contains(position)) {
+					// token = "{" + token + "}";
 				}
 				snippet.append(token);
 			} else {
 				tokenizer.next();
 			}
 		}
-		String finalSnippet = snippet.toString().trim();
-		return finalSnippet;
+		return snippet.toString().trim();
 	}
 }

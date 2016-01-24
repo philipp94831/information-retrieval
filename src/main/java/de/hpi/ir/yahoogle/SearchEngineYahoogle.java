@@ -40,7 +40,7 @@ import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PartialIndexFactory;
 import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.rm.Result;
-import de.hpi.ir.yahoogle.rm.ResultComparator;
+import de.hpi.ir.yahoogle.rm.QLResultComparator;
 import de.hpi.ir.yahoogle.rm.QLResult;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 
@@ -152,6 +152,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		index();
 	}
 
+	private double computeGain(int goldRank) {
+		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
+	}
+
 	@Override
 	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
 		double originalDcg = 0.0;
@@ -175,13 +179,11 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return originalDcg / goldDcg;
 	}
 
-	private double computeGain(int goldRank) {
-		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
-	}
-
 	private ArrayList<String> generateOutput(Collection<? extends Result> results2, Map<Integer, String> snippets, String query) {
 		ArrayList<String> results = new ArrayList<>();
-		ArrayList<String> goldRanking = new WebFile().getGoogleRanking(query);
+		String googleQuery = toGoogleQuery(query);
+		ArrayList<String> goldRanking = new WebFile()
+				.getGoogleRanking(googleQuery);
 		ArrayList<String> originalRanking = new ArrayList<>(
 				results2.stream().map(r -> Integer.toString(r.getDocNumber()))
 						.collect(Collectors.toList()));
@@ -193,6 +195,15 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 					+ index.getPatent(docNumber).getPatent().getInventionTitle()
 					+ "\t" + ndcg + "\n" + snippets.get(docNumber));
 			i++;
+		}
+		return results;
+	}
+
+	private ArrayList<String> generateSlimOutput(List<Integer> r) {
+		ArrayList<String> results = new ArrayList<>();
+		for (Integer docNumber : r) {
+			results.add(String.format("%08d", docNumber) + "\t" + index
+					.getPatent(docNumber).getPatent().getInventionTitle());
 		}
 		return results;
 	}
@@ -216,7 +227,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			File patents = new File(dataDirectory);
 			factory.start();
 			PatentParser handler = new PatentParser(factory);
-			for (File patentFile : patents.listFiles()) {
+			File[] files = patents.listFiles();
+			for (File patentFile : files) {
 				LOGGER.info(patentFile.getName());
 				FileInputStream stream = new FileInputStream(patentFile);
 				handler.setFileName(patentFile.getName());
@@ -232,6 +244,14 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		} catch (XMLStreamException e) {
 			LOGGER.severe("Error parsing XML");
 		}
+	}
+
+	private boolean isBooleanQuery(List<String> queryPlan) {
+		return queryPlan.size() == 1;
+	}
+
+	private boolean isLinkQuery(String query) {
+		return query.startsWith("LinkTo:");
 	}
 
 	@Override
@@ -252,28 +272,83 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return false;
 	}
 
+	private int parsePrf(String[] parts) {
+		int prf = 0;
+		if (parts.length > 1) {
+			prf = Integer.parseInt(parts[1].trim());
+		}
+		return prf;
+	}
+
 	@Override
 	ArrayList<String> search(String query, int topK) {
 		String[] parts = query.split("#");
 		query = parts[0];
-		if (query.startsWith("LinkTo:")) {
-			return searchLinks(query, topK);
+		if (isLinkQuery(query)) {
+			return searchLinks(topK, query);
 		}
 		List<String> queryPlan = processQuery(query);
 		if (queryPlan.isEmpty()) {
 			return new ArrayList<>();
 		}
-		if (queryPlan.size() == 1) {
-			prf = 0;
-			if (parts.length > 1) {
-				prf = Integer.parseInt(parts[1].trim());
-			}
-			return searchRelevant(topK, prf, queryPlan, query);
+		if (isBooleanQuery(queryPlan)) {
+			int prf = parsePrf(parts);
+			return searchRelevant(topK, prf, query);
 		}
 		return searchBoolean(topK, queryPlan, query);
 	}
 
-	private ArrayList<String> searchLinks(String query, int topK) {
+	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan, String query) {
+		Set<Integer> booleanResult = new HashSet<>();
+		Operator operator = Operator.OR;
+		if (queryPlan.get(0).equalsIgnoreCase("not")) {
+			booleanResult.addAll(index.getAllDocNumbers());
+		}
+		List<String> allPhrases = new ArrayList<>();
+		for (String phrase : queryPlan) {
+			switch (phrase.toLowerCase()) {
+			case "and":
+				operator = Operator.AND;
+				break;
+			case "or":
+				operator = Operator.OR;
+				break;
+			case "not":
+				operator = Operator.NOT;
+				break;
+			default:
+				List<String> phrases = extractPhrases(phrase);
+				Set<Integer> result = index.find(phrases);
+				switch (operator) {
+				case AND:
+					booleanResult.retainAll(result);
+					allPhrases.addAll(phrases);
+					break;
+				case OR:
+					booleanResult.addAll(result);
+					allPhrases.addAll(phrases);
+					break;
+				case NOT:
+					booleanResult.removeAll(result);
+					break;
+				default:
+					break;
+				}
+				break;
+			}
+		}
+		Map<Integer, QLResult> result = new HashMap<>();
+		index.findRelevant(allPhrases)
+				.forEach(r -> result.put(r.getDocNumber(), r));
+		result.keySet().retainAll(booleanResult);
+		List<QLResult> r = result.values().stream()
+				.sorted(new QLResultComparator()).limit(topK)
+				.collect(Collectors.toList());
+		Map<Integer, String> snippets = generateSnippets(r, allPhrases);
+		return generateOutput(r, snippets, query);
+	}
+
+	private ArrayList<String> searchLinks(int topK, String query) {
 		query = query.replaceAll("LinkTo:", "");
 		List<String> queryPlan = processQuery(query);
 		Set<Integer> results = new HashSet<>();
@@ -309,79 +384,27 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		}
 		List<Integer> r = results.stream().limit(topK)
 				.collect(Collectors.toList());
-		return generateSmallOutput(r);
+		return generateSlimOutput(r);
 	}
 
-	private ArrayList<String> generateSmallOutput(List<Integer> r) {
-		ArrayList<String> results = new ArrayList<>();
-		for (Integer docNumber : r) {
-			results.add(String.format("%08d", docNumber) + "\t" + index
-					.getPatent(docNumber).getPatent().getInventionTitle());
-		}
-		return results;
-	}
-
-	private ArrayList<String> searchBoolean(int topK, List<String> queryPlan, String query) {
-		Map<Integer, Result> docNumbers = new HashMap<>();
-		Operator operator = Operator.OR;
-		if (queryPlan.get(0).equalsIgnoreCase("not")) {
-			docNumbers.putAll(index.getAllDocNumbers().stream()
-					.collect(Collectors.toMap(d -> d, QLResult::new)));
-		}
-		List<String> allPhrases = new ArrayList<>();
-		for (String phrase : queryPlan) {
-			switch (phrase.toLowerCase()) {
-			case "and":
-				operator = Operator.AND;
-				break;
-			case "or":
-				operator = Operator.OR;
-				break;
-			case "not":
-				operator = Operator.NOT;
-				break;
-			default:
-				List<String> phrases = extractPhrases(phrase);
-				Map<Integer, Result> result = new HashMap<>();
-				index.find(phrases).forEach(r -> result.merge(r.getDocNumber(),
-						r, (v1, v2) -> v1.merge(v2)));
-				switch (operator) {
-				case AND:
-					docNumbers.keySet().retainAll(result.keySet());
-					result.keySet().retainAll(docNumbers.keySet());
-				case OR:
-					result.values()
-							.forEach(r -> docNumbers.merge(r.getDocNumber(), r,
-									(r1, r2) -> r1.merge(r2)));
-					allPhrases.addAll(phrases);
-					break;
-				case NOT:
-					docNumbers.keySet().removeAll(result.keySet());
-					break;
-				default:
-					break;
-				}
-				break;
-			}
-		}
-		List<Result> r = docNumbers.values().stream().sorted(new ResultComparator()).limit(topK)
-				.collect(Collectors.toList());
-		Map<Integer, String> snippets = generateSnippets(r, allPhrases);
-		return generateOutput(r, snippets, query);
-	}
-
-	private ArrayList<String> searchRelevant(int topK, int prf, List<String> queryPlan, String query) {
-		List<String> phrases = extractPhrases(queryPlan.get(0));
-		List<Result> results = index.find(phrases, Math.max(topK, prf));
+	private ArrayList<String> searchRelevant(int topK, int prf, String query) {
+		List<String> phrases = extractPhrases(query);
+		List<QLResult> results = index.findRelevant(phrases,
+				Math.max(topK, prf));
 		Map<Integer, String> snippets = generateSnippets(results, phrases);
 		if (prf > 0) {
 			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());
 			List<String> newPhrases = new ArrayList<>();
 			newPhrases.addAll(phrases);
 			newPhrases.addAll(topWords);
-			results = index.find(newPhrases, topK);
+			results = index.findRelevant(newPhrases, topK);
 			snippets = generateSnippets(results, phrases);
 		}
 		return generateOutput(results, snippets, query);
+	}
+
+	private String toGoogleQuery(String query) {
+		return query.toLowerCase().replaceAll("\\snot\\s", " -")
+				.replaceAll("^not\\s", "-");
 	}
 }

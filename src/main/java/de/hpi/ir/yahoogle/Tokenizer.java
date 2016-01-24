@@ -8,11 +8,11 @@ public class Tokenizer implements Iterator<String> {
 	private static final String DELIM = "- \t\n\r\f";
 	private String nextToken;
 	private int pos = 0;
+	private boolean realToken;
 	private final boolean returnDelims;
 	private final boolean skipStopWords;
 	private final String string;
 	private StringTokenizer tokenizer;
-	private boolean realToken;
 
 	public Tokenizer(String string) {
 		this(string, true, false);
@@ -68,6 +68,10 @@ public class Tokenizer implements Iterator<String> {
 		}
 	}
 
+	public boolean isRealToken() {
+		return realToken;
+	}
+
 	@Override
 	public String next() {
 		String token;
@@ -83,9 +87,5 @@ public class Tokenizer implements Iterator<String> {
 			pos++;
 		}
 		return token;
-	}
-	
-	public boolean isRealToken() {
-		return realToken;
 	}
 }

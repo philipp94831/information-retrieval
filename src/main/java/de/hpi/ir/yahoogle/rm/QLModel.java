@@ -37,25 +37,27 @@ public class QLModel extends Model {
 	}
 
 	@Override
-	public List<Result> compute(List<String> query) {
-		List<Result> results = new ArrayList<>();
+	public List<QLResult> compute(List<String> query) {
+		List<QLResult> results = new ArrayList<>();
 		int[] cis = new int[query.size()];
 		List<Map<Integer, Set<Integer>>> found = new ArrayList<>();
 		for (int i = 0; i < query.size(); i++) {
 			String phrase = query.get(i);
-			Map<Integer, Set<Integer>> result = index.findWithPositions(phrase);
+			Map<Integer, Set<Integer>> result = index.findPositions(phrase);
 			found.add(result);
 			cis[i] = result.values().stream().mapToInt(Set::size).sum();
 		}
 		Map<Integer, Integer> totalHits = found.stream().map(Map::entrySet)
 				.flatMap(Collection::stream)
-				.collect(Collectors.groupingBy(e -> e.getKey(), Collectors
+				.collect(Collectors.groupingBy(Entry::getKey, Collectors
 						.reducing(0, e -> e.getValue().size(), Integer::sum)));
-		if(totalHits.isEmpty()) {
+		if (totalHits.isEmpty()) {
 			return results;
 		}
-		TreeMap<Integer, Integer> sorted = ValueComparator.sortByValueDescending(totalHits);
-		int minHits = new ArrayList<>(sorted.entrySet()).get(Math.min(topK, sorted.size() - 1)).getValue();
+		TreeMap<Integer, Integer> sorted = ValueComparator
+				.sortByValueDescending(totalHits);
+		int minHits = new ArrayList<>(sorted.entrySet())
+				.get(Math.min(topK, sorted.size() - 1)).getValue();
 		Set<Integer> all = totalHits.entrySet().stream()
 				.filter(e -> e.getValue() >= minHits).map(Entry::getKey)
 				.collect(Collectors.toSet());

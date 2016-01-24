@@ -17,12 +17,11 @@ public class BinaryCitationList implements Comparable<BinaryCitationList> {
 		this.bytes = b;
 	}
 
-	public byte[] getBytes() {
-		return bytes;
-	}
-
-	public int getDocNumber() {
-		return docNumber;
+	public void append(byte[] newBytes) throws IOException {
+		ByteWriter out = new ByteWriter();
+		out.write(bytes);
+		out.write(newBytes);
+		bytes = out.toByteArray();
 	}
 
 	@Override
@@ -31,17 +30,18 @@ public class BinaryCitationList implements Comparable<BinaryCitationList> {
 		return comp == 0 ? 1 : comp;
 	}
 
-	public void append(byte[] newBytes) throws IOException {
-		ByteWriter out = new ByteWriter();
-		out.write(bytes);
-		out.write(newBytes);
-		bytes = out.toByteArray();
+	public byte[] getBytes() {
+		return bytes;
+	}
+
+	public int getDocNumber() {
+		return docNumber;
 	}
 
 	public List<Integer> getDocNumbers() {
 		ByteReader in = new ByteReader(bytes);
 		List<Integer> result = new ArrayList<>();
-		while(in.hasLeft()) {
+		while (in.hasLeft()) {
 			result.add(in.readInt());
 		}
 		return result;

@@ -45,11 +45,13 @@ public class CitationIndex extends Loadable {
 				int size = file.readInt();
 				byte[] b = new byte[size];
 				file.read(b);
-				BinaryCitationList postingList = new BinaryCitationList(docNumber, b);
+				BinaryCitationList postingList = new BinaryCitationList(
+						docNumber, b);
 				return postingList.getDocNumbers();
 			}
 		} catch (IOException e) {
-			LOGGER.severe("Error reading citation list for docNumber " + docNumber);
+			LOGGER.severe(
+					"Error reading citation list for docNumber " + docNumber);
 		}
 		return new ArrayList<>();
 	}
@@ -105,6 +107,9 @@ public class CitationIndex extends Loadable {
 		file.seek(currentOffset);
 	}
 
+	public void warmUp() {
+	}
+
 	@Override
 	public void write() throws IOException {
 		file.close();
@@ -117,10 +122,5 @@ public class CitationIndex extends Loadable {
 		out.writeInt(bytes.length);
 		out.write(bytes);
 		file.write(out.toByteArray());
-	}
-
-	public void warmUp() {
-		// TODO Auto-generated method stub
-		
 	}
 }

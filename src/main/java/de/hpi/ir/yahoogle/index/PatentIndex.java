@@ -156,26 +156,26 @@ public class PatentIndex extends Loadable {
 		return list;
 	}
 
-	@Override
-	public void write() throws IOException {
-		file.seek(TOTAL_WORD_COUNT_OFFSET);
-		file.writeInt(totalWordCount);
-		file.close();
-		offsets.write();
-	}
-
 	public void warmUp() {
 		try {
 			Set<Integer> docNumbers = offsets.keys();
 			Integer[] a = new Integer[docNumbers.size()];
 			a = docNumbers.toArray(a);
 			Random rand = new Random();
-			for(int i = 0; i < WARM_UP_ITERATIONS; i++) {
+			for (int i = 0; i < WARM_UP_ITERATIONS; i++) {
 				get(a[rand.nextInt(a.length)]);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void write() throws IOException {
+		file.seek(TOTAL_WORD_COUNT_OFFSET);
+		file.writeInt(totalWordCount);
+		file.close();
+		offsets.write();
 	}
 }

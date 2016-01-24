@@ -14,28 +14,42 @@ import java.util.ArrayList;
  *          you make here will be ignored for the final test!
  */
 public class SearchEngineTest {
-	
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_2 = { "selection", "device", "justify", "write" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_3 = { "file-system", "included", "storing" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_4 = { "comprises AND consists", "methods NOT invention", "data OR method", "prov* NOT free", "inc* OR memory", "\"the presented invention\"", "\"mobile devices\"" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_5 = { "processing", "computers", "\"mobile devices\"", "data" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_6 = { "digital", "rootkits", "network access" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_7 = { "access control", "computers", "data processing", "web servers", "vulnerability information", "computer-readable media" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_8 = { "access", "control", "image data", "program", "vulnerability", "\"mobile device\"" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_9 = { "add-on module", "digital signature", "data processing", "\"a scanning\"" };
-	private static final String[] EXECERSICE_10 = { "\"graph editor\"", "\"social trend\"", "fossil hydrocarbons", "physiological AND saline", "tires NOT pressure" };
-	@SuppressWarnings("unused")
-	private static final String[] EXECERSICE_12 = { "LinkTo:07920906", "LinkTo:07904949", "LinkTo:08078787", "LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142" };
 
 	private static final boolean CREATE_INDEX = false;
+	private static final String[] EXECERSICE_10 = { "\"graph editor\"",
+			"\"social trend\"", "fossil hydrocarbons",
+			"physiological AND saline", "tires NOT pressure" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_12 = { "LinkTo:07920906",
+			"LinkTo:07904949", "LinkTo:08078787",
+			"LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_2 = { "selection", "device",
+			"justify", "write" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_3 = { "file-system", "included",
+			"storing" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_4 = { "comprises AND consists",
+			"methods NOT invention", "data OR method", "prov* NOT free",
+			"inc* OR memory", "\"the presented invention\"",
+			"\"mobile devices\"" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_5 = { "processing", "computers",
+			"\"mobile devices\"", "data" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_6 = { "digital", "rootkits",
+			"network access" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_7 = { "access control",
+			"computers", "data processing", "web servers",
+			"vulnerability information", "computer-readable media" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_8 = { "access", "control",
+			"image data", "program", "vulnerability", "\"mobile device\"" };
+	@SuppressWarnings("unused")
+	private static final String[] EXECERSICE_9 = { "add-on module",
+			"digital signature", "data processing", "\"a scanning\"" };
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 
 	private static void initialize(boolean create) {

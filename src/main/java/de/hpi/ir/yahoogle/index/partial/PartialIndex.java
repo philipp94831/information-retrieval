@@ -18,10 +18,10 @@ public class PartialIndex extends Loadable {
 	private static final Logger LOGGER = Logger
 			.getLogger(PartialIndex.class.getName());
 	private static final boolean SKIP_STOPWORDS = true;
+	private PartialCitationIndex citations;
 	private PartialTokenDictionary dictionary;
 	private final String name;
 	private PartialPatentIndex patents;
-	private PartialCitationIndex citations;
 	private PatentResume resume;
 	private int startOffset;
 	private int wordCount;
@@ -41,12 +41,6 @@ public class PartialIndex extends Loadable {
 		indexCitations(patent.getCitations());
 		resume.setWordCount(wordCount);
 		patents.add(resume);
-	}
-
-	private void indexCitations(List<Integer> cited) {
-		for(Integer citation : cited) {
-			citations.add(citation, resume.getDocNumber());
-		}
 	}
 
 	@Override
@@ -75,16 +69,16 @@ public class PartialIndex extends Loadable {
 				+ FILE_EXTENSION;
 	}
 
+	public PartialCitationIndex getCitations() {
+		return citations;
+	}
+
 	public PartialTokenDictionary getDictionary() {
 		return dictionary;
 	}
 
 	public PartialPatentIndex getPatents() {
 		return patents;
-	}
-
-	public PartialCitationIndex getCitations() {
-		return citations;
 	}
 
 	private void indexAbstract(String patentAbstract) {
@@ -98,6 +92,12 @@ public class PartialIndex extends Loadable {
 		}
 		wordCount += tokenizer.getPosition();
 		startOffset += tokenizer.getPosition() + 1;
+	}
+
+	private void indexCitations(List<Integer> cited) {
+		for (Integer citation : cited) {
+			citations.add(citation, resume.getDocNumber());
+		}
 	}
 
 	private void indexClaims(List<String> claims) {

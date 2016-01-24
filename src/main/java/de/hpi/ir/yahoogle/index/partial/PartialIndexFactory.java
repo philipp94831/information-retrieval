@@ -12,13 +12,14 @@ public class PartialIndexFactory implements PatentParserCallback {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(PartialIndexFactory.class.getName());
-	private int indexNumber;
-	private final List<String> names = new ArrayList<>();
-	private static final long MAX_PATENTS = Runtime.getRuntime().maxMemory() / (530 * 1000);
-	private int patentsAdded;
+	private static final long MAX_PATENTS = Runtime.getRuntime().maxMemory()
+			/ (530 * 1000);
 	private PartialIndex currentIndex;
+	private int indexNumber;
 	private final String name;
-	
+	private final List<String> names = new ArrayList<>();
+	private int patentsAdded;
+
 	public PartialIndexFactory() {
 		this("default");
 	}
@@ -27,11 +28,7 @@ public class PartialIndexFactory implements PatentParserCallback {
 		this.name = name;
 	}
 
-	public List<String> getNames() {
-		return names;
-	}
-
-	public PartialIndex createPartialIndex() {
+	private PartialIndex createPartialIndex() {
 		String indexName = name + "." + indexNumber;
 		PartialIndex index = new PartialIndex(indexName);
 		names.add(indexName);
@@ -39,10 +36,18 @@ public class PartialIndexFactory implements PatentParserCallback {
 		return index;
 	}
 
+	public void finish() throws IOException {
+		currentIndex.write();
+	}
+
+	public List<String> getNames() {
+		return names;
+	}
+
 	@Override
 	public void receivePatent(Patent patent) {
 		try {
-			if(patentsAdded > MAX_PATENTS) {
+			if (patentsAdded > MAX_PATENTS) {
 				finish();
 				start();
 			}
@@ -57,9 +62,5 @@ public class PartialIndexFactory implements PatentParserCallback {
 		currentIndex = createPartialIndex();
 		currentIndex.create();
 		patentsAdded = 0;
-	}
-
-	public void finish() throws IOException {
-		currentIndex.write();
 	}
 }

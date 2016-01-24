@@ -6,7 +6,6 @@ package de.hpi.ir.yahoogle;
  * @dataset: US patent utility grants : ipg files from http://www.google.com/googlebooks/uspto-patents-grants-text.html from 2011 to 2015
  * @course: Information Retrieval and Web Search, Hasso-Plattner Institut, 2015
  */
-
 import java.util.ArrayList;
 
 /* The only changes you should make in this file is to define your baseDirectory and dataDirectory!!
@@ -19,39 +18,47 @@ import java.util.ArrayList;
 */
 public abstract class SearchEngine {
 
-        // paths
-		protected static String baseDirectory = "";  /************* Define your baseDirectory here !! ******************/
-        protected static String teamDirectory; // don't change this
-		// directory containing all xml files from PatentData.zip :
-		protected static String dataDirectory = "patents/";  /************* Define your dataDirectory here !! ******************/
-		
-        
-        protected int topK; // how many patents to return
-        protected int prf; // whether to use prf and how many patents to consider (defined in the query with the symbol '#')
-        
-		public SearchEngine() {
-		
-            // the baseDirectory is already defined
-            teamDirectory = baseDirectory + getClass().getSimpleName(); // creates SearchEngineMyTeamName directory
-         //   new File(teamDirectory).mkdirs();
-		}
+	// paths
+	protected static String baseDirectory = ""; // directory containing all xml
+												// files from PatentData.zip :
+	protected static String dataDirectory = "patents/";
+	/************* Define your baseDirectory here !! ******************/
+	protected static String teamDirectory; // don't change this protected int
+											// prf; // whether to use prf and
+											// how many patents to consider
+											// (defined in the query with the
+											// symbol '#')
+	/************* Define your dataDirectory here !! ******************/
+	protected int topK; // how many patents to return
 
-        // contruct your patent index and save it in a file in the teamDirectory
-        abstract void index();
-        
-        // load the index's seeklist from the teamDirectory
-		abstract boolean loadIndex();
-        
-        // construct a compressed version of the index and save it in a file in the teamDirectory
-        abstract void compressIndex();
+	public SearchEngine() {
+		// the baseDirectory is already defined
+		teamDirectory = baseDirectory + getClass().getSimpleName(); // creates
+																	// SearchEngineMyTeamName
+																	// directory
+		// new File(teamDirectory).mkdirs();
+	}
 
-        // load the seeklist for the compressed index from the teamDirectory
-        abstract boolean loadCompressedIndex();
+	// construct a compressed version of the index and save it in a file in the
+	// teamDirectory
+	abstract void compressIndex();
 
-        // search the index for a given query and return the relevant patents (with your improved visualization and the NDCG values) in an ArrayList of Strings
-        abstract ArrayList<String> search(String query, int topK);
+	// compute the NDCG metric using your ranking and the google ranking for a
+	// given query (the gold ranking method returns IDs, so the ranking
+	// arraylist should also contain IDs)
+	abstract Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p);
 
-		// compute the NDCG metric using your ranking and the google ranking for a given query (the gold ranking method returns IDs, so the ranking arraylist should also contain IDs)
-        abstract Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p);
-        
+	// contruct your patent index and save it in a file in the teamDirectory
+	abstract void index();
+
+	// load the seeklist for the compressed index from the teamDirectory
+	abstract boolean loadCompressedIndex();
+
+	// load the index's seeklist from the teamDirectory
+	abstract boolean loadIndex();
+
+	// search the index for a given query and return the relevant patents (with
+	// your improved visualization and the NDCG values) in an ArrayList of
+	// Strings
+	abstract ArrayList<String> search(String query, int topK);
 }
