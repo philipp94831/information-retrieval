@@ -73,7 +73,7 @@ public class PatentIndex extends Loadable {
 			resume = new PatentResume(read(offset));
 			resume.setPatentFolder(patentsFolder);
 			cache.put(resume.getDocNumber(), resume);
-			return cache.get(docNumber);
+			return resume;
 		} catch (IOException e) {
 			LOGGER.severe("Error loading patent " + docNumber + " from disk");
 		}
