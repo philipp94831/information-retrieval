@@ -21,6 +21,9 @@ public class QLModel extends Model<QLResult> {
 
 	private final double lambda;
 	private final int lc;
+	private int[] cis;
+	private Set<Integer> all;
+	private List<Map<Integer, Set<Integer>>> found;
 
 	public QLModel(Index index) {
 		this(index, 0.2);
@@ -39,49 +42,75 @@ public class QLModel extends Model<QLResult> {
 	}
 
 	public List<QLResult> compute(List<String> query) {
+		phrases = query;
+		found = findPatents();
+		cis = computeCi();
+		Map<Integer, Integer> totalHits = getTotalHitsPerPatent();
+		all = getAllCandidates(totalHits);
+		return computeAll();
+	}
+
+	private List<QLResult> computeAll() {
 		List<QLResult> results = new ArrayList<>();
-		int[] cis = new int[query.size()];
-		List<Map<Integer, Set<Integer>>> found = new ArrayList<>();
-		for (int i = 0; i < query.size(); i++) {
-			String phrase = query.get(i);
-			Map<Integer, Set<Integer>> result = index.findPositions(phrase);
-			found.add(result);
-			cis[i] = result.values().stream().mapToInt(Set::size).sum();
-		}
-		Map<Integer, Integer> totalHits = found.stream().map(Map::entrySet)
-				.flatMap(Collection::stream)
-				.collect(Collectors.groupingBy(Entry::getKey, Collectors
-						.reducing(0, e -> e.getValue().size(), Integer::sum)));
-		if (totalHits.isEmpty()) {
-			return results;
-		}
-		TreeMap<Integer, Integer> sorted = ValueComparator
-				.sortByValueDescending(totalHits);
-		int minHits = new ArrayList<>(sorted.entrySet())
-				.get(Math.min(topK, sorted.size() - 1)).getValue();
-		Set<Integer> all = totalHits.entrySet().stream()
-				.filter(e -> e.getValue() >= minHits).map(Entry::getKey)
-				.collect(Collectors.toSet());
 		for (Integer docNumber : all) {
-			QLResult result = new QLResult(docNumber);
-			double score = 0.0;
-			PatentResume resume = index.getPatent(docNumber);
-			int ld = resume.getWordCount();
-			for (int i = 0; i < query.size(); i++) {
-				Set<Integer> list = found.get(i).getOrDefault(docNumber,
-						new HashSet<>());
-				result.addPositions(query.get(i), list);
-				double fi = list.stream().mapToDouble(
-						pos -> partWeight(resume.getPartAtPosition(pos))).sum();
-				score += compute(fi, ld, cis[i]);
-			}
-			result.setScore(score);
+			QLResult result = computeForPatent(docNumber);
 			results.add(result);
 		}
 		return results;
 	}
 
-	private double partWeight(PatentPart part) {
+	private List<Map<Integer, Set<Integer>>> findPatents() {
+		List<Map<Integer, Set<Integer>>> found = new ArrayList<>();
+		for (int i = 0; i < phrases.size(); i++) {
+			String phrase = phrases.get(i);
+			Map<Integer, Set<Integer>> result = index.findPositions(phrase);
+			found.add(result);
+		}
+		return found;
+	}
+
+	private int[] computeCi() {
+		int[] cis = new int[phrases.size()];
+		for (int i = 0; i < phrases.size(); i++) {
+			Map<Integer, Set<Integer>> result = found.get(i);
+			cis[i] = result.values().stream().mapToInt(Set::size).sum();
+		}
+		return cis;
+	}
+
+	private QLResult computeForPatent(Integer docNumber) {
+		QLResult result = new QLResult(docNumber);
+		PatentResume resume = index.getPatent(docNumber);
+		int ld = resume.getWordCount();
+		double score = 0.0;
+		for (int i = 0; i < phrases.size(); i++) {
+			Set<Integer> list = found.get(i).getOrDefault(docNumber, new HashSet<>());
+			result.addPositions(phrases.get(i), list);
+			double fi = list.stream().mapToDouble(pos -> partWeight(resume.getPartAtPosition(pos))).sum();
+			score += compute(fi, ld, cis[i]);
+		}
+		result.setScore(score);
+		return result;
+	}
+
+	private Set<Integer> getAllCandidates(Map<Integer, Integer> totalHits) {
+		if (totalHits.isEmpty()) {
+			return new HashSet<>();
+		}
+		TreeMap<Integer, Integer> sorted = ValueComparator.sortByValueDescending(totalHits);
+		int minHits = new ArrayList<>(sorted.entrySet()).get(Math.min(topK, sorted.size() - 1)).getValue();
+		Set<Integer> all = totalHits.entrySet().stream().filter(e -> e.getValue() >= minHits).map(Entry::getKey)
+				.collect(Collectors.toSet());
+		return all;
+	}
+
+	private Map<Integer, Integer> getTotalHitsPerPatent() {
+		Map<Integer, Integer> totalHits = found.stream().map(Map::entrySet).flatMap(Collection::stream).collect(
+				Collectors.groupingBy(Entry::getKey, Collectors.reducing(0, e -> e.getValue().size(), Integer::sum)));
+		return totalHits;
+	}
+
+	private static double partWeight(PatentPart part) {
 		switch (part) {
 		case TITLE:
 			return 5.0;
@@ -98,7 +127,6 @@ public class QLModel extends Model<QLResult> {
 
 	@Override
 	public List<QLResult> compute(String query) {
-		phrases = QueryProcessor.extractPhrases(query);
-		return compute(phrases);
+		return compute(QueryProcessor.extractPhrases(query));
 	}
 }

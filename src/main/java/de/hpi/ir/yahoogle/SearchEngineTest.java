@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = false;
+	private static final boolean CREATE_INDEX = true;
 	private static final String[] EXECERSICE_10 = { "\"graph editor\"",
 			"\"social trend\"", "fossil hydrocarbons",
 			"physiological AND saline", "tires NOT pressure" };
@@ -67,7 +67,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = EXECERSICE_10;
+		String[] queries = EXECERSICE_9;
 		for (String query : queries) {
 			printResults(search(query, 10), query);
 		}
