@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.index.Index;
-import de.hpi.ir.yahoogle.query.Operator;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
 
