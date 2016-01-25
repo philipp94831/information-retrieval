@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.hpi.ir.yahoogle.index.PatentIndex;
+
 /**
  *
  * @author: Your team name
@@ -18,7 +20,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = true;
+	private static final boolean CREATE_INDEX = false;
 	private static final String[] EXECERSICE_10 = { "\"graph editor\"",
 			"\"social trend\"", "fossil hydrocarbons",
 			"physiological AND saline", "tires NOT pressure" };
@@ -61,7 +63,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = allQueries();
+		String[] queries = EXECERSICE_10;
 		for (String query : queries) {
 			printResults(search(query, 10), query);
 		}

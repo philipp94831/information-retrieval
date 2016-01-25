@@ -55,7 +55,8 @@ public class QLModel extends Model<QLResult> {
 	}
 
 	private List<QLResult> computeAll() {
-		return all.stream().map(this::computeForPatent).collect(Collectors.toList());
+		List<QLResult> res = all.stream().map(this::computeForPatent).collect(Collectors.toList());
+		return res;
 	}
 
 	private List<Map<Integer, Set<Integer>>> findPatents() {

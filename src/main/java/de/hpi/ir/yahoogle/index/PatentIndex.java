@@ -3,7 +3,6 @@ package de.hpi.ir.yahoogle.index;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +13,10 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.map.LRUMap;
+
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialPatentIndex;
-import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class PatentIndex extends Loadable {
@@ -24,11 +24,10 @@ public class PatentIndex extends Loadable {
 	private static final String FILE_NAME = "patents";
 	private static final Logger LOGGER = Logger
 			.getLogger(PatentIndex.class.getName());
-	private static final int MAX_BYTE_READ = 1024 * 128;
 	private static final int MAX_CACHE_SIZE = 100000;
 	private static final long TOTAL_WORD_COUNT_OFFSET = 0L;
-	private static final int WARM_UP_ITERATIONS = 1000;
-	private final Map<Integer, PatentResume> cache = new HashMap<>();
+	private final Map<Integer, PatentResume> cache = new LRUMap<>(
+			MAX_CACHE_SIZE);
 	private RandomAccessFile file;
 	private IntegerOffsetsIndex offsets;
 	private final String patentsFolder;
@@ -64,28 +63,16 @@ public class PatentIndex extends Loadable {
 				+ FILE_EXTENSION;
 	}
 
-	private void freeCache() {
-		Set<Integer> toRemove = cache.keySet().stream()
-				.limit(MAX_CACHE_SIZE / 2).collect(Collectors.toSet());
-		cache.keySet().removeAll(toRemove);
-	}
-
 	public PatentResume get(Integer docNumber) {
 		PatentResume resume = cache.get(docNumber);
 		if (resume != null) {
 			return resume;
 		}
-		if (cache.size() > MAX_CACHE_SIZE) {
-			freeCache();
-		}
 		try {
 			long offset = offsets.get(docNumber);
-			List<byte[]> bytes = read(offset);
-			for (byte[] b : bytes) {
-				resume = new PatentResume(b);
-				resume.setPatentFolder(patentsFolder);
-				cache.put(resume.getDocNumber(), resume);
-			}
+			resume = new PatentResume(read(offset));
+			resume.setPatentFolder(patentsFolder);
+			cache.put(resume.getDocNumber(), resume);
 			return cache.get(docNumber);
 		} catch (IOException e) {
 			LOGGER.severe("Error loading patent " + docNumber + " from disk");
@@ -134,40 +121,25 @@ public class PatentIndex extends Loadable {
 		}
 	}
 
-	private List<byte[]> read(long offset) throws IOException {
+	private byte[] read(long offset) throws IOException {
 		file.seek(offset);
-		int size = Math.min((int) (file.length() - file.getFilePointer()),
-				MAX_BYTE_READ);
-		byte[] large = new byte[size];
-		file.read(large);
-		ByteReader in = new ByteReader(large);
-		List<byte[]> list = new ArrayList<>();
-		while (true) {
-			if (in.remaining() < Integer.BYTES) {
-				break;
-			}
-			int length = in.readInt();
-			if (in.remaining() < length) {
-				break;
-			}
-			byte[] bytes = in.read(length);
-			list.add(bytes);
-		}
-		return list;
+		int length = file.readInt();
+		byte[] bytes = new byte[length];
+		file.read(bytes);
+		return bytes;
 	}
 
 	public void warmUp() {
 		try {
-			Set<Integer> docNumbers = offsets.keys();
-			Integer[] a = new Integer[docNumbers.size()];
-			a = docNumbers.toArray(a);
+			List<Integer> docNumbers = new ArrayList<>(offsets.keys());
 			Random rand = new Random();
-			for (int i = 0; i < WARM_UP_ITERATIONS; i++) {
-				get(a[rand.nextInt(a.length)]);
+			for (int i = 0; i < MAX_CACHE_SIZE / 2; i++) {
+				int index = rand.nextInt(docNumbers.size());
+				get(docNumbers.get(index));
+				docNumbers.remove(index);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe("Error reading patents when warming up");
 		}
 	}
 
