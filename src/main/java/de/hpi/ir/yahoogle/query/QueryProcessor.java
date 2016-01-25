@@ -18,17 +18,14 @@ public class QueryProcessor {
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
 			boolean checkEmpty = false;
-			String lower = token.toLowerCase();
+			String cleaned = token.toLowerCase().replaceAll(PHRASE_DELIMITER, "");;
 			if (token.startsWith(PHRASE_DELIMITER)) {
 				inPhrase = true;
 			}
-			if (token.endsWith(PHRASE_DELIMITER)) {
-				inPhrase = false;
-			}
-			if (lower.equals("or")) {
+			if (cleaned.equals("or")) {
 				checkEmpty = true;
 			}
-			if (!inPhrase && (lower.equals("and") || lower.equals("or") || lower.equals("not"))) {
+			if (!inPhrase && (cleaned.equals("and") || cleaned.equals("or") || cleaned.equals("not"))) {
 				if (phrase.size() > 0) {
 					queryPlan.add(String.join(" ", phrase));
 					phrase = new ArrayList<>();
@@ -45,6 +42,9 @@ public class QueryProcessor {
 				if (!StopWordList.isStopword(cleanedToken)) {
 					phrase.add(token);
 				}
+			}
+			if (token.endsWith(PHRASE_DELIMITER)) {
+				inPhrase = false;
 			}
 		}
 		if (phrase.size() > 0) {
@@ -93,11 +93,22 @@ public class QueryProcessor {
 	}
 
 	private static boolean isBooleanQuery(String query) {
-		String lower = query.toLowerCase();
-		boolean and = lower.matches(".*(^|\\s)and($|\\s).*");
-		boolean or = lower.matches(".*(^|\\s)or($|\\s).*");
-		boolean not = lower.matches(".*(^|\\s)not($|\\s).*");
-		return and || or || not;
+		StringTokenizer tokenizer = new StringTokenizer(query);
+		boolean inPhrase = false;
+		while (tokenizer.hasMoreTokens()) {
+			String token = tokenizer.nextToken();
+			String cleaned = token.toLowerCase().replaceAll(PHRASE_DELIMITER, "");
+			if (token.startsWith(PHRASE_DELIMITER)) {
+				inPhrase = true;
+			}
+			if (!inPhrase && (cleaned.equals("and") || cleaned.equals("or") || cleaned.equals("not"))) {
+				return true;
+			}
+			if (token.endsWith(PHRASE_DELIMITER)) {
+				inPhrase = false;
+			}
+		}
+		return false;
 	}
 
 	private static boolean isLinkQuery(String query) {

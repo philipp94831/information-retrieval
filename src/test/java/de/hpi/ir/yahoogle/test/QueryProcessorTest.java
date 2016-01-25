@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import de.hpi.ir.yahoogle.language.StopWordList;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.query.QueryType;
 
@@ -20,11 +21,15 @@ public class QueryProcessorTest {
 
 	@Test
 	public void test() {
-		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType("comprises AND consists"));
+		String stopWord = "comprises";
+		assertTrue(StopWordList.isStopword(stopWord));
+		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType(stopWord + " AND foo"));
+		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType(stopWord));
 		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("foo bar"));
 		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("fooandbar"));
-//		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("\"foo and bar\""));
+		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("\"foo and bar\""));
+		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("foo \"and\" bar"));
 		assertEquals(QueryType.LINK, QueryProcessor.getQueryType("LinkTo:12345678"));
-		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType("NOT comprises"));
+		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType("NOT " + stopWord));
 	}
 }
