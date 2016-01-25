@@ -90,7 +90,7 @@ public class Index extends Loadable {
 
 	public Map<Integer, Set<Integer>> findPositions(String phrase) {
 		Tokenizer tokenizer = new Tokenizer(phrase);
-		Map<Integer, Set<Integer>> result = null;
+		Map<Integer, Set<Integer>> result = new HashMap<>();
 		if (tokenizer.hasNext()) {
 			result = findAll(tokenizer.next());
 		}

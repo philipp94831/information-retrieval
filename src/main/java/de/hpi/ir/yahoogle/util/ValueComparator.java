@@ -4,27 +4,27 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class ValueComparator<K, T extends Comparable<T>>
+public class ValueComparator<K, V extends Comparable<V>>
 		implements Comparator<K> {
 
 	public static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueAscending(Map<K, V> result) {
-		ValueComparator<K, V> comp = new ValueComparator<>(result, true);
-		TreeMap<K, V> sortedResults = new TreeMap<>(comp);
-		sortedResults.putAll(result);
-		return sortedResults;
+		return new ValueComparator<>(result, true).sort(result);
 	}
 
 	public static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueDescending(Map<K, V> result) {
-		ValueComparator<K, V> comp = new ValueComparator<>(result, false);
-		TreeMap<K, V> sortedResults = new TreeMap<>(comp);
+		return new ValueComparator<>(result, false).sort(result);
+	}
+	
+	private TreeMap<K, V> sort(Map<K, V> result) {
+		TreeMap<K, V> sortedResults = new TreeMap<>(this);
 		sortedResults.putAll(result);
-		return sortedResults;
+		return sortedResults;		
 	}
 
 	private final boolean ascending;
-	private final Map<K, T> base;
+	private final Map<K, V> base;
 
-	private ValueComparator(Map<K, T> base, boolean ascending) {
+	private ValueComparator(Map<K, V> base, boolean ascending) {
 		this.base = base;
 		this.ascending = ascending;
 	}

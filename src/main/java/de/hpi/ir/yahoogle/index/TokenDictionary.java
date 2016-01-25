@@ -29,13 +29,13 @@ public class TokenDictionary extends Loadable {
 
 	private long currentOffset;
 	private RandomAccessFile file;
-	private StringOffsetIndex offsets;
+	private StringOffsetsIndex offsets;
 
 	@Override
 	public void create() throws IOException {
 		deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new StringOffsetIndex(FILE_NAME);
+		offsets = new StringOffsetsIndex(FILE_NAME);
 		offsets.create();
 	}
 
@@ -88,7 +88,7 @@ public class TokenDictionary extends Loadable {
 	@Override
 	public void load() throws IOException {
 		file = new RandomAccessFile(fileName(), "rw");
-		offsets = new StringOffsetIndex(FILE_NAME);
+		offsets = new StringOffsetsIndex(FILE_NAME);
 		offsets.load();
 	}
 

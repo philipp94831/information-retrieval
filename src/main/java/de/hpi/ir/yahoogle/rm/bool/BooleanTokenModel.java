@@ -11,6 +11,7 @@ public class BooleanTokenModel extends BooleanModel {
 		super(index);
 	}
 
+	@Override
 	protected Set<Integer> find(List<String> phrases) {
 		return index.find(phrases);
 	}

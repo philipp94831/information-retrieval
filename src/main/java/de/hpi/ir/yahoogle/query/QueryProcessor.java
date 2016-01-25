@@ -7,9 +7,9 @@ import java.util.StringTokenizer;
 import de.hpi.ir.yahoogle.language.StopWordList;
 
 public class QueryProcessor {
-	
+
 	private static final String PHRASE_DELIMITER = "\"";
-	
+
 	public static List<String> generateQueryPlan(String query) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		List<String> queryPlan = new ArrayList<>();
@@ -65,8 +65,11 @@ public class QueryProcessor {
 			if (token.endsWith(PHRASE_DELIMITER)) {
 				inPhrase = false;
 			}
-			buffer.append(" ").append(token.replaceAll(PHRASE_DELIMITER, ""));
-			if (!inPhrase) {
+			String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
+			if(!StopWordList.isStopword(cleanedToken)) {
+				buffer.append(" ").append(cleanedToken);
+			}
+			if (!inPhrase && buffer.length() > 0) {
 				phrases.add(buffer.toString().trim());
 				buffer = new StringBuilder();
 			}
@@ -74,15 +77,25 @@ public class QueryProcessor {
 		return phrases;
 	}
 
-	public static boolean isEmptyQuery(String query) {
-		return generateQueryPlan(query).isEmpty();
+	public static QueryType getQueryType(String query) {
+		if (isLinkQuery(query)) {
+			return QueryType.LINK;
+		} else if (isBooleanQuery(query)) {
+			return QueryType.BOOLEAN;
+		} else {
+			return QueryType.RELEVANT;
+		}
 	}
 
-	public static boolean isRelevanceQuery(String query) {
-		return generateQueryPlan(query).size() == 1;
+	private static boolean isBooleanQuery(String query) {
+		String lower = query.toLowerCase();
+		boolean and = lower.matches(".*(^|\\s)and($|\\s).*");
+		boolean or = lower.matches(".*(^|\\s)or($|\\s).*");
+		boolean not = lower.matches(".*(^|\\s)not($|\\s).*");
+		return and || or || not;
 	}
 
-	public static boolean isLinkQuery(String query) {
-		return query.startsWith("LinkTo:");
+	private static boolean isLinkQuery(String query) {
+		return query.toLowerCase().startsWith("linkto:");
 	}
 }

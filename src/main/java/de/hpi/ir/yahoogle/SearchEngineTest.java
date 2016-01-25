@@ -1,6 +1,8 @@
 package de.hpi.ir.yahoogle;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -13,41 +15,33 @@ import java.util.ArrayList;
  *          this file during the development of your search engine. Any changes
  *          you make here will be ignored for the final test!
  */
+@SuppressWarnings("unused")
 public class SearchEngineTest {
 
 	private static final boolean CREATE_INDEX = true;
 	private static final String[] EXECERSICE_10 = { "\"graph editor\"",
 			"\"social trend\"", "fossil hydrocarbons",
 			"physiological AND saline", "tires NOT pressure" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_12 = { "LinkTo:07920906",
 			"LinkTo:07904949", "LinkTo:08078787",
 			"LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_2 = { "selection", "device",
 			"justify", "write" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_3 = { "file-system", "included",
 			"storing" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_4 = { "comprises AND consists",
 			"methods NOT invention", "data OR method", "prov* NOT free",
 			"inc* OR memory", "\"the presented invention\"",
 			"\"mobile devices\"" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_5 = { "processing", "computers",
 			"\"mobile devices\"", "data" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_6 = { "digital", "rootkits",
 			"network access" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_7 = { "access control",
 			"computers", "data processing", "web servers",
 			"vulnerability information", "computer-readable media" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_8 = { "access", "control",
 			"image data", "program", "vulnerability", "\"mobile device\"" };
-	@SuppressWarnings("unused")
 	private static final String[] EXECERSICE_9 = { "add-on module",
 			"digital signature", "data processing", "\"a scanning\"" };
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
@@ -67,10 +61,26 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = EXECERSICE_9;
+		String[] queries = allQueries();
 		for (String query : queries) {
 			printResults(search(query, 10), query);
 		}
+	}
+	
+	private static String[] allQueries() {
+		List<String> all = new ArrayList<>();
+		all.addAll(Arrays.asList(EXECERSICE_2));
+		all.addAll(Arrays.asList(EXECERSICE_3));
+		all.addAll(Arrays.asList(EXECERSICE_4));
+		all.addAll(Arrays.asList(EXECERSICE_5));
+		all.addAll(Arrays.asList(EXECERSICE_6));
+		all.addAll(Arrays.asList(EXECERSICE_7));
+		all.addAll(Arrays.asList(EXECERSICE_8));
+		all.addAll(Arrays.asList(EXECERSICE_9));
+		all.addAll(Arrays.asList(EXECERSICE_10));
+		all.addAll(Arrays.asList(EXECERSICE_12));
+		String[] result = new String[all.size()];
+		return all.toArray(result);
 	}
 
 	private static void printResults(ArrayList<String> results, String query) {

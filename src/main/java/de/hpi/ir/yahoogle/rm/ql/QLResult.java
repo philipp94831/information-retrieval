@@ -10,10 +10,6 @@ public class QLResult extends Result implements Comparable<QLResult> {
 		super(docNumber);
 	}
 
-	public int compareScore(QLResult o2) {
-		return -Double.compare(score, o2.score);
-	}
-
 	public void setScore(double score) {
 		this.score = score;
 	}

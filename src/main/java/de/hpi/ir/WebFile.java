@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,14 +45,12 @@ public class WebFile {
 		try {
 			// issue the query
 			String queryTerms = query.replaceAll(" ", "+");
-			String queryUrl = "https://www.google.com/search?hl=en&q="
-					+ queryTerms + "&tbm=pts&num=" + safeNumber
+			String queryUrl = "https://www.google.com/search?hl=en&q=" + queryTerms + "&tbm=pts&num=" + safeNumber
 					+ "&tbs=ptso:us,ptss:g,ptst:u";
 			String page = "";
 			openWebFile(queryUrl);
 			page = (String) getContent();
-			Pattern pattern = Pattern
-					.compile("<div><h3 class=\"r\">(.*?)</a></h3></div>");
+			Pattern pattern = Pattern.compile("<div><h3 class=\"r\">(.*?)</a></h3></div>");
 			Matcher matcher = pattern.matcher(page);
 			String textMatched = "";
 			while (matcher.find()) {
@@ -61,16 +59,14 @@ public class WebFile {
 				Element link = Jsoup.parse(textMatched).select("a").first();
 				String url = link.attr("href");
 				// System.out.print(url + "\n");
-				Pattern patentPattern = Pattern
-						.compile("https://www.google.de/patents/US(.*?)?dq=");
+				Pattern patentPattern = Pattern.compile("https://www.google.de/patents/US(.*?)?dq=");
 				Matcher patentMatcher = patentPattern.matcher(url);
 				String patentNumber = "";
 				while (patentMatcher.find()) {
 					patentNumber = patentMatcher.group(1); // get the ID
 					// System.out.print("patentNumber " + patentNumber + "\n");
 				}
-				if (patentNumber != null && patentNumber.compareTo(minID) > 0
-						&& patentNumber.compareTo(maxID) < 0) {
+				if (patentNumber != null && patentNumber.compareTo(minID) > 0 && patentNumber.compareTo(maxID) < 0) {
 					ranking.add(patentNumber.replace("?", "")); // without the
 																// zero infront
 																// of the ID
@@ -79,8 +75,7 @@ public class WebFile {
 			}
 			// System.out.print(ranking + "\n");
 		} catch (IOException ex) {
-			Logger.getLogger(WebFile.class.getName()).log(Level.SEVERE, null,
-					ex);
+			Logger.getLogger(WebFile.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		return ranking;
 	}
@@ -134,8 +129,7 @@ public class WebFile {
 		final java.net.URL url = new java.net.URL(urlString);
 		final java.net.URLConnection uconn = url.openConnection();
 		if (!(uconn instanceof java.net.HttpURLConnection)) {
-			throw new java.lang.IllegalArgumentException(
-					"URL protocol must be HTTP.");
+			throw new java.lang.IllegalArgumentException("URL protocol must be HTTP.");
 		}
 		final java.net.HttpURLConnection conn = (java.net.HttpURLConnection) uconn;
 		// Set up a request.
@@ -166,8 +160,7 @@ public class WebFile {
 		final java.io.InputStream stream = conn.getErrorStream();
 		if (stream != null) {
 			content = readStream(length, stream);
-		} else if ((content = conn.getContent()) != null
-				&& content instanceof java.io.InputStream) {
+		} else if ((content = conn.getContent()) != null && content instanceof java.io.InputStream) {
 			content = readStream(length, (java.io.InputStream) content);
 		}
 		conn.disconnect();
@@ -180,8 +173,7 @@ public class WebFile {
 		final int buflen = Math.max(1024, Math.max(length, stream.available()));
 		byte[] buf = new byte[buflen];
 		byte[] bytes = null;
-		for (int nRead = stream.read(buf); nRead != -1; nRead = stream
-				.read(buf)) {
+		for (int nRead = stream.read(buf); nRead != -1; nRead = stream.read(buf)) {
 			if (bytes == null) {
 				bytes = buf;
 				buf = new byte[buflen];

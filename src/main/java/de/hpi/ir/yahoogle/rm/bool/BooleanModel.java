@@ -21,7 +21,7 @@ public abstract class BooleanModel extends Model<BooleanResult> {
 		Set<Integer> booleanResult = new HashSet<>();
 		Operator operator = Operator.OR;
 		List<String> queryPlan = QueryProcessor.generateQueryPlan(query);
-		if (queryPlan.get(0).equalsIgnoreCase("not")) {
+		if (!queryPlan.isEmpty() && queryPlan.get(0).equalsIgnoreCase("not")) {
 			booleanResult.addAll(index.getAllDocNumbers());
 		}
 		phrases = new ArrayList<>();

@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle;
+package de.hpi.ir;
 
 /**
  *
@@ -41,24 +41,24 @@ public abstract class SearchEngine {
 
 	// construct a compressed version of the index and save it in a file in the
 	// teamDirectory
-	abstract void compressIndex();
+	protected abstract void compressIndex();
 
 	// compute the NDCG metric using your ranking and the google ranking for a
 	// given query (the gold ranking method returns IDs, so the ranking
 	// arraylist should also contain IDs)
-	abstract Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p);
+	protected abstract Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p);
 
 	// contruct your patent index and save it in a file in the teamDirectory
-	abstract void index();
+	protected abstract void index();
 
 	// load the seeklist for the compressed index from the teamDirectory
-	abstract boolean loadCompressedIndex();
+	protected abstract boolean loadCompressedIndex();
 
 	// load the index's seeklist from the teamDirectory
-	abstract boolean loadIndex();
+	protected abstract boolean loadIndex();
 
 	// search the index for a given query and return the relevant patents (with
 	// your improved visualization and the NDCG values) in an ArrayList of
 	// Strings
-	abstract ArrayList<String> search(String query, int topK);
+	protected abstract ArrayList<String> search(String query, int topK);
 }

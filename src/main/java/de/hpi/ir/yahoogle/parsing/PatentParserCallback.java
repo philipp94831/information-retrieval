@@ -2,5 +2,5 @@ package de.hpi.ir.yahoogle.parsing;
 
 public interface PatentParserCallback {
 
-	void receivePatent(Patent patent);
+	public void receivePatent(Patent patent);
 }

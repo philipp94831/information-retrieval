@@ -8,9 +8,9 @@ import java.util.Map.Entry;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
-public class StringOffsetIndex extends OffsetsIndex<String> {
+public class StringOffsetsIndex extends OffsetsIndex<String> {
 
-	public StringOffsetIndex(String name) {
+	public StringOffsetsIndex(String name) {
 		super(name);
 	}
 
