@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,8 +13,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.map.LRUMap;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialPatentIndex;
@@ -26,8 +25,8 @@ public class PatentIndex extends Loadable {
 			.getLogger(PatentIndex.class.getName());
 	private static final int MAX_CACHE_SIZE = 100000;
 	private static final long TOTAL_WORD_COUNT_OFFSET = 0L;
-	private final Map<Integer, PatentResume> cache = new LRUMap<>(
-			MAX_CACHE_SIZE);
+	private final Map<Integer, PatentResume> cache = new LinkedHashMap<>(
+			MAX_CACHE_SIZE, 0.75F, true);
 	private RandomAccessFile file;
 	private IntegerOffsetsIndex offsets;
 	private final String patentsFolder;
