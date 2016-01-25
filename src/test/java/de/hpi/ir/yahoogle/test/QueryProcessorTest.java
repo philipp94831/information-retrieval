@@ -23,7 +23,7 @@ public class QueryProcessorTest {
 		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType("comprises AND consists"));
 		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("foo bar"));
 		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("fooandbar"));
-		//assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("\"foo and bar\""));
+//		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("\"foo and bar\""));
 		assertEquals(QueryType.LINK, QueryProcessor.getQueryType("LinkTo:12345678"));
 		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType("NOT comprises"));
 	}

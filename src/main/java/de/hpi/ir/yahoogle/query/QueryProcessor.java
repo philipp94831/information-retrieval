@@ -13,18 +13,25 @@ public class QueryProcessor {
 	public static List<String> generateQueryPlan(String query) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		List<String> queryPlan = new ArrayList<>();
-		StringBuilder phrase = new StringBuilder();
+		List<String> phrase = new ArrayList<>();
+		boolean inPhrase = false;
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
 			boolean checkEmpty = false;
-			switch (token.toLowerCase()) {
-			case "and":
-			case "or":
+			String lower = token.toLowerCase();
+			if (token.startsWith(PHRASE_DELIMITER)) {
+				inPhrase = true;
+			}
+			if (token.endsWith(PHRASE_DELIMITER)) {
+				inPhrase = false;
+			}
+			if (lower.equals("or")) {
 				checkEmpty = true;
-			case "not":
-				if (phrase.length() > 0) {
-					queryPlan.add(phrase.toString().trim());
-					phrase = new StringBuilder();
+			}
+			if (!inPhrase && (lower.equals("and") || lower.equals("or") || lower.equals("not"))) {
+				if (phrase.size() > 0) {
+					queryPlan.add(String.join(" ", phrase));
+					phrase = new ArrayList<>();
 				} else {
 					if (!queryPlan.isEmpty()) {
 						queryPlan.remove(queryPlan.size() - 1);
@@ -33,17 +40,15 @@ public class QueryProcessor {
 				if (!(checkEmpty && queryPlan.isEmpty())) {
 					queryPlan.add(token.trim());
 				}
-				break;
-			default:
+			} else {
 				String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
 				if (!StopWordList.isStopword(cleanedToken)) {
-					phrase.append(" ").append(token);
+					phrase.add(token);
 				}
-				break;
 			}
 		}
-		if (phrase.length() > 0) {
-			queryPlan.add(phrase.toString().trim());
+		if (phrase.size() > 0) {
+			queryPlan.add(String.join(" ", phrase));
 		} else {
 			if (!queryPlan.isEmpty()) {
 				queryPlan.remove(queryPlan.size() - 1);
@@ -66,7 +71,7 @@ public class QueryProcessor {
 				inPhrase = false;
 			}
 			String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
-			if(!StopWordList.isStopword(cleanedToken)) {
+			if (!StopWordList.isStopword(cleanedToken)) {
 				buffer.append(" ").append(cleanedToken);
 			}
 			if (!inPhrase && buffer.length() > 0) {
