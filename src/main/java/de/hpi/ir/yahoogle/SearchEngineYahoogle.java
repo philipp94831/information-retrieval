@@ -107,6 +107,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 			index.create();
 			index.mergeIndices(receiver.getNames());
 			index.write();
+			index.load();
+			index.calculatePageRank();
 		} catch (IOException e) {
 			LOGGER.severe("Error indexing files");
 		} catch (XMLStreamException e) {

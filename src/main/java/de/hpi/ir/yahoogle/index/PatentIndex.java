@@ -132,7 +132,7 @@ public class PatentIndex extends Loadable {
 		try {
 			List<Integer> docNumbers = new ArrayList<>(offsets.keys());
 			Random rand = new Random();
-			for (int i = 0; i < MAX_CACHE_SIZE / 2; i++) {
+			for (int i = 0; i < MAX_CACHE_SIZE / 2 && !docNumbers.isEmpty(); i++) {
 				int index = rand.nextInt(docNumbers.size());
 				get(docNumbers.get(index));
 				docNumbers.remove(index);
@@ -148,5 +148,15 @@ public class PatentIndex extends Loadable {
 		file.writeInt(totalWordCount);
 		file.close();
 		offsets.write();
+	}
+
+	public void update(PatentResume resume) throws IOException {
+		byte[] bytes = resume.toByteArray();
+		long offset = offsets.get(resume.getDocNumber());
+		file.seek(offset);
+		ByteWriter out = new ByteWriter();
+		out.writeInt(bytes.length);
+		out.write(bytes);
+		file.write(out.toByteArray());
 	}
 }

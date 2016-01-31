@@ -45,4 +45,8 @@ public class ByteWriter implements AbstractWriter {
 		writeShort((short) s.length());
 		out.write(s.getBytes(Charset.forName("UTF-8")));
 	}
+
+	public void writeDouble(double d) throws IOException {
+		out.write(ByteBuffer.allocate(Double.BYTES).putDouble(d).array());
+	}
 }

@@ -100,7 +100,9 @@ public class TokenDictionary extends Loadable {
 		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<>();
 		for (int i = 0; i < iterators.size(); i++) {
 			Iterator<BinaryPostingList> iterator = iterators.get(i);
-			candidates.put(iterator.next(), i);
+			if (iterator.hasNext()) {
+				candidates.put(iterator.next(), i);
+			}
 		}
 		BinaryPostingList currentPostings = null;
 		int count = 0;
@@ -137,8 +139,10 @@ public class TokenDictionary extends Loadable {
 				}
 			}
 		}
-		writePostingList(currentPostings);
-		finishPostingList(count);
+		if(currentPostings != null) {
+			writePostingList(currentPostings);
+			finishPostingList(count);
+		}
 	}
 
 	private void startPostingList(String token) throws IOException {

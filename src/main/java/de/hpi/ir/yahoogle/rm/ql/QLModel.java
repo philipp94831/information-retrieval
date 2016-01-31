@@ -82,6 +82,7 @@ public class QLModel extends Model<QLResult> {
 			double fi = positions.stream().mapToDouble(pos -> partWeight(resume.getPartAtPosition(pos))).sum();
 			score += compute(fi, ld, cis[i]);
 		}
+//		score /= Math.pow(resume.getPageRank(), 0.1);
 		result.setScore(score);
 		return result;
 	}
