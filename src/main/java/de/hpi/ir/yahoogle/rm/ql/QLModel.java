@@ -1,12 +1,13 @@
 package de.hpi.ir.yahoogle.rm.ql;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -22,11 +23,13 @@ import de.hpi.ir.yahoogle.util.ValueComparator;
 
 public class QLModel extends Model<QLResult> {
 
+	private static final Logger LOGGER = Logger.getLogger(QLModel.class.getName());
 	private final double lambda;
 	private final int lc;
 	private int[] cis;
 	private Set<Integer> all;
-	private List<Map<Integer, Set<Integer>>> found;
+	private List<Map<Integer, byte[]>> found;
+	private Map<Integer, Integer> totalHits = new HashMap<>();
 
 	public QLModel(Index index) {
 		this(index, 0.2);
@@ -60,18 +63,23 @@ public class QLModel extends Model<QLResult> {
 		return res;
 	}
 
-	private List<Map<Integer, Set<Integer>>> findPatents() {
+	private List<Map<Integer, byte[]>> findPatents() {
 		cis = new int[phrases.size()];
-		List<Map<Integer, Set<Integer>>> listOfResults = new ArrayList<>();
+		List<Map<Integer, byte[]>> listOfResults = new ArrayList<>();
 		int i = 0;
-		for(String phrase : phrases) {
+		for (String phrase : phrases) {
 			cis[i] = 0;
-			Map<Integer, Set<Integer>> result = new HashMap<>();
+			Map<Integer, byte[]> result = new HashMap<>();
 			PhraseResultIterator iterator = index.findPositions(phrase);
-			while(iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				DocumentPosting d = iterator.next();
 				cis[i] += d.getAll().size();
-				result.put(d.getDocNumber(), d.getAll());
+				totalHits.merge(d.getDocNumber(), d.getAll().size(), (v1, v2) -> v1 + v2);
+				try {
+					result.put(d.getDocNumber(), d.toByteArray());
+				} catch (IOException e) {
+					LOGGER.severe("Error encoding DocumentPosting " + d.getDocNumber());
+				}
 			}
 			listOfResults.add(result);
 		}
@@ -84,18 +92,25 @@ public class QLModel extends Model<QLResult> {
 		int ld = resume.getWordCount();
 		double score = 0.0;
 		for (int i = 0; i < phrases.size(); i++) {
-			Set<Integer> positions = found.get(i).getOrDefault(docNumber, new HashSet<>());
+			Set<Integer> positions = new HashSet<>();
+			byte[] bytes = found.get(i).get(docNumber);
+			if (bytes != null) {
+				try {
+					positions = DocumentPosting.fromBytes(bytes).getAll();
+				} catch (IOException e) {
+					LOGGER.severe("Error decoding DocumentPosting " + docNumber);
+				}
+			}
 			result.addPositions(phrases.get(i), positions);
 			double fi = positions.stream().mapToDouble(pos -> partWeight(resume.getPartAtPosition(pos))).sum();
 			score += compute(fi, ld, cis[i]);
 		}
-//		score /= Math.pow(resume.getPageRank(), 0.1);
+		// score /= Math.pow(resume.getPageRank(), 0.1);
 		result.setScore(score);
 		return result;
 	}
 
 	private Set<Integer> getAllCandidates() {
-		Map<Integer, Integer> totalHits = getTotalHitsPerPatent();
 		if (totalHits.isEmpty()) {
 			return new HashSet<>();
 		}
@@ -103,11 +118,6 @@ public class QLModel extends Model<QLResult> {
 		int minHits = new ArrayList<>(sorted.entrySet()).get(Math.min(topK, sorted.size() - 1)).getValue();
 		return totalHits.entrySet().stream().filter(e -> e.getValue() >= minHits).map(Entry::getKey)
 				.collect(Collectors.toSet());
-	}
-
-	private Map<Integer, Integer> getTotalHitsPerPatent() {
-		return found.stream().map(Map::entrySet).flatMap(Collection::stream).collect(
-				Collectors.groupingBy(Entry::getKey, Collectors.reducing(0, e -> e.getValue().size(), Integer::sum)));
 	}
 
 	private static double partWeight(PatentPart part) {

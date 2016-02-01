@@ -54,7 +54,9 @@ class PostingList
 	public byte[] toByteArray() throws IOException {
 		ByteWriter block = new ByteWriter();
 		for (DocumentPosting entry : documents.values()) {
-			block.write(entry.toByteArray());
+			byte[] bytes = entry.toByteArray();
+			block.writeInt(bytes.length);
+			block.write(bytes);
 		}
 		return block.toByteArray();
 	}

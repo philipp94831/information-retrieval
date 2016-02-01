@@ -3,9 +3,7 @@ package de.hpi.ir.yahoogle.index;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.hpi.ir.yahoogle.io.AbstractReader;
 import de.hpi.ir.yahoogle.io.ByteReader;
-import de.hpi.ir.yahoogle.io.VByteReader;
 import de.hpi.ir.yahoogle.util.Mergeable;
 
 public class BinaryPostingList
@@ -13,7 +11,6 @@ public class BinaryPostingList
 
 	private byte[] bytes;
 	private String token;
-	private int read;
 
 	public BinaryPostingList(String token, byte[] bytes) {
 		this.token = token;
@@ -34,29 +31,22 @@ public class BinaryPostingList
 
 	@Override
 	public Iterator<DocumentPosting> iterator() {
-		read = 0;
 		return new DocumentPostingIterator(this);
 	}
-
-	public DocumentPosting next() throws IOException {
-		AbstractReader in = new ByteReader(bytes, read, 2 * Integer.BYTES);
-		read += 2 * Integer.BYTES;
-		int docNumber = in.readInt();
-		int bsize = in.readInt();
-		in = new VByteReader(bytes, read, bsize);
-		DocumentPosting document = new DocumentPosting(docNumber);
-		int oldPos = 0;
-		while (in.hasLeft()) {
-			int p = in.readInt();
-			document.add(oldPos + p);
-			oldPos += p;
-		}
-		read += bsize;
-		return document;
+	
+	public int getSize(int offset) {
+		ByteReader in = new ByteReader(bytes, offset, Integer.BYTES);
+		return in.readInt();		
 	}
 
-	public boolean hasLeft() {
-		return read < bytes.length;
+	public DocumentPosting next(int offset, int size) throws IOException {
+		ByteReader in = new ByteReader(bytes, offset, size);
+		byte[] bytes = in.read(size);
+		return DocumentPosting.fromBytes(bytes);
+	}
+
+	public int size() {
+		return bytes.length;
 	}
 
 	@Override

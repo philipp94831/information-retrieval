@@ -20,7 +20,6 @@ public class TokenDictionary extends Loadable {
 		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
 	}
 
-	private long currentOffset;
 	private RandomAccessFile file;
 	private StringOffsetsIndex offsets;
 
@@ -108,7 +107,7 @@ public class TokenDictionary extends Loadable {
 	}
 
 	private void writePostingList(PartitionedBinaryPostingList postingList) throws IOException {
-		currentOffset = file.length();
+		long currentOffset = file.length();
 		offsets.put(postingList.getToken(), currentOffset);
 		file.seek(currentOffset);
 		List<byte[]> blocks = postingList.getSortedBlocks();

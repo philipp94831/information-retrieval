@@ -18,12 +18,10 @@ import de.hpi.ir.yahoogle.io.ByteWriter;
 public class CitationIndex extends Loadable {
 
 	private static final String FILE_NAME = "citations";
-	private static final Logger LOGGER = Logger
-			.getLogger(CitationIndex.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(CitationIndex.class.getName());
 
 	private static String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
-				+ FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
 	}
 
 	private RandomAccessFile file;
@@ -45,13 +43,11 @@ public class CitationIndex extends Loadable {
 				int size = file.readInt();
 				byte[] b = new byte[size];
 				file.read(b);
-				BinaryCitationList postingList = new BinaryCitationList(
-						docNumber, b);
+				BinaryCitationList postingList = new BinaryCitationList(docNumber, b);
 				return postingList.getDocNumbers();
 			}
 		} catch (IOException e) {
-			LOGGER.severe(
-					"Error reading citation list for docNumber " + docNumber);
+			LOGGER.severe("Error reading citation list for docNumber " + docNumber);
 		}
 		return new ArrayList<>();
 	}
@@ -65,8 +61,7 @@ public class CitationIndex extends Loadable {
 
 	public void merge(List<PartialCitationIndex> indexes) throws IOException {
 		LOGGER.info("Merging citation indices");
-		List<CitationListIterator> iterators = indexes.stream()
-				.map(PartialCitationIndex::iterator)
+		List<CitationListIterator> iterators = indexes.stream().map(PartialCitationIndex::iterator)
 				.collect(Collectors.toList());
 		TreeMap<BinaryCitationList, Integer> candidates = new TreeMap<>();
 		for (int i = 0; i < iterators.size(); i++) {
@@ -75,10 +70,8 @@ public class CitationIndex extends Loadable {
 		}
 		BinaryCitationList currentPostings = null;
 		while (!candidates.isEmpty()) {
-			Entry<BinaryCitationList, Integer> entry = candidates
-					.pollFirstEntry();
-			Iterator<BinaryCitationList> iterator = iterators
-					.get(entry.getValue());
+			Entry<BinaryCitationList, Integer> entry = candidates.pollFirstEntry();
+			Iterator<BinaryCitationList> iterator = iterators.get(entry.getValue());
 			if (iterator.hasNext()) {
 				candidates.put(iterator.next(), entry.getValue());
 			}

@@ -38,7 +38,8 @@ public class PartitionedBinaryPostingList {
 				}
 				old = document.getDocNumber();
 				byte[] b = document.toByteArray();
-				if(b.length <= out.spaceLeft()) {
+				if(b.length + Integer.BYTES <= out.spaceLeft()) {
+					out.writeInt(b.length);
 					out.write(b);
 				} else {
 					blocks.add(out.toByteArray());

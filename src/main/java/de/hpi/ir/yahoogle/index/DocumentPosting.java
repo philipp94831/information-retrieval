@@ -6,7 +6,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.io.AbstractWriter;
+import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.io.VByteReader;
 import de.hpi.ir.yahoogle.io.VByteWriter;
 import de.hpi.ir.yahoogle.util.Mergeable;
 
@@ -51,7 +53,6 @@ public class DocumentPosting implements Comparable<DocumentPosting>, Mergeable<I
 		byte[] encoded = pout.toByteArray();
 		ByteWriter out = new ByteWriter();
 		out.writeInt(docNumber); // docNumber
-		out.writeInt(encoded.length); // size of block
 		out.write(encoded);
 		return out.toByteArray();
 	}
@@ -72,5 +73,19 @@ public class DocumentPosting implements Comparable<DocumentPosting>, Mergeable<I
 		Set<Integer> newPos = next.getAll();
 		Set<Integer> oldPos = positions;
 		oldPos.retainAll(newPos.stream().map(p -> p - delta).collect(Collectors.toSet()));
+	}
+
+	public static DocumentPosting fromBytes(byte[] bytes) throws IOException {
+		ByteReader in = new ByteReader(bytes);
+		int docNumber = in.readInt();
+		VByteReader vin = new VByteReader(in.read(in.remaining()));
+		DocumentPosting document = new DocumentPosting(docNumber);
+		int oldPos = 0;
+		while (vin.hasLeft()) {
+			int p = vin.readInt();
+			document.add(oldPos + p);
+			oldPos += p;
+		}
+		return document;
 	}
 }
