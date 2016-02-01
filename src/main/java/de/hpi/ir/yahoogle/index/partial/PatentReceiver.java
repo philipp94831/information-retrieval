@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.parsing.Patent;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 
@@ -13,7 +14,7 @@ public class PatentReceiver implements PatentParserCallback {
 	private static final Logger LOGGER = Logger
 			.getLogger(PatentReceiver.class.getName());
 	private static final long MAX_PATENTS = Runtime.getRuntime().maxMemory()
-			/ (530 * 1000);
+			/ (530 * 1000) / SearchEngineYahoogle.NUMBER_OF_THREADS;
 	private PartialIndex currentIndex;
 	private int indexNumber;
 	private final String name;

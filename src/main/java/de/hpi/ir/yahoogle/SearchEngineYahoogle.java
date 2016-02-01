@@ -1,7 +1,7 @@
 package de.hpi.ir.yahoogle;
 
 import java.io.File;
-import java.io.FileInputStream;
+
 
 /**
  *
@@ -23,19 +23,19 @@ import java.io.FileInputStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.xml.stream.XMLStreamException;
 
 import de.hpi.ir.SearchEngine;
 import de.hpi.ir.WebFile;
 import de.hpi.ir.yahoogle.index.Index;
-import de.hpi.ir.yahoogle.index.partial.PatentReceiver;
-import de.hpi.ir.yahoogle.parsing.PatentParser;
+import de.hpi.ir.yahoogle.index.partial.PatentIndexer;
 import de.hpi.ir.yahoogle.query.BooleanSearch;
 import de.hpi.ir.yahoogle.query.LinkSearch;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
@@ -51,7 +51,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 															// i.e.
 															// SearchEngineMyTeamName
 
-	private static final Logger LOGGER = Logger.getLogger(SearchEngineYahoogle.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(SearchEngineYahoogle.class.getName());
+	public static final int NUMBER_OF_THREADS = 4;
 
 	private static double computeGain(int goldRank) {
 		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
@@ -62,7 +64,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	}
 
 	private static String toGoogleQuery(String query) {
-		return query.toLowerCase().replaceAll("\\snot\\s", " -").replaceAll("^not\\s", "-");
+		return query.toLowerCase().replaceAll("\\snot\\s", " -")
+				.replaceAll("^not\\s", "-");
 	}
 
 	private Index index;
@@ -97,20 +100,21 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		return originalDcg / goldDcg;
 	}
 
-	protected ArrayList<String> generateOutput(Collection<? extends Result> results, Map<Integer, String> snippets,
-			String query) {
+	protected ArrayList<String> generateOutput(Collection<? extends Result> results, Map<Integer, String> snippets, String query) {
 		ArrayList<String> output = new ArrayList<>();
 		String googleQuery = toGoogleQuery(query);
-		ArrayList<String> goldRanking = new WebFile().getGoogleRanking(googleQuery);
+		ArrayList<String> goldRanking = new WebFile()
+				.getGoogleRanking(googleQuery);
 		ArrayList<String> originalRanking = new ArrayList<>(
-				results.stream().map(r -> Integer.toString(r.getDocNumber())).collect(Collectors.toList()));
+				results.stream().map(r -> Integer.toString(r.getDocNumber()))
+						.collect(Collectors.toList()));
 		int i = 1;
 		for (Result result : results) {
 			int docNumber = result.getDocNumber();
 			double ndcg = computeNdcg(goldRanking, originalRanking, i);
-			output.add(
-					String.format("%08d", docNumber) + "\t" + index.getPatent(docNumber).getPatent().getInventionTitle()
-							+ "\t" + ndcg + "\n" + snippets.get(docNumber));
+			output.add(String.format("%08d", docNumber) + "\t"
+					+ index.getPatent(docNumber).getPatent().getInventionTitle()
+					+ "\t" + ndcg + "\n" + snippets.get(docNumber));
 			i++;
 		}
 		return output;
@@ -120,7 +124,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		ArrayList<String> results = new ArrayList<>();
 		for (Result result : r) {
 			results.add(String.format("%08d", result.getDocNumber()) + "\t"
-					+ index.getPatent(result.getDocNumber()).getPatent().getInventionTitle());
+					+ index.getPatent(result.getDocNumber()).getPatent()
+							.getInventionTitle());
 		}
 		return results;
 	}
@@ -128,27 +133,34 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	@Override
 	public void index() {
 		try {
-			PatentReceiver receiver = new PatentReceiver();
-			receiver.start();
-			PatentParser handler = new PatentParser(receiver);
-			File[] files = new File(dataDirectory).listFiles();
-			for (File patentFile : files) {
-				LOGGER.info(patentFile.getName());
-				FileInputStream stream = new FileInputStream(patentFile);
-				handler.setFileName(patentFile.getName());
-				handler.parse(stream);
+			File patents = new File(dataDirectory);
+			Queue<File> files = new ConcurrentLinkedQueue<File>(
+					Arrays.asList(patents.listFiles()));
+			int size = files.size();
+			List<PatentIndexer> threads = new ArrayList<PatentIndexer>();
+			for (int i = 0; i < Math.min(NUMBER_OF_THREADS, size); i++) {
+				PatentIndexer indexer = new PatentIndexer(Integer.toString(i),
+						files);
+				indexer.start();
+				threads.add(indexer);
 			}
-			receiver.finish();
+			try {
+				for (PatentIndexer indexer : threads) {
+					indexer.join();
+				}
+			} catch (InterruptedException e) {
+				LOGGER.severe("Error joining indexer threads");
+			}
+			List<String> names = threads.stream().map(PatentIndexer::getNames)
+					.flatMap(Collection::stream).collect(Collectors.toList());
 			index = new Index(dataDirectory);
 			index.create();
-			index.mergeIndices(receiver.getNames());
+			index.mergeIndices(names);
 			index.write();
 			index.load();
 			index.calculatePageRank();
 		} catch (IOException e) {
 			LOGGER.severe("Error indexing files");
-		} catch (XMLStreamException e) {
-			LOGGER.severe("Error parsing XML");
 		}
 	}
 
@@ -188,8 +200,8 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		BooleanSearch s = new BooleanSearch(index, query);
 		s.setTopK(topK);
 		List<QLResult> results = s.search();
-		return generateOutput(results, new SnippetGenerator(index).generateSnippets(results, s.getPhrases()),
-				s.getQuery());
+		return generateOutput(results, new SnippetGenerator(index)
+				.generateSnippets(results, s.getPhrases()), s.getQuery());
 	}
 
 	private ArrayList<String> searchLinks(String query, int topK) {
@@ -203,7 +215,7 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 		RelevantSearch s = new RelevantSearch(index, query);
 		s.setTopK(topK);
 		List<QLResult> results = s.search();
-		return generateOutput(results, new SnippetGenerator(index).generateSnippets(results, s.getPhrases()),
-				s.getQuery());
+		return generateOutput(results, new SnippetGenerator(index)
+				.generateSnippets(results, s.getPhrases()), s.getQuery());
 	}
 }
