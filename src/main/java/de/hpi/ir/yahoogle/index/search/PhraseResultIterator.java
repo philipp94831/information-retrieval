@@ -1,9 +1,11 @@
-package de.hpi.ir.yahoogle.index;
+package de.hpi.ir.yahoogle.index.search;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import de.hpi.ir.yahoogle.index.DocumentPosting;
 
 public class PhraseResultIterator implements Iterator<DocumentPosting> {
 
@@ -16,11 +18,10 @@ public class PhraseResultIterator implements Iterator<DocumentPosting> {
 		first = sources.get(0);
 		sources.remove(0);
 		this.sources = sources;
-		fetchNext();
+		currentNext = fetchNext();
 	}
 
-	private void fetchNext() {
-		currentNext = null;
+	private DocumentPosting fetchNext() {
 		while (first.hasNext()) {
 			DocumentPosting base = first.next();
 			boolean invalid = false;
@@ -43,10 +44,10 @@ public class PhraseResultIterator implements Iterator<DocumentPosting> {
 				}
 			}
 			if (!invalid) {
-				currentNext = base;
-				return;
+				return base;
 			}
 		}
+		return null;
 	}
 
 	private DocumentPosting nextPosting(int i) {
@@ -68,7 +69,7 @@ public class PhraseResultIterator implements Iterator<DocumentPosting> {
 	@Override
 	public DocumentPosting next() {
 		DocumentPosting next = currentNext;
-		fetchNext();
+		currentNext = fetchNext();
 		return next;
 	}
 }

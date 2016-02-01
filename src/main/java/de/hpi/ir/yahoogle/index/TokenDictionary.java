@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialTokenDictionary;
+import de.hpi.ir.yahoogle.index.search.BinaryPostingListIterator;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.util.MergeSortIterator;
 

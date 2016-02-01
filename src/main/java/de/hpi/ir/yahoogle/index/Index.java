@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
+import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
+import de.hpi.ir.yahoogle.index.search.TokenResultIterator;
 import de.hpi.ir.yahoogle.language.Stemmer;
 import de.hpi.ir.yahoogle.language.Tokenizer;
 

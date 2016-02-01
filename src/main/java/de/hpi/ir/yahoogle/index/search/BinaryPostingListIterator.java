@@ -1,8 +1,12 @@
-package de.hpi.ir.yahoogle.index;
+package de.hpi.ir.yahoogle.index.search;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.logging.Logger;
+
+import de.hpi.ir.yahoogle.index.BinaryPostingList;
+import de.hpi.ir.yahoogle.index.DocumentPosting;
+import de.hpi.ir.yahoogle.index.TokenDictionary;
 
 public class BinaryPostingListIterator implements Iterable<DocumentPosting>, Iterator<DocumentPosting> {
 
@@ -39,7 +43,6 @@ public class BinaryPostingListIterator implements Iterable<DocumentPosting>, Ite
 					return currentIterator.hasNext();
 				} catch (IOException e) {
 					LOGGER.severe("Error reading next BinaryPostingList");
-					;
 				}
 			}
 		}

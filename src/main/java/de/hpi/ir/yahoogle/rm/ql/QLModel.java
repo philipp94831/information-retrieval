@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import de.hpi.ir.yahoogle.index.DocumentPosting;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
-import de.hpi.ir.yahoogle.index.PhraseResultIterator;
+import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
