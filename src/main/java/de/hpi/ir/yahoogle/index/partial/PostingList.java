@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.hpi.ir.yahoogle.index.DocumentPosting;
-import de.hpi.ir.yahoogle.index.Posting;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 class PostingList
@@ -22,7 +21,7 @@ class PostingList
 		documents.put(posting.getDocNumber(), posting);
 	}
 
-	public void add(int docNumber, Posting posting) {
+	public void add(int docNumber, Integer posting) {
 		if (documents.get(docNumber) == null) {
 			documents.put(docNumber, new DocumentPosting(docNumber));
 		}

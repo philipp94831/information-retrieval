@@ -13,7 +13,7 @@ public class PageRank {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(PageRank.class.getName());
-	private static final double LAMDBA = 0.15;
+	private static final double LAMBDA = 0.15;
 	private final Map<Integer, List<Integer>> cites;
 	private Map<Integer, Integer> outLinks;
 	private Map<Integer, Double> pageRank;
@@ -79,6 +79,6 @@ public class PageRank {
 			Integer o = outLinks.get(citation);
 			inScore += p / o;
 		}
-		return (1 - LAMDBA) / cites.size() + LAMDBA * inScore;
+		return LAMBDA / cites.size() + (1 - LAMBDA) * inScore;
 	}
 }

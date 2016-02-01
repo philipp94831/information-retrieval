@@ -2,27 +2,21 @@ package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialTokenDictionary;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
 public class TokenDictionary extends Loadable {
 
 	private static final String FILE_NAME = "dictionary";
-	private static final Logger LOGGER = Logger
-			.getLogger(TokenDictionary.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(TokenDictionary.class.getName());
 
 	private static String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
-				+ FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
 	}
 
 	private long currentOffset;
@@ -36,7 +30,7 @@ public class TokenDictionary extends Loadable {
 		offsets = new StringOffsetsIndex(FILE_NAME);
 		offsets.create();
 	}
-	
+
 	public BinaryPostingListIterator find(String token) {
 		try {
 			Long offset = offsets.get(token);
@@ -57,11 +51,6 @@ public class TokenDictionary extends Loadable {
 		byte[] b = new byte[size];
 		file.readFully(b);
 		return new BinaryPostingList(b);
-	}
-
-	private void finishPostingList(int count) throws IOException {
-		file.seek(currentOffset);
-		file.writeInt(count);
 	}
 
 	public Set<String> getTokens() {
@@ -91,61 +80,21 @@ public class TokenDictionary extends Loadable {
 
 	public void merge(List<PartialTokenDictionary> indexes) throws IOException {
 		LOGGER.info("Merging token dictionaries");
-		List<Iterator<BinaryPostingList>> iterators = indexes.stream()
-				.map(PartialTokenDictionary::iterator)
-				.collect(Collectors.toList());
-		TreeMap<BinaryPostingList, Integer> candidates = new TreeMap<>();
-		for (int i = 0; i < iterators.size(); i++) {
-			Iterator<BinaryPostingList> iterator = iterators.get(i);
-			if (iterator.hasNext()) {
-				candidates.put(iterator.next(), i);
-			}
-		}
-		BinaryPostingList currentPostings = null;
-		int count = 0;
-		while (!candidates.isEmpty()) {
-			Entry<BinaryPostingList, Integer> entry = candidates
-					.pollFirstEntry();
-			Iterator<BinaryPostingList> iterator = iterators
-					.get(entry.getValue());
-			if (iterator.hasNext()) {
-				candidates.put(iterator.next(), entry.getValue());
-			}
-			BinaryPostingList postingList = entry.getKey();
-			String token = postingList.getToken();
-			if (currentPostings == null) {
-				startPostingList(token);
-				count = 1;
-				currentPostings = postingList;
-				continue;
-			}
-			if (!token.equals(currentPostings.getToken())) {
-				writePostingList(currentPostings);
-				finishPostingList(count);
-				startPostingList(token);
-				count = 1;
-				currentPostings = postingList;
-			} else {
-				byte[] newBytes = postingList.getBytes();
-				byte[] rest = currentPostings.append(newBytes);
-				if (rest.length > 0) {
-					writePostingList(currentPostings);
-					count++;
-					currentPostings = new BinaryPostingList(postingList.getToken(), rest);
+		MergeSortIterator<PartialTokenDictionary, BinaryPostingList, String> postingLists = new MergeSortIterator<>(indexes);
+		while (postingLists.hasNext()) {
+			List<BinaryPostingList> postingListList = postingLists.next();
+			PartitionedBinaryPostingList currentPostings = null;
+			for(BinaryPostingList postingList : postingListList) {
+				if (currentPostings == null) {
+					currentPostings = new PartitionedBinaryPostingList(postingList);
+					continue;
 				}
+				currentPostings.add(postingList);
+			}
+			if (currentPostings != null) {
+				writePostingList(currentPostings);
 			}
 		}
-		if(currentPostings != null) {
-			writePostingList(currentPostings);
-			finishPostingList(count);
-		}
-	}
-
-	private void startPostingList(String token) throws IOException {
-		currentOffset = file.length();
-		offsets.put(token, currentOffset);
-		file.seek(currentOffset);
-		file.writeInt(0);
 	}
 
 	public void warmUp() {
@@ -157,11 +106,20 @@ public class TokenDictionary extends Loadable {
 		offsets.write();
 	}
 
-	private void writePostingList(BinaryPostingList postingList) throws IOException {
-		byte[] bytes = postingList.getBytes();
-		ByteWriter out = new ByteWriter();
-		out.writeInt(bytes.length);
-		out.write(bytes);
-		file.write(out.toByteArray());
+	private void writePostingList(PartitionedBinaryPostingList postingList) throws IOException {
+		currentOffset = file.length();
+		offsets.put(postingList.getToken(), currentOffset);
+		file.seek(currentOffset);
+		List<byte[]> blocks = postingList.getSortedBlocks();
+		file.writeInt(blocks.size());
+		if(blocks.size() > 1) {
+			LOGGER.info("writing " + blocks.size() + " blocks for token " + postingList.getToken());
+		}
+		for (byte[] bytes : blocks) {
+			ByteWriter out = new ByteWriter();
+			out.writeInt(bytes.length);
+			out.write(bytes);
+			file.write(out.toByteArray());
+		}
 	}
 }

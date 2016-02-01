@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
-import de.hpi.ir.yahoogle.index.Posting;
 import de.hpi.ir.yahoogle.language.Stemmer;
 import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.parsing.Patent;
@@ -16,8 +15,7 @@ import de.hpi.ir.yahoogle.parsing.PatentPart;
 public class PartialIndex extends Loadable {
 
 	private static final String BASE_NAME = ".index";
-	private static final Logger LOGGER = Logger
-			.getLogger(PartialIndex.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(PartialIndex.class.getName());
 	private static final boolean SKIP_STOPWORDS = true;
 	private PartialCitationIndex citations;
 	private PartialTokenDictionary dictionary;
@@ -66,8 +64,7 @@ public class PartialIndex extends Loadable {
 	}
 
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
-				+ FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
 	}
 
 	public PartialCitationIndex getCitations() {
@@ -87,9 +84,7 @@ public class PartialIndex extends Loadable {
 		Tokenizer tokenizer = new Tokenizer(patentAbstract, SKIP_STOPWORDS);
 		while (tokenizer.hasNext()) {
 			String token = Stemmer.stem(tokenizer.next());
-			Posting posting = new Posting();
-			posting.setPosition(startOffset + tokenizer.getPosition());
-			dictionary.add(token, resume.getDocNumber(), posting);
+			dictionary.add(token, resume.getDocNumber(), startOffset + tokenizer.getPosition());
 		}
 		wordCount += tokenizer.getPosition();
 		startOffset += tokenizer.getPosition() + 1;
@@ -107,9 +102,7 @@ public class PartialIndex extends Loadable {
 			Tokenizer tokenizer = new Tokenizer(claim, SKIP_STOPWORDS);
 			while (tokenizer.hasNext()) {
 				String token = Stemmer.stem(tokenizer.next());
-				Posting posting = new Posting();
-				posting.setPosition(startOffset + tokenizer.getPosition());
-				dictionary.add(token, resume.getDocNumber(), posting);
+				dictionary.add(token, resume.getDocNumber(), startOffset + tokenizer.getPosition());
 			}
 			wordCount += tokenizer.getPosition();
 			startOffset += tokenizer.getPosition() + 1;
@@ -122,9 +115,7 @@ public class PartialIndex extends Loadable {
 			Tokenizer tokenizer = new Tokenizer(description, SKIP_STOPWORDS);
 			while (tokenizer.hasNext()) {
 				String token = Stemmer.stem(tokenizer.next());
-				Posting posting = new Posting();
-				posting.setPosition(startOffset + tokenizer.getPosition());
-				dictionary.add(token, resume.getDocNumber(), posting);
+				dictionary.add(token, resume.getDocNumber(), startOffset + tokenizer.getPosition());
 			}
 			wordCount += tokenizer.getPosition();
 			startOffset += tokenizer.getPosition() + 1;
@@ -136,9 +127,7 @@ public class PartialIndex extends Loadable {
 		Tokenizer tokenizer = new Tokenizer(title, SKIP_STOPWORDS);
 		while (tokenizer.hasNext()) {
 			String token = Stemmer.stem(tokenizer.next());
-			Posting posting = new Posting();
-			posting.setPosition(startOffset + tokenizer.getPosition());
-			dictionary.add(token, resume.getDocNumber(), posting);
+			dictionary.add(token, resume.getDocNumber(), startOffset + tokenizer.getPosition());
 		}
 		wordCount += tokenizer.getPosition();
 		startOffset += tokenizer.getPosition() + 1;

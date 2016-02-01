@@ -9,7 +9,6 @@ import java.util.TreeMap;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.BinaryPostingList;
 import de.hpi.ir.yahoogle.index.Loadable;
-import de.hpi.ir.yahoogle.index.Posting;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class PartialTokenDictionary extends Loadable
@@ -24,7 +23,7 @@ public class PartialTokenDictionary extends Loadable
 		this.name = name;
 	}
 
-	public void add(String token, int docNumber, Posting posting) {
+	public void add(String token, int docNumber, Integer posting) {
 		if (dictionary.get(token) == null) {
 			dictionary.put(token, new PostingList(token));
 		}

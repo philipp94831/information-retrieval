@@ -4,18 +4,17 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-public class BinaryPostingListIterator implements Iterator<DocumentPosting>{
+public class BinaryPostingListIterator implements Iterable<DocumentPosting>, Iterator<DocumentPosting> {
 
-	private static final Logger LOGGER = Logger
-			.getLogger(BinaryPostingListIterator.class.getName());
-	
+	private static final Logger LOGGER = Logger.getLogger(BinaryPostingListIterator.class.getName());
 	private final int count;
 	private long currentPosition;
 	private final TokenDictionary tokenDictionary;
 	private int partsRead;
 	private Iterator<DocumentPosting> currentIterator;
 
-	public BinaryPostingListIterator(TokenDictionary tokenDictionary, int count, long currentPosition) throws IOException {
+	public BinaryPostingListIterator(TokenDictionary tokenDictionary, int count, long currentPosition)
+			throws IOException {
 		this.tokenDictionary = tokenDictionary;
 		this.count = count;
 		this.currentPosition = currentPosition;
@@ -31,15 +30,16 @@ public class BinaryPostingListIterator implements Iterator<DocumentPosting>{
 
 	@Override
 	public boolean hasNext() {
-		if(currentIterator.hasNext()) {
+		if (currentIterator.hasNext()) {
 			return true;
 		} else {
-			if(partsRead < count) {
+			if (partsRead < count) {
 				try {
 					getNextPart();
 					return currentIterator.hasNext();
 				} catch (IOException e) {
-					LOGGER.severe("Error reading next BinaryPostingList");;
+					LOGGER.severe("Error reading next BinaryPostingList");
+					;
 				}
 			}
 		}
@@ -49,5 +49,10 @@ public class BinaryPostingListIterator implements Iterator<DocumentPosting>{
 	@Override
 	public DocumentPosting next() {
 		return currentIterator.next();
+	}
+
+	@Override
+	public Iterator<DocumentPosting> iterator() {
+		return this;
 	}
 }

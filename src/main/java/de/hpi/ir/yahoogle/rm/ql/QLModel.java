@@ -2,6 +2,7 @@ package de.hpi.ir.yahoogle.rm.ql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +11,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import de.hpi.ir.yahoogle.index.DocumentPosting;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
+import de.hpi.ir.yahoogle.index.PhraseResultIterator;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
@@ -49,7 +52,6 @@ public class QLModel extends Model<QLResult> {
 	private void initializeModel(List<String> query) {
 		phrases = query;
 		found = findPatents();
-		cis = computeCi();
 		all = getAllCandidates();
 	}
 
@@ -59,15 +61,21 @@ public class QLModel extends Model<QLResult> {
 	}
 
 	private List<Map<Integer, Set<Integer>>> findPatents() {
-		return phrases.stream().map(index::findPositions).collect(Collectors.toList());
-	}
-
-	private int[] computeCi() {
-		int[] cis = new int[phrases.size()];
-		for (int i = 0; i < phrases.size(); i++) {
-			cis[i] = found.get(i).values().stream().mapToInt(Set::size).sum();
+		cis = new int[phrases.size()];
+		List<Map<Integer, Set<Integer>>> listOfResults = new ArrayList<>();
+		int i = 0;
+		for(String phrase : phrases) {
+			cis[i] = 0;
+			Map<Integer, Set<Integer>> result = new HashMap<>();
+			PhraseResultIterator iterator = index.findPositions(phrase);
+			while(iterator.hasNext()) {
+				DocumentPosting d = iterator.next();
+				cis[i] += d.getAll().size();
+				result.put(d.getDocNumber(), d.getAll());
+			}
+			listOfResults.add(result);
 		}
-		return cis;
+		return listOfResults;
 	}
 
 	private QLResult computeForPatent(Integer docNumber) {
