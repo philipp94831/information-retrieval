@@ -54,7 +54,8 @@ public class QLModel extends Model<QLResult> {
 	}
 
 	private List<QLResult> computeAll() {
-		return all.stream().map(this::computeForPatent).collect(Collectors.toList());
+		List<QLResult> res = all.stream().map(this::computeForPatent).collect(Collectors.toList());
+		return res;
 	}
 
 	private List<Map<Integer, Set<Integer>>> findPatents() {
@@ -80,6 +81,7 @@ public class QLModel extends Model<QLResult> {
 			double fi = positions.stream().mapToDouble(pos -> partWeight(resume.getPartAtPosition(pos))).sum();
 			score += compute(fi, ld, cis[i]);
 		}
+//		score /= Math.pow(resume.getPageRank(), 0.1);
 		result.setScore(score);
 		return result;
 	}

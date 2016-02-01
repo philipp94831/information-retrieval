@@ -13,10 +13,11 @@ import de.hpi.ir.yahoogle.language.Stemmer;
 import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.rm.ql.QLModel;
 import de.hpi.ir.yahoogle.rm.ql.QLResult;
+import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 import de.hpi.ir.yahoogle.util.ValueComparator;
 
-public class RelevantSearch extends Search {
-	private static final int TOP_WORDS = 4;
+public class RelevantSearch extends Search<QLResult> {
+	private static final int TOP_WORDS = 2;
 
 	private static final String PRF_SEPARATOR = "#";
 
@@ -54,10 +55,10 @@ public class RelevantSearch extends Search {
 	}
 
 	@Override
-	public ArrayList<String> search() {
+	public List<QLResult> search() {
 		List<QLResult> results = searchResults(Math.max(topK, prf));
-		List<String> phrases = QueryProcessor.extractPhrases(query);
-		Map<Integer, String> snippets = generateSnippets(results, phrases);
+		phrases = QueryProcessor.extractPhrases(query);
+		Map<Integer, String> snippets = new SnippetGenerator(index).generateSnippets(results, phrases);
 		if (prf > 0) {
 			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());
 			List<String> newPhrases = new ArrayList<>();
@@ -65,9 +66,8 @@ public class RelevantSearch extends Search {
 			newPhrases.addAll(topWords);
 			RelevantSearch rs = new RelevantSearch(index, String.join(" ", newPhrases));
 			results = rs.searchResults(topK);
-			snippets = generateSnippets(results, phrases);
 		}
-		return generateOutput(results, snippets, query);
+		return results;
 	}
 
 	public List<QLResult> searchResults(int topK) {

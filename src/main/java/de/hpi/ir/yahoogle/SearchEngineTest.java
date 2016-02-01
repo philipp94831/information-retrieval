@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.hpi.ir.yahoogle.index.PatentIndex;
+
 /**
  *
  * @author: Your team name
@@ -18,13 +20,14 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = true;
+	private static final boolean CREATE_INDEX = false;
 	private static final String[] EXECERSICE_10 = { "\"graph editor\"",
 			"\"social trend\"", "fossil hydrocarbons",
 			"physiological AND saline", "tires NOT pressure" };
 	private static final String[] EXECERSICE_12 = { "LinkTo:07920906",
 			"LinkTo:07904949", "LinkTo:08078787",
-			"LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142" };
+			"LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142",
+			"review guidelines", "on-chip OR OCV" };
 	private static final String[] EXECERSICE_2 = { "selection", "device",
 			"justify", "write" };
 	private static final String[] EXECERSICE_3 = { "file-system", "included",
@@ -61,12 +64,12 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = allQueries();
+		String[] queries = EXECERSICE_10;
 		for (String query : queries) {
-			printResults(search(query, 10), query);
+			printResults(search(query, 15), query);
 		}
 	}
-	
+
 	private static String[] allQueries() {
 		List<String> all = new ArrayList<>();
 		all.addAll(Arrays.asList(EXECERSICE_2));
@@ -98,7 +101,7 @@ public class SearchEngineTest {
 		long startTime = System.nanoTime();
 		ArrayList<String> results = myEngine.search(query, topK);
 		long time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for search: " + time + "ms");
+		// System.out.println("Time for search: " + time + "ms");
 		return results;
 	}
 }

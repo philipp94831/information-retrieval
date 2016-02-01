@@ -16,6 +16,7 @@ public class QLResult extends Result implements Comparable<QLResult> {
 	
 	@Override
 	public int compareTo(QLResult o2) {
-		return -Double.compare(score, o2.score);
+		int comp = -Double.compare(score, o2.score);
+		return comp == 0? -Integer.compare(getDocNumber(), o2.getDocNumber()) : comp;
 	}
 }

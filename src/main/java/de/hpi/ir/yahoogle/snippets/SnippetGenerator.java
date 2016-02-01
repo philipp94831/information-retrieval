@@ -1,10 +1,14 @@
 package de.hpi.ir.yahoogle.snippets;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
@@ -13,13 +17,23 @@ import de.hpi.ir.yahoogle.rm.Result;
 public class SnippetGenerator {
 
 	static final int MAX_WINDOW_LENGTH = 10;
-	private final List<String> phrases;
+	private final Index index;
 
-	public SnippetGenerator(List<String> phrases) {
-		this.phrases = phrases;
+	public SnippetGenerator(Index index) {
+		this.index = index;
 	}
 
-	private SnippetWindow buildWindow(Result result, int i) {
+	public Map<Integer, String> generateSnippets(Collection<? extends Result> results, List<String> phrases) {
+		Map<Integer, String> snippets = new HashMap<>();
+		for (Result result : results) {
+			int docNumber = result.getDocNumber();
+			String snippet = generate(result, index.getPatent(docNumber), phrases);
+			snippets.put(docNumber, snippet);
+		}
+		return snippets;
+	}
+
+	private SnippetWindow buildWindow(Result result, int i, List<String> phrases) {
 		SnippetWindow window = new SnippetWindow(i);
 		for (String phrase : phrases) {
 			TreeSet<Integer> positions = new TreeSet<>(
@@ -43,7 +57,7 @@ public class SnippetGenerator {
 		return window;
 	}
 
-	public String generate(Result result, PatentResume resume) {
+	private String generate(Result result, PatentResume resume, List<String> phrases) {
 		String patentAbstract = resume.getPatent().getPatentAbstract();
 		Tokenizer tokenizer = new Tokenizer(patentAbstract);
 		while (tokenizer.hasNext()) {
@@ -54,7 +68,7 @@ public class SnippetGenerator {
 		SnippetWindow bestWindow = new SnippetWindow(start);
 		for (int i = start; i <= Math.max(1,
 				start + numberOfTokens - MAX_WINDOW_LENGTH); i++) {
-			SnippetWindow window = buildWindow(result, i);
+			SnippetWindow window = buildWindow(result, i, phrases);
 			if (bestWindow.compareTo(window) > 0) {
 				bestWindow = window;
 			}

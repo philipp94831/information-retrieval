@@ -30,6 +30,7 @@ public class PatentResume
 	private String patentFolder;
 	private final long start;
 	private int wordCount;
+	private double pageRank = 0.0;
 
 	public PatentResume(byte[] bytes) {
 		ByteReader in = new ByteReader(bytes);
@@ -38,6 +39,7 @@ public class PatentResume
 		this.start = in.readLong();
 		this.end = in.readLong();
 		this.wordCount = in.readInt();
+		this.pageRank = in.readDouble();
 		for (PatentPart part : PatentPart.values()) {
 			this.setPosition(part, in.readInt());
 		}
@@ -131,9 +133,18 @@ public class PatentResume
 		out.writeLong(start);
 		out.writeLong(end);
 		out.writeInt(wordCount);
+		out.writeDouble(pageRank);
 		for (PatentPart part : PatentPart.values()) {
 			out.writeInt(getPosition(part));
 		}
 		return out.toByteArray();
+	}
+
+	public double getPageRank() {
+		return pageRank;
+	}
+
+	public void setPageRank(double pageRank) {
+		this.pageRank = pageRank;
 	}
 }

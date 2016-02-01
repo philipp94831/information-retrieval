@@ -2,6 +2,7 @@ package de.hpi.ir.yahoogle.language;
 
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 public class Tokenizer implements Iterator<String> {
 
@@ -82,7 +83,7 @@ public class Tokenizer implements Iterator<String> {
 			token = tokenizer.nextToken();
 		}
 		if (!StopWordList.isStopword(token)
-				&& !token.matches("[" + DELIM + "]+")) {
+				&& !token.matches("[" + Pattern.quote(DELIM) + "]+")) {
 			realToken = true;
 			pos++;
 		}

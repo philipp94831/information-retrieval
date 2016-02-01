@@ -51,4 +51,8 @@ public class ByteReader implements AbstractReader {
 	public int remaining() {
 		return in.remaining();
 	}
+
+	public double readDouble() {
+		return in.getDouble();
+	}
 }

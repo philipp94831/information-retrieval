@@ -154,6 +154,21 @@ public class Index extends Loadable {
 		LOGGER.info("finished merging");
 	}
 
+	public void calculatePageRank() throws IOException {
+		LOGGER.info("calculating PageRank");
+		Set<Integer> all = patents.getAllDocNumbers();
+		Map<Integer, List<Integer>> cites = new HashMap<>();
+		all.forEach(d -> cites.put(d, citations.find(d)));
+		PageRank pr = new PageRank(cites);
+		Map<Integer, Double> pageRank = pr.compute();
+		for (int docNumber : all) {
+			PatentResume resume = patents.get(docNumber);
+			resume.setPageRank(pageRank.get(docNumber));
+			patents.update(resume);
+		}
+		LOGGER.info("finished calculating PageRank");
+	}
+
 	private void printDictionary() {
 		try {
 			deleteIfExists(DICTIONARY_FILE);
