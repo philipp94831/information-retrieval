@@ -20,7 +20,7 @@ import de.hpi.ir.yahoogle.index.PatentIndex;
 @SuppressWarnings("unused")
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = false;
+	private static final boolean CREATE_INDEX = true;
 	private static final String[] EXECERSICE_10 = { "\"graph editor\"",
 			"\"social trend\"", "fossil hydrocarbons",
 			"physiological AND saline", "tires NOT pressure" };
@@ -101,7 +101,7 @@ public class SearchEngineTest {
 		long startTime = System.nanoTime();
 		ArrayList<String> results = myEngine.search(query, topK);
 		long time = (System.nanoTime() - startTime) / 1000000;
-		// System.out.println("Time for search: " + time + "ms");
+		System.out.println("Time for search: " + time + "ms");
 		return results;
 	}
 }

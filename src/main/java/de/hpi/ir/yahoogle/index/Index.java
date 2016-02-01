@@ -60,23 +60,49 @@ public class Index extends Loadable {
 	private Set<Integer> find(String phrase) {
 		return findPositions(phrase).keySet();
 	}
-
+	
 	private Map<Integer, Set<Integer>> findAll(String token) {
+		return findAll(token, null);
+	}
+
+	private Map<Integer, Set<Integer>> findAll(String token, Set<Integer> whiteList) {
 		boolean prefix = token.endsWith("*");
+		Map<Integer, Set<Integer>> result = new HashMap<>();
 		if (prefix) {
 			String pre = token.substring(0, token.length() - 1);
-			Map<Integer, Set<Integer>> result = new HashMap<>();
 			for (String t : dictionary.getTokensForPrefix(pre)) {
-				dictionary.find(t).entrySet().forEach(e -> result
-						.merge(e.getKey(), e.getValue(), (v1, v2) -> {
-							v1.addAll(v2);
-							return v1;
-						}));
+				BinaryPostingListIterator iterator = dictionary
+						.find(t);
+				while (iterator.hasNext()) {
+					DocumentPosting posting = iterator.next();
+					int docNumber = posting.getDocNumber();
+					if(whiteList != null && !whiteList.contains(docNumber)) {
+						continue;
+					}
+					Set<Integer> positions = posting.getAll().stream()
+							.map(Posting::getPosition)
+							.collect(Collectors.toSet());
+					result.merge(docNumber, positions, (v1, v2) -> {
+						v1.addAll(v2);
+						return v1;
+					});
+				}
 			}
-			return result;
 		} else {
-			return dictionary.find(Stemmer.stem(token));
+			BinaryPostingListIterator iterator = dictionary
+					.find(Stemmer.stem(token));
+			while (iterator.hasNext()) {
+				DocumentPosting posting = iterator.next();
+				int docNumber = posting.getDocNumber();
+				if(whiteList != null && !whiteList.contains(docNumber)) {
+					continue;
+				}
+				Set<Integer> positions = posting.getAll().stream()
+						.map(Posting::getPosition).collect(Collectors.toSet());
+				result.put(docNumber, positions);
+			}
 		}
+		return result;
 	}
 
 	private List<Integer> findLinks(String phrase) {
@@ -95,7 +121,7 @@ public class Index extends Loadable {
 			result = findAll(tokenizer.next());
 		}
 		for (int i = 1; tokenizer.hasNext(); i++) {
-			Map<Integer, Set<Integer>> newResult = findAll(tokenizer.next());
+			Map<Integer, Set<Integer>> newResult = findAll(tokenizer.next(), result.keySet());
 			matchNextPhraseToken(result, newResult, i);
 		}
 		return result;

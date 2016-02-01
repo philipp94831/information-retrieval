@@ -2,10 +2,8 @@ package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -38,28 +36,27 @@ public class TokenDictionary extends Loadable {
 		offsets = new StringOffsetsIndex(FILE_NAME);
 		offsets.create();
 	}
-
-	public Map<Integer, Set<Integer>> find(String token) {
+	
+	public BinaryPostingListIterator find(String token) {
 		try {
 			Long offset = offsets.get(token);
 			if (offset != null) {
 				file.seek(offset);
 				int count = file.readInt();
-				Map<Integer, Set<Integer>> result = new HashMap<>();
-				for (int i = 0; i < count; i++) {
-					int size = file.readInt();
-					byte[] b = new byte[size];
-					file.readFully(b);
-					BinaryPostingList postingList = new BinaryPostingList(token,
-							b);
-					result.putAll(postingList.getDocumentsWithPositions());
-				}
-				return result;
+				return new BinaryPostingListIterator(this, count, file.getFilePointer());
 			}
 		} catch (IOException e) {
-			LOGGER.severe("Error reading posting list for token " + token);
+			LOGGER.severe("Error initializing search for token " + token);
 		}
-		return new HashMap<>();
+		return null;
+	}
+
+	public BinaryPostingList getBinaryPostingList(long offset) throws IOException {
+		file.seek(offset);
+		int size = file.readInt();
+		byte[] b = new byte[size];
+		file.readFully(b);
+		return new BinaryPostingList(b);
 	}
 
 	private void finishPostingList(int count) throws IOException {
@@ -130,12 +127,11 @@ public class TokenDictionary extends Loadable {
 				currentPostings = postingList;
 			} else {
 				byte[] newBytes = postingList.getBytes();
-				if (currentPostings.hasSpaceLeft(newBytes)) {
-					currentPostings.append(newBytes);
-				} else {
+				byte[] rest = currentPostings.append(newBytes);
+				if (rest.length > 0) {
 					writePostingList(currentPostings);
 					count++;
-					currentPostings = postingList;
+					currentPostings = new BinaryPostingList(postingList.getToken(), rest);
 				}
 			}
 		}

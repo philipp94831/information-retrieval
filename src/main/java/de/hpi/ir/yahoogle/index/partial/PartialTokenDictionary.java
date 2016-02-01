@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.BinaryPostingList;
 import de.hpi.ir.yahoogle.index.Loadable;
+import de.hpi.ir.yahoogle.index.Posting;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 
 public class PartialTokenDictionary extends Loadable

@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import de.hpi.ir.yahoogle.io.AbstractWriter;
+import de.hpi.ir.yahoogle.index.DocumentPosting;
+import de.hpi.ir.yahoogle.index.Posting;
 import de.hpi.ir.yahoogle.io.ByteWriter;
-import de.hpi.ir.yahoogle.io.VByteWriter;
 
 class PostingList
 		implements Comparable<PostingList>, Iterable<DocumentPosting> {
@@ -55,17 +55,7 @@ class PostingList
 	public byte[] toByteArray() throws IOException {
 		ByteWriter block = new ByteWriter();
 		for (DocumentPosting entry : documents.values()) {
-			AbstractWriter positions = new VByteWriter();
-			int oldPos = 0;
-			for (Posting posting : entry) {
-				int dp = (posting.getPosition() - oldPos);
-				positions.writeInt(dp);
-				oldPos = posting.getPosition();
-			}
-			byte[] encoded = positions.toByteArray();
-			block.writeInt(entry.getDocNumber()); // docNumber
-			block.writeInt(encoded.length); // size of block
-			block.write(encoded);
+			block.write(entry.toByteArray());
 		}
 		return block.toByteArray();
 	}

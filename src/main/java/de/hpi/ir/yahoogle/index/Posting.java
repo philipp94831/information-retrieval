@@ -1,6 +1,6 @@
-package de.hpi.ir.yahoogle.index.partial;
+package de.hpi.ir.yahoogle.index;
 
-class Posting implements Comparable<Posting> {
+public class Posting implements Comparable<Posting> {
 
 	private int position;
 

@@ -8,12 +8,14 @@ import java.nio.charset.Charset;
 public class ByteWriter implements AbstractWriter {
 
 	private final ByteArrayOutputStream out;
+	private int size = Integer.MAX_VALUE;
 
 	public ByteWriter() {
 		out = new ByteArrayOutputStream();
 	}
 
 	public ByteWriter(int size) {
+		this.size  = size;
 		out = new ByteArrayOutputStream(size);
 	}
 
@@ -48,5 +50,9 @@ public class ByteWriter implements AbstractWriter {
 
 	public void writeDouble(double d) throws IOException {
 		out.write(ByteBuffer.allocate(Double.BYTES).putDouble(d).array());
+	}
+	
+	public int spaceLeft() {
+		return size - out.size();
 	}
 }
