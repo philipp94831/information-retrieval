@@ -50,8 +50,7 @@ public class QLModel extends Model<QLResult> {
 		phrases = query;
 		found = findPatents();
 		cis = computeCi();
-		Map<Integer, Integer> totalHits = getTotalHitsPerPatent();
-		all = getAllCandidates(totalHits);
+		all = getAllCandidates();
 	}
 
 	private List<QLResult> computeAll() {
@@ -87,7 +86,8 @@ public class QLModel extends Model<QLResult> {
 		return result;
 	}
 
-	private Set<Integer> getAllCandidates(Map<Integer, Integer> totalHits) {
+	private Set<Integer> getAllCandidates() {
+		Map<Integer, Integer> totalHits = getTotalHitsPerPatent();
 		if (totalHits.isEmpty()) {
 			return new HashSet<>();
 		}
