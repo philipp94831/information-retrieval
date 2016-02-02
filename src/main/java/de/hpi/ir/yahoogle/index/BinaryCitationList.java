@@ -6,8 +6,9 @@ import java.util.List;
 
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.Mergeable;
 
-public class BinaryCitationList implements Comparable<BinaryCitationList> {
+public class BinaryCitationList implements Comparable<BinaryCitationList>, Mergeable<Integer> {
 
 	private byte[] bytes;
 	private final int docNumber;
@@ -17,10 +18,10 @@ public class BinaryCitationList implements Comparable<BinaryCitationList> {
 		this.bytes = b;
 	}
 
-	public void append(byte[] newBytes) throws IOException {
+	public void append(BinaryCitationList postingList) throws IOException {
 		ByteWriter out = new ByteWriter();
 		out.write(bytes);
-		out.write(newBytes);
+		out.write(postingList.getBytes());
 		bytes = out.toByteArray();
 	}
 
@@ -45,5 +46,10 @@ public class BinaryCitationList implements Comparable<BinaryCitationList> {
 			result.add(in.readInt());
 		}
 		return result;
+	}
+
+	@Override
+	public Integer getKey() {
+		return this.docNumber;
 	}
 }

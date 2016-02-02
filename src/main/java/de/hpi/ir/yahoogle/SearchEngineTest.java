@@ -20,7 +20,7 @@ import de.hpi.ir.yahoogle.index.PatentIndex;
 @SuppressWarnings("unused")
 public class SearchEngineTest {
 
-	private static final boolean CREATE_INDEX = true;
+	private static final boolean CREATE_INDEX = false;
 	private static final String[] EXECERSICE_10 = { "\"graph editor\"", "\"social trend\"", "fossil hydrocarbons",
 			"physiological AND saline", "tires NOT pressure" };
 	private static final String[] EXECERSICE_12 = { "LinkTo:07920906", "LinkTo:07904949", "LinkTo:08078787",
@@ -70,7 +70,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = { "computer" };
+		String[] queries = {"selection"};
 		for (String query : queries) {
 			printResults(search(query, 15), query);
 		}

@@ -3,17 +3,12 @@ package de.hpi.ir.yahoogle.index;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
-import de.hpi.ir.yahoogle.index.partial.CitationListIterator;
 import de.hpi.ir.yahoogle.index.partial.PartialCitationIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
 public class CitationIndex extends Loadable {
 
@@ -61,43 +56,21 @@ public class CitationIndex extends Loadable {
 
 	public void merge(List<PartialCitationIndex> indexes) throws IOException {
 		LOGGER.info("Merging citation indices");
-		List<CitationListIterator> iterators = indexes.stream().map(PartialCitationIndex::iterator)
-				.collect(Collectors.toList());
-		TreeMap<BinaryCitationList, Integer> candidates = new TreeMap<>();
-		for (int i = 0; i < iterators.size(); i++) {
-			Iterator<BinaryCitationList> iterator = iterators.get(i);
-			candidates.put(iterator.next(), i);
-		}
-		BinaryCitationList currentPostings = null;
-		while (!candidates.isEmpty()) {
-			Entry<BinaryCitationList, Integer> entry = candidates.pollFirstEntry();
-			Iterator<BinaryCitationList> iterator = iterators.get(entry.getValue());
-			if (iterator.hasNext()) {
-				candidates.put(iterator.next(), entry.getValue());
+		MergeSortIterator<PartialCitationIndex, BinaryCitationList, Integer> postingLists = new MergeSortIterator<>(indexes);
+		while (postingLists.hasNext()) {
+			List<BinaryCitationList> postingListList = postingLists.next();
+			BinaryCitationList currentPostings = null;
+			for(BinaryCitationList postingList : postingListList) {
+				if (currentPostings == null) {
+					currentPostings = postingList;
+					continue;
+				}
+				currentPostings.append(postingList);
 			}
-			BinaryCitationList postingList = entry.getKey();
-			int token = postingList.getDocNumber();
-			if (currentPostings == null) {
-				startPostingList(token);
-				currentPostings = postingList;
-				continue;
-			}
-			if (token != currentPostings.getDocNumber()) {
+			if (currentPostings != null) {
 				writePostingList(currentPostings);
-				startPostingList(token);
-				currentPostings = postingList;
-			} else {
-				byte[] newBytes = postingList.getBytes();
-				currentPostings.append(newBytes);
 			}
 		}
-		writePostingList(currentPostings);
-	}
-
-	private void startPostingList(int token) throws IOException {
-		long currentOffset = file.length();
-		offsets.put(token, currentOffset);
-		file.seek(currentOffset);
 	}
 
 	public void warmUp() {
@@ -110,6 +83,9 @@ public class CitationIndex extends Loadable {
 	}
 
 	private void writePostingList(BinaryCitationList postingList) throws IOException {
+		long currentOffset = file.length();
+		offsets.put(postingList.getDocNumber(), currentOffset);
+		file.seek(currentOffset);
 		byte[] bytes = postingList.getBytes();
 		ByteWriter out = new ByteWriter();
 		out.writeInt(bytes.length);

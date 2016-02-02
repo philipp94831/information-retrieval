@@ -3,20 +3,16 @@ package de.hpi.ir.yahoogle.index;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialPatentIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
 public class PatentIndex extends Loadable {
 
@@ -103,19 +99,11 @@ public class PatentIndex extends Loadable {
 
 	public void merge(List<PartialPatentIndex> indexes) throws IOException {
 		LOGGER.info("Merging patent indices");
-		List<Iterator<PatentResume>> iterators = indexes.stream()
-				.map(PartialPatentIndex::iterator).collect(Collectors.toList());
-		TreeMap<PatentResume, Integer> candidates = new TreeMap<>();
-		for (int i = 0; i < iterators.size(); i++) {
-			Iterator<PatentResume> iterator = iterators.get(i);
-			candidates.put(iterator.next(), i);
-		}
-		while (!candidates.isEmpty()) {
-			Entry<PatentResume, Integer> entry = candidates.pollFirstEntry();
-			add(entry.getKey());
-			Iterator<PatentResume> iterator = iterators.get(entry.getValue());
-			if (iterator.hasNext()) {
-				candidates.put(iterator.next(), entry.getValue());
+		MergeSortIterator<PartialPatentIndex, PatentResume, Integer> patents = new MergeSortIterator<>(indexes);
+		while (patents.hasNext()) {
+			List<PatentResume> list = patents.next();
+			for(PatentResume resume : list) {
+				add(resume);
 			}
 		}
 	}

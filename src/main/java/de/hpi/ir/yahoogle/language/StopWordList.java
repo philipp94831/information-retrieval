@@ -34,6 +34,7 @@ public class StopWordList {
 	}
 
 	public static boolean isStopword(String word) {
-		return !word.endsWith("*") && stopwords.contains(Stemmer.stem(word));
+		String stem = Stemmer.stem(word);
+		return !word.endsWith("*") && (word.length() < 2 || stopwords.contains(stem) || stem.matches("[^a-zA-Z]*"));
 	}
 }

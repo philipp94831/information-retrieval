@@ -16,9 +16,10 @@ import de.hpi.ir.yahoogle.parsing.Patent;
 import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
+import de.hpi.ir.yahoogle.util.Mergeable;
 
 public class PatentResume
-		implements PatentParserCallback, Comparable<PatentResume> {
+		implements PatentParserCallback, Comparable<PatentResume>, Mergeable<Integer> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(PatentResume.class.getName());
@@ -146,5 +147,10 @@ public class PatentResume
 
 	public void setPageRank(double pageRank) {
 		this.pageRank = pageRank;
+	}
+
+	@Override
+	public Integer getKey() {
+		return docNumber;
 	}
 }

@@ -113,7 +113,7 @@ public class TokenDictionary extends Loadable {
 		List<byte[]> blocks = postingList.getSortedBlocks();
 		file.writeInt(blocks.size());
 		if(blocks.size() > 1) {
-			LOGGER.info("writing " + blocks.size() + " blocks for token " + postingList.getToken());
+			LOGGER.finest("writing " + blocks.size() + " blocks for token " + postingList.getToken());
 		}
 		for (byte[] bytes : blocks) {
 			ByteWriter out = new ByteWriter();
