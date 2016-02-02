@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import de.hpi.ir.yahoogle.index.Index;
@@ -70,11 +71,12 @@ public class RelevantSearch extends Search<QLResult> {
 		return results;
 	}
 
-	public List<QLResult> searchResults(int topK) {
+	public List<QLResult> searchResults(int topK, Set<Integer> whiteList) {
 		QLModel model = new QLModel(index);
 		if (topK != ALL_RESULTS) {
-			// model.setTopK(topK * 10);
+			model.setTopK(topK);
 		}
+		model.setWhiteList(whiteList);
 		List<QLResult> results = model.compute(query);
 		Collections.sort(results);
 		if (topK != ALL_RESULTS) {
@@ -85,5 +87,13 @@ public class RelevantSearch extends Search<QLResult> {
 
 	public List<QLResult> searchResults() {
 		return searchResults(ALL_RESULTS);
+	}
+
+	public List<QLResult> searchResults(int topK) {
+		return searchResults(topK, null);
+	}
+
+	public Iterable<QLResult> searchResults(Set<Integer> whiteList) {
+		return searchResults(ALL_RESULTS, whiteList);
 	}
 }

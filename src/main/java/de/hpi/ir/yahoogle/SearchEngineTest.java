@@ -70,7 +70,7 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = {"selection"};
+		String[] queries = EXECERSICE_12;
 		for (String query : queries) {
 			printResults(search(query, 15), query);
 		}

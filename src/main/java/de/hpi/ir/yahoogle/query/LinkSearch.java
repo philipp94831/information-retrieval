@@ -16,7 +16,6 @@ public class LinkSearch extends Search<BooleanResult> {
 
 	@Override
 	public List<BooleanResult> search() {
-		query = query.replaceAll("LinkTo:", "");
 		BooleanLinkModel model = new BooleanLinkModel(index);
 		Set<BooleanResult> booleanResult = model.compute(query);
 		return booleanResult.stream().limit(topK).collect(Collectors.toList());

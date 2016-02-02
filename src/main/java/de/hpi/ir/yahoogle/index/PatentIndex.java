@@ -21,8 +21,8 @@ public class PatentIndex extends Loadable {
 			.getLogger(PatentIndex.class.getName());
 	private static final int MAX_CACHE_SIZE = 100000;
 	private static final long TOTAL_WORD_COUNT_OFFSET = 0L;
-	private final Map<Integer, PatentResume> cache = new LinkedHashMap<>(
-			MAX_CACHE_SIZE, 0.75F, true);
+//	private final Map<Integer, PatentResume> cache = new LinkedHashMap<>(
+//			MAX_CACHE_SIZE, 0.75F, true);
 	private RandomAccessFile file;
 	private IntegerOffsetsIndex offsets;
 	private final String patentsFolder;
@@ -59,15 +59,15 @@ public class PatentIndex extends Loadable {
 	}
 
 	public PatentResume get(Integer docNumber) {
-		PatentResume resume = cache.get(docNumber);
-		if (resume != null) {
-			return resume;
-		}
+//		PatentResume resume = cache.get(docNumber);
+//		if (resume != null) {
+//			return resume;
+//		}
 		try {
 			long offset = offsets.get(docNumber);
-			resume = new PatentResume(read(offset));
+			PatentResume resume = new PatentResume(read(offset));
 			resume.setPatentFolder(patentsFolder);
-			cache.put(resume.getDocNumber(), resume);
+//			cache.put(resume.getDocNumber(), resume);
 			return resume;
 		} catch (IOException e) {
 			LOGGER.severe("Error loading patent " + docNumber + " from disk");
@@ -117,17 +117,17 @@ public class PatentIndex extends Loadable {
 	}
 
 	public void warmUp() {
-		try {
-			List<Integer> docNumbers = new ArrayList<>(offsets.keys());
-			Random rand = new Random();
-			for (int i = 0; i < MAX_CACHE_SIZE / 2 && !docNumbers.isEmpty(); i++) {
-				int index = rand.nextInt(docNumbers.size());
-				get(docNumbers.get(index));
-				docNumbers.remove(index);
-			}
-		} catch (IOException e) {
-			LOGGER.severe("Error reading patents when warming up");
-		}
+//		try {
+//			List<Integer> docNumbers = new ArrayList<>(offsets.keys());
+//			Random rand = new Random();
+//			for (int i = 0; i < MAX_CACHE_SIZE / 2 && !docNumbers.isEmpty(); i++) {
+//				int index = rand.nextInt(docNumbers.size());
+//				get(docNumbers.get(index));
+//				docNumbers.remove(index);
+//			}
+//		} catch (IOException e) {
+//			LOGGER.severe("Error reading patents when warming up");
+//		}
 	}
 
 	@Override

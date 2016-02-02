@@ -25,8 +25,7 @@ public class BooleanSearch extends Search<QLResult> {
 				.collect(Collectors.toSet());
 		Map<Integer, QLResult> result = new HashMap<>();
 		RelevantSearch rs = new RelevantSearch(index, String.join(" ", model.getPhrases()));
-		rs.searchResults().forEach(r -> result.put(r.getDocNumber(), r));
-		result.keySet().retainAll(booleanResult);
+		rs.searchResults(booleanResult).forEach(r -> result.put(r.getDocNumber(), r));
 		phrases = model.getPhrases();
 		return result.values().stream().sorted().limit(topK).collect(Collectors.toList());
 	}

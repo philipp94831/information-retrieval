@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.MinMaxPriorityQueue;
+
 import de.hpi.ir.yahoogle.index.DocumentPosting;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
@@ -23,13 +25,15 @@ import de.hpi.ir.yahoogle.util.ValueComparator;
 
 public class QLModel extends Model<QLResult> {
 
-	private static final Logger LOGGER = Logger.getLogger(QLModel.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(QLModel.class.getName());
 	private final double lambda;
 	private final int lc;
 	private int[] cis;
 	private Set<Integer> all;
 	private List<Map<Integer, byte[]>> found;
 	private Map<Integer, Integer> totalHits = new HashMap<>();
+	private Set<Integer> whiteList;
 
 	public QLModel(Index index) {
 		this(index, 0.2);
@@ -59,8 +63,12 @@ public class QLModel extends Model<QLResult> {
 	}
 
 	private List<QLResult> computeAll() {
-		List<QLResult> res = all.stream().map(this::computeForPatent).collect(Collectors.toList());
-		return res;
+		MinMaxPriorityQueue<QLResult> res = MinMaxPriorityQueue
+				.maximumSize(topK).create();
+		for (int docNumber : all) {
+			res.add(computeForPatent(docNumber));
+		}
+		return new ArrayList<>(res);
 	}
 
 	private List<Map<Integer, byte[]>> findPatents() {
@@ -74,11 +82,16 @@ public class QLModel extends Model<QLResult> {
 			while (iterator.hasNext()) {
 				DocumentPosting d = iterator.next();
 				cis[i] += d.getAll().size();
-				totalHits.merge(d.getDocNumber(), d.getAll().size(), (v1, v2) -> v1 + v2);
+				if(whiteList != null && !whiteList.contains(d.getDocNumber())) {
+					continue;
+				}
+				totalHits.merge(d.getDocNumber(), d.getAll().size(),
+						Integer::sum);
 				try {
 					result.put(d.getDocNumber(), d.toByteArray());
 				} catch (IOException e) {
-					LOGGER.severe("Error encoding DocumentPosting " + d.getDocNumber());
+					LOGGER.severe("Error encoding DocumentPosting "
+							+ d.getDocNumber());
 				}
 			}
 			listOfResults.add(result);
@@ -93,16 +106,20 @@ public class QLModel extends Model<QLResult> {
 		double score = 0.0;
 		for (int i = 0; i < phrases.size(); i++) {
 			Set<Integer> positions = new HashSet<>();
-			byte[] bytes = found.get(i).get(docNumber);
+			byte[] bytes = found.get(i).remove(docNumber);
 			if (bytes != null) {
 				try {
 					positions = DocumentPosting.fromBytes(bytes).getAll();
 				} catch (IOException e) {
-					LOGGER.severe("Error decoding DocumentPosting " + docNumber);
+					LOGGER.severe(
+							"Error decoding DocumentPosting " + docNumber);
 				}
 			}
 			result.addPositions(phrases.get(i), positions);
-			double fi = positions.stream().mapToDouble(pos -> partWeight(resume.getPartAtPosition(pos))).sum();
+			double fi = positions.stream()
+					.mapToDouble(
+							pos -> partWeight(resume.getPartAtPosition(pos)))
+					.sum();
 			score += compute(fi, ld, cis[i]);
 		}
 		// score /= Math.pow(resume.getPageRank(), 0.1);
@@ -114,9 +131,12 @@ public class QLModel extends Model<QLResult> {
 		if (totalHits.isEmpty()) {
 			return new HashSet<>();
 		}
-		TreeMap<Integer, Integer> sorted = ValueComparator.sortByValueDescending(totalHits);
-		int minHits = new ArrayList<>(sorted.entrySet()).get(Math.min(topK, sorted.size() - 1)).getValue();
-		return totalHits.entrySet().stream().filter(e -> e.getValue() >= minHits).map(Entry::getKey)
+		TreeMap<Integer, Integer> sorted = ValueComparator
+				.sortByValueDescending(totalHits);
+		int minHits = new ArrayList<>(sorted.entrySet())
+				.get(Math.min(topK * 1000, sorted.size() - 1)).getValue();
+		return totalHits.entrySet().stream()
+				.filter(e -> e.getValue() >= minHits).map(Entry::getKey)
 				.collect(Collectors.toSet());
 	}
 
@@ -138,5 +158,9 @@ public class QLModel extends Model<QLResult> {
 	@Override
 	public List<QLResult> compute(String query) {
 		return compute(QueryProcessor.extractPhrases(query));
+	}
+
+	public void setWhiteList(Set<Integer> whiteList) {
+		this.whiteList = whiteList;
 	}
 }
