@@ -37,7 +37,6 @@ import de.hpi.ir.WebFile;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PatentIndexer;
 import de.hpi.ir.yahoogle.query.BooleanSearch;
-import de.hpi.ir.yahoogle.query.LinkSearch;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.query.RelevantSearch;
 import de.hpi.ir.yahoogle.rm.Result;
@@ -185,8 +184,6 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	@Override
 	protected ArrayList<String> search(String query, int topK) {
 		switch (QueryProcessor.getQueryType(query)) {
-		case LINK:
-			return searchLinks(query, topK);
 		case RELEVANT:
 			return searchRelevant(query, topK);
 		case BOOLEAN:
@@ -199,16 +196,9 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	private ArrayList<String> searchBoolean(String query, int topK) {
 		BooleanSearch s = new BooleanSearch(index, query);
 		s.setTopK(topK);
-		List<QLResult> results = s.search();
+		List<BooleanResult> results = s.search();
 		return generateOutput(results, new SnippetGenerator(index)
 				.generateSnippets(results, s.getPhrases()), s.getQuery());
-	}
-
-	private ArrayList<String> searchLinks(String query, int topK) {
-		LinkSearch s = new LinkSearch(index, query);
-		s.setTopK(topK);
-		List<BooleanResult> results = s.search();
-		return generateSlimOutput(results);
 	}
 
 	private ArrayList<String> searchRelevant(String query, int topK) {

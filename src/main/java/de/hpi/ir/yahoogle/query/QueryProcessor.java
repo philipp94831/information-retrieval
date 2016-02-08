@@ -18,14 +18,16 @@ public class QueryProcessor {
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
 			boolean checkEmpty = false;
-			String cleaned = token.toLowerCase().replaceAll(PHRASE_DELIMITER, "");;
+			String cleaned = token.toLowerCase().replaceAll(PHRASE_DELIMITER,
+					"");
 			if (token.startsWith(PHRASE_DELIMITER)) {
 				inPhrase = true;
 			}
 			if (cleaned.equals("or")) {
 				checkEmpty = true;
 			}
-			if (!inPhrase && (cleaned.equals("and") || cleaned.equals("or") || cleaned.equals("not"))) {
+			if (!inPhrase && (cleaned.equals("and") || cleaned.equals("or")
+					|| cleaned.equals("not"))) {
 				if (phrase.size() > 0) {
 					queryPlan.add(String.join(" ", phrase));
 					phrase = new ArrayList<>();
@@ -83,9 +85,7 @@ public class QueryProcessor {
 	}
 
 	public static QueryType getQueryType(String query) {
-		if (isLinkQuery(query)) {
-			return QueryType.LINK;
-		} else if (isBooleanQuery(query)) {
+		if (isBooleanQuery(query)) {
 			return QueryType.BOOLEAN;
 		} else {
 			return QueryType.RELEVANT;
@@ -97,11 +97,14 @@ public class QueryProcessor {
 		boolean inPhrase = false;
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
-			String cleaned = token.toLowerCase().replaceAll(PHRASE_DELIMITER, "");
+			String cleaned = token.toLowerCase().replaceAll(PHRASE_DELIMITER,
+					"");
 			if (token.startsWith(PHRASE_DELIMITER)) {
 				inPhrase = true;
 			}
-			if (!inPhrase && (cleaned.equals("and") || cleaned.equals("or") || cleaned.equals("not"))) {
+			if (!inPhrase && (cleaned.equals("and") || cleaned.equals("or")
+					|| cleaned.equals("not")
+					|| cleaned.startsWith("linkto:"))) {
 				return true;
 			}
 			if (token.endsWith(PHRASE_DELIMITER)) {
@@ -109,9 +112,5 @@ public class QueryProcessor {
 			}
 		}
 		return false;
-	}
-
-	private static boolean isLinkQuery(String query) {
-		return query.toLowerCase().startsWith("linkto:");
 	}
 }

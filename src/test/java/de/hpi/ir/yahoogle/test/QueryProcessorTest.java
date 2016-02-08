@@ -29,7 +29,7 @@ public class QueryProcessorTest {
 		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("fooandbar"));
 		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("\"foo and bar\""));
 		assertEquals(QueryType.RELEVANT, QueryProcessor.getQueryType("foo \"and\" bar"));
-		assertEquals(QueryType.LINK, QueryProcessor.getQueryType("LinkTo:12345678"));
+		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType("LinkTo:12345678"));
 		assertEquals(QueryType.BOOLEAN, QueryProcessor.getQueryType("NOT " + stopWord));
 	}
 }
