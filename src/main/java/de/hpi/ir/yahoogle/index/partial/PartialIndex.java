@@ -33,10 +33,23 @@ public class PartialIndex extends Loadable {
 		resume = new PatentResume(patent);
 		wordCount = 0;
 		startOffset = 0;
-		indexTitle(patent.getInventionTitle());
-		indexAbstract(patent.getPatentAbstract());
-		indexDescriptions(patent.getDescriptions());
-		indexClaims(patent.getClaims());
+		for(PatentPart part : PatentPart.values()) {
+			switch(part) {
+			case TITLE:
+				indexTitle(patent.getInventionTitle());
+				break;
+			case ABSTRACT:
+				indexAbstract(patent.getPatentAbstract());
+				break;
+			case DESCRIPTION:
+				indexDescriptions(patent.getDescriptions());
+			case CLAIM:
+				indexClaims(patent.getClaims());
+				break;
+			default:
+				break;
+			}
+		}
 		indexCitations(patent.getCitations());
 		resume.setWordCount(wordCount);
 		patents.add(resume);

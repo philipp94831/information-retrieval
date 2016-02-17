@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import javax.xml.stream.XMLStreamException;
@@ -26,7 +24,7 @@ public class PatentResume
 	private final int docNumber;
 	private final long end;
 	private final String fileName;
-	private final TreeMap<Integer, PatentPart> parts = new TreeMap<>();
+	private int[] parts = new int[PatentPart.values().length];
 	private Patent patent;
 	private String patentFolder;
 	private final long start;
@@ -41,6 +39,10 @@ public class PatentResume
 		this.end = in.readLong();
 		this.wordCount = in.readInt();
 		this.pageRank = in.readDouble();
+//		this.setPosition(PatentPart.ABSTRACT, in.readInt());
+//		this.setPosition(PatentPart.CLAIM, in.readInt());
+//		this.setPosition(PatentPart.DESCRIPTION, in.readInt());
+//		this.setPosition(PatentPart.TITLE, in.readInt());
 		for (PatentPart part : PatentPart.values()) {
 			this.setPosition(part, in.readInt());
 		}
@@ -87,7 +89,14 @@ public class PatentResume
 	}
 
 	public PatentPart getPartAtPosition(int pos) {
-		return parts.floorEntry(pos).getValue();
+		PatentPart result = null;
+		for(PatentPart part : PatentPart.values()) {
+			if(pos < parts[part.ordinal()]) {
+				return result;
+			}
+			result = part;
+		}
+		return result;
 	}
 
 	public Patent getPatent() {
@@ -98,12 +107,7 @@ public class PatentResume
 	}
 
 	public int getPosition(PatentPart part) {
-		for (Entry<Integer, PatentPart> entry : parts.entrySet()) {
-			if (entry.getValue().equals(part)) {
-				return entry.getKey();
-			}
-		}
-		return -1;
+		return parts[part.ordinal()];
 	}
 
 	public int getWordCount() {
@@ -120,7 +124,7 @@ public class PatentResume
 	}
 
 	public void setPosition(PatentPart part, int pos) {
-		parts.put(pos, part);
+		parts[part.ordinal()] = pos;
 	}
 
 	public void setWordCount(int wordCount) {

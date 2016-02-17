@@ -1,23 +1,32 @@
 package de.hpi.ir.yahoogle.rm.bool;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.MinMaxPriorityQueue;
+
+import de.hpi.ir.yahoogle.index.DocumentPosting;
 import de.hpi.ir.yahoogle.index.Index;
+import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
 
 public class BooleanModel extends Model<BooleanResult> {
+
+	private static final String LINK_KEYWORD = "linkto:";
 
 	public BooleanModel(Index index) {
 		super(index);
 	}
 
 	@Override
-	public Set<BooleanResult> compute(String query) {
+	public Collection<BooleanResult> compute(String query) {
 		Set<Integer> booleanResult = new HashSet<>();
 		Operator operator = Operator.OR;
 		List<String> queryPlan = QueryProcessor.generateQueryPlan(query);
@@ -42,17 +51,17 @@ public class BooleanModel extends Model<BooleanResult> {
 				if (isLinkPhrase(newPhrases)) {
 					result = findLinks(newPhrases);
 				} else {
-					phrases.addAll(newPhrases);
 					result = findToken(newPhrases);
+					if(operator != Operator.NOT) {
+						phrases.addAll(newPhrases);						
+					}
 				}
 				switch (operator) {
 				case AND:
 					booleanResult.retainAll(result);
-					phrases.addAll(newPhrases);
 					break;
 				case OR:
 					booleanResult.addAll(result);
-					phrases.addAll(newPhrases);
 					break;
 				case NOT:
 					booleanResult.removeAll(result);
@@ -63,12 +72,27 @@ public class BooleanModel extends Model<BooleanResult> {
 				break;
 			}
 		}
-		return booleanResult.stream().map(BooleanResult::new)
-				.collect(Collectors.toSet());
+		MinMaxPriorityQueue<BooleanResult> cropped = MinMaxPriorityQueue
+				.maximumSize(topK).create();
+		booleanResult.forEach(i -> cropped.add(new BooleanResult(i)));
+		Map<Integer, BooleanResult> result = new HashMap<>();
+		cropped.forEach(b -> result.put(b.getDocNumber(), b));
+		for(String phrase : phrases) {
+			PhraseResultIterator iterator = index.findPositions(phrase);
+			while(iterator.hasNext()) {
+				DocumentPosting next = iterator.next();
+				if(result.containsKey(next.getDocNumber())) {
+					BooleanResult br = new BooleanResult(next.getDocNumber());
+					br.addPositions(phrase, next.getAll());
+					result.merge(next.getDocNumber(), br, (v1, v2) -> v1.merge(v2));
+				}
+			}
+		}
+		return result.values();
 	}
 
 	private boolean isLinkPhrase(List<String> newPhrases) {
-		return newPhrases.stream().anyMatch(s -> s.toLowerCase().startsWith("linkto:"));
+		return newPhrases.stream().anyMatch(s -> s.toLowerCase().startsWith(LINK_KEYWORD));
 	}
 
 	private Set<Integer> findToken(List<String> phrases) {
@@ -76,7 +100,7 @@ public class BooleanModel extends Model<BooleanResult> {
 	}
 
 	private Set<Integer> findLinks(List<String> phrases) {
-		phrases = phrases.stream().map(p -> p.replaceAll("LinkTo:", ""))
+		phrases = phrases.stream().map(p -> p.toLowerCase().replaceAll(LINK_KEYWORD, ""))
 				.collect(Collectors.toList());
 		return index.findLinks(phrases);
 	}

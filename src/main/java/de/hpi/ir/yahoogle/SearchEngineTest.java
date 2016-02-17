@@ -21,22 +21,39 @@ import de.hpi.ir.yahoogle.index.PatentIndex;
 public class SearchEngineTest {
 
 	private static final boolean CREATE_INDEX = false;
-	private static final String[] EXECERSICE_10 = { "\"graph editor\"", "\"social trend\"", "fossil hydrocarbons",
+	private static final String[] EXECERSICE_10 = { "\"graph editor\"",
+			"\"social trend\"", "fossil hydrocarbons",
 			"physiological AND saline", "tires NOT pressure" };
-	private static final String[] EXECERSICE_12 = { "LinkTo:07920906", "LinkTo:07904949", "LinkTo:08078787",
-			"LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142", "review guidelines", "on-chip OR OCV" };
-	private static final String[] EXECERSICE_2 = { "selection", "device", "justify", "write" };
-	private static final String[] EXECERSICE_3 = { "file-system", "included", "storing" };
-	private static final String[] EXECERSICE_4 = { "comprises AND consists", "methods NOT invention", "data OR method",
-			"prov* NOT free", "inc* OR memory", "\"the presented invention\"", "\"mobile devices\"" };
-	private static final String[] EXECERSICE_5 = { "processing", "computers", "\"mobile devices\"", "data" };
-	private static final String[] EXECERSICE_6 = { "digital", "rootkits", "network access" };
-	private static final String[] EXECERSICE_7 = { "access control", "computers", "data processing", "web servers",
-			"vulnerability information", "computer-readable media" };
-	private static final String[] EXECERSICE_8 = { "access", "control", "image data", "program", "vulnerability",
-			"\"mobile device\"" };
-	private static final String[] EXECERSICE_9 = { "add-on module", "digital signature", "data processing",
-			"\"a scanning\"" };
+	private static final String[] EXECERSICE_14 = { "Marker pen holder",
+			"sodium polyphosphates", "\"ionizing radiation\"",
+			"solar coronal holes", "patterns in scale-free networks",
+			"\"nail polish\"", "\"keyboard shortcuts\"",
+			"radiographic NOT ventilator", "multi-label AND learning",
+			"LinkTo:07866385" };
+	private static final String[] EXECERSICE_12 = { "LinkTo:07920906",
+			"LinkTo:07904949", "LinkTo:08078787",
+			"LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142",
+			"review guidelines", "on-chip OR OCV" };
+	private static final String[] EXECERSICE_2 = { "selection", "device",
+			"justify", "write" };
+	private static final String[] EXECERSICE_3 = { "file-system", "included",
+			"storing" };
+	private static final String[] EXECERSICE_4 = { "comprises AND consists",
+			"methods NOT invention", "data OR method", "prov* NOT free",
+			"inc* OR memory", "\"the presented invention\"",
+			"\"mobile devices\"" };
+	private static final String[] EXECERSICE_5 = { "processing", "computers",
+			"\"mobile devices\"", "data" };
+	private static final String[] EXECERSICE_6 = { "digital", "rootkits",
+			"network access", "digital #2", "rootkits #2",
+			"network access #2" };
+	private static final String[] EXECERSICE_7 = { "access control #2",
+			"computers #2", "data processing #2", "web servers #2",
+			"vulnerability information #2", "computer-readable media #2" };
+	private static final String[] EXECERSICE_8 = { "access", "control",
+			"image data", "program", "vulnerability", "\"mobile device\"" };
+	private static final String[] EXECERSICE_9 = { "add-on module",
+			"digital signature", "data processing", "\"a scanning\"" };
 	private static SearchEngineYahoogle myEngine = new SearchEngineYahoogle();
 
 	private static String[] allQueries() {
@@ -51,6 +68,7 @@ public class SearchEngineTest {
 		all.addAll(Arrays.asList(EXECERSICE_9));
 		all.addAll(Arrays.asList(EXECERSICE_10));
 		all.addAll(Arrays.asList(EXECERSICE_12));
+		all.addAll(Arrays.asList(EXECERSICE_14));
 		String[] result = new String[all.size()];
 		return all.toArray(result);
 	}
@@ -70,10 +88,11 @@ public class SearchEngineTest {
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
 		System.out.println("==============================");
-		String[] queries = EXECERSICE_12;
+		String[] queries = allQueries();
 		for (String query : queries) {
-			printResults(search(query, 15), query);
+			printResults(search(query, 10), query);
 		}
+		System.out.println("finished");
 	}
 
 	private static void printResults(ArrayList<String> results, String query) {

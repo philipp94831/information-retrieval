@@ -1,7 +1,7 @@
 package de.hpi.ir.yahoogle.query;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.index.Index;
@@ -17,7 +17,10 @@ public class BooleanSearch extends Search<BooleanResult> {
 	@Override
 	public List<BooleanResult> search() {
 		BooleanModel model = new BooleanModel(index);
-		Set<BooleanResult> booleanResult = model.compute(query);
+		if (topK != ALL_RESULTS) {
+			model.setTopK(topK);
+		}
+		Collection<BooleanResult> booleanResult = model.compute(query);
 		return booleanResult.stream().sorted().limit(topK).collect(Collectors.toList());
 	}
 }
