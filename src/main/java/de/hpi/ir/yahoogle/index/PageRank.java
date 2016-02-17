@@ -37,7 +37,7 @@ public class PageRank {
 		while (!converged) {
 			Map<Integer, Double> newPageRank = computeNewPageRank();
 			double delta = getDiff(newPageRank);
-			LOGGER.finer("Delta after " + ++i + " iteration" + (i > 1 ? "s" : "")
+			LOGGER.info("Delta after " + ++i + " iteration" + (i > 1 ? "s" : "")
 					+ ": " + delta);
 			pageRank = newPageRank;
 			converged = delta < Math.pow(10, -17) || (i > 200);
@@ -46,11 +46,10 @@ public class PageRank {
 	}
 
 	private double getDiff(Map<Integer, Double> newPageRank) {
-		double diff = Math.sqrt(newPageRank.entrySet().stream()
+		return Math.sqrt(newPageRank.entrySet().stream()
 				.mapToDouble(e -> e.getValue()
 						- pageRank.getOrDefault(e.getKey(), 0.0))
 				.map(d -> d * d).sum());
-		return diff;
 	}
 
 	private Map<Integer, Double> computeNewPageRank() {
@@ -63,9 +62,8 @@ public class PageRank {
 	}
 
 	private void normalize(Map<Integer, Double> newPageRank) {
-		double length = Math.sqrt(
-				newPageRank.values().stream().mapToDouble(d -> d * d).sum());
-		newPageRank.entrySet().forEach(e -> e.setValue(e.getValue() / length));
+		double sum = newPageRank.values().stream().mapToDouble(d -> d).sum();
+		newPageRank.entrySet().forEach(e -> e.setValue(e.getValue() / sum));
 	}
 
 	private double compute(Integer docNumber) {
