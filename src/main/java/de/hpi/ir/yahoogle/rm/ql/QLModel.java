@@ -65,7 +65,7 @@ public class QLModel extends Model<QLResult> {
 	private List<QLResult> computeAll() {
 		MinMaxPriorityQueue<QLResult> res = MinMaxPriorityQueue
 				.maximumSize(topK).create();
-		res.addAll(all.stream().map(this::computeForPatent).collect(Collectors.toList()));
+		all.stream().forEach(i -> res.add(computeForPatent(i)));
 		return new ArrayList<>(res);
 	}
 
@@ -80,7 +80,8 @@ public class QLModel extends Model<QLResult> {
 			while (iterator.hasNext()) {
 				DocumentPosting d = iterator.next();
 				cis[i] += d.getAll().size();
-				if(whiteList != null && !whiteList.contains(d.getDocNumber())) {
+				if (whiteList != null
+						&& !whiteList.contains(d.getDocNumber())) {
 					continue;
 				}
 				totalHits.merge(d.getDocNumber(), d.getAll().size(),
