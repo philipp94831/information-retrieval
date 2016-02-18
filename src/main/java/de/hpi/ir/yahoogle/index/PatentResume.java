@@ -81,7 +81,7 @@ public class PatentResume implements PatentParserCallback,
 	}
 
 	private String getFullFileName() {
-		return patentFolder + "/" + fileName;
+		return patentFolder + fileName;
 	}
 
 	@Override

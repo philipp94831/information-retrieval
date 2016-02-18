@@ -18,7 +18,7 @@ public class CitationIndex extends Loadable {
 			.getLogger(CitationIndex.class.getName());
 
 	private static String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
+		return SearchEngineYahoogle.getTeamDirectory() + FILE_NAME
 				+ FILE_EXTENSION;
 	}
 

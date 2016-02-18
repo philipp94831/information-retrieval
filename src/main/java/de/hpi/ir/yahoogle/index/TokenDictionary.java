@@ -18,7 +18,7 @@ public class TokenDictionary extends Loadable {
 			.getLogger(TokenDictionary.class.getName());
 
 	private static String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
+		return SearchEngineYahoogle.getTeamDirectory() + FILE_NAME
 				+ FILE_EXTENSION;
 	}
 

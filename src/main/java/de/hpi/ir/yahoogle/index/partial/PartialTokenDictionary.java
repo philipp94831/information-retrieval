@@ -48,7 +48,7 @@ public class PartialTokenDictionary extends Loadable
 	}
 
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
+		return SearchEngineYahoogle.getTeamDirectory() + name + BASE_NAME
 				+ FILE_EXTENSION;
 	}
 

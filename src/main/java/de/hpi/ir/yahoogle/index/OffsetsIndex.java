@@ -45,7 +45,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	}
 
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME
+		return SearchEngineYahoogle.getTeamDirectory() + name + BASE_NAME
 				+ FILE_EXTENSION;
 	}
 
@@ -109,7 +109,7 @@ public abstract class OffsetsIndex<K> extends Loadable {
 	protected abstract K readKey(ByteReader in);
 
 	private String skipListFileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name
+		return SearchEngineYahoogle.getTeamDirectory() + name
 				+ SKIPLIST_BASE_NAME + FILE_EXTENSION;
 	}
 

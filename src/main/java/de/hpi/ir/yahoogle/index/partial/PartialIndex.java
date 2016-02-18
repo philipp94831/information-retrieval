@@ -77,7 +77,7 @@ public class PartialIndex extends Loadable {
 	}
 
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + name + BASE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + name + BASE_NAME + FILE_EXTENSION;
 	}
 
 	public PartialCitationIndex getCitations() {

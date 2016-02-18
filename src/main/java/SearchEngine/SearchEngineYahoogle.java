@@ -48,7 +48,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineYahoogle.class.getName());
 	public static final int NUMBER_OF_THREADS = 4;
-	private static final String QUERYLOG = "/querylog.txt";
+	private static final String QUERYLOG = "querylog.txt";
 	public static final boolean USE_NDCG = false;
 
 	private static double computeGain(int goldRank) {
@@ -56,7 +56,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 	}
 
 	public static String getTeamDirectory() {
-		return teamDirectory;
+		return teamDirectory + "/";
 	}
 
 	private static String toGoogleQuery(String query) {

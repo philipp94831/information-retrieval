@@ -56,7 +56,7 @@ public class PatentIndex extends Loadable {
 	}
 
 	private String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
+		return SearchEngineYahoogle.getTeamDirectory() + FILE_NAME
 				+ FILE_EXTENSION;
 	}
 
