@@ -83,7 +83,7 @@ public class SnippetGenerator {
 				tokenizer.next();
 			}
 		}
-		if(tokenizer.hasNext()) {
+		if (tokenizer.hasNext()) {
 			snippet.append(" ...");
 		}
 		return snippet.toString().trim();

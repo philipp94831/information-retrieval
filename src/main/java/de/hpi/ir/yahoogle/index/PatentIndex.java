@@ -2,7 +2,7 @@ package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class PatentIndex extends Loadable {
 			.getLogger(PatentIndex.class.getName());
 	private static final int MAX_CACHE_SIZE = 100000;
 	private static final long TOTAL_WORD_COUNT_OFFSET = 0L;
-	private static final boolean USE_CACHE = false;
+	private static final boolean USE_CACHE = true;
 	private final Map<Integer, PatentResume> cache = new LinkedHashMap<>(
 			MAX_CACHE_SIZE, 0.75F, true);
 	private RandomAccessFile file;
@@ -83,7 +83,7 @@ public class PatentIndex extends Loadable {
 
 	public Set<Integer> getAllDocNumbers() {
 		try {
-			return offsets.keys();
+			return new HashSet<>(offsets.keys());
 		} catch (IOException e) {
 			LOGGER.severe("Error retrieving all docnumbers");
 		}
@@ -133,19 +133,15 @@ public class PatentIndex extends Loadable {
 		file.write(out.toByteArray());
 	}
 
-	public void warmUp() {
+	public void warmUp() throws IOException {
 		if (USE_CACHE) {
-			try {
-				List<Integer> docNumbers = new ArrayList<>(offsets.keys());
-				Random rand = new Random();
-				for (int i = 0; i < MAX_CACHE_SIZE / 2
-						&& !docNumbers.isEmpty(); i++) {
-					int index = rand.nextInt(docNumbers.size());
-					get(docNumbers.get(index));
-					docNumbers.remove(index);
-				}
-			} catch (IOException e) {
-				LOGGER.severe("Error reading patents when warming up");
+			List<Integer> docNumbers = offsets.keys();
+			Random rand = new Random();
+			for (int i = 0; i < MAX_CACHE_SIZE / 2
+					&& !docNumbers.isEmpty(); i++) {
+				int index = rand.nextInt(docNumbers.size());
+				get(docNumbers.get(index));
+				docNumbers.remove(index);
 			}
 		}
 	}

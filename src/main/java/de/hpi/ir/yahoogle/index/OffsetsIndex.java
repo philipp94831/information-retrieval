@@ -2,12 +2,12 @@ package de.hpi.ir.yahoogle.index;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import SearchEngine.SearchEngineYahoogle;
 
-import java.util.Set;
 import java.util.TreeMap;
 
 import de.hpi.ir.yahoogle.io.ByteReader;
@@ -66,8 +66,8 @@ public abstract class OffsetsIndex<K> extends Loadable {
 		return null;
 	}
 
-	public Set<K> keys() throws IOException {
-		Set<K> keys = new HashSet<>();
+	public List<K> keys() throws IOException {
+		List<K> keys = new ArrayList<>();
 		for (Long offset : skiplist.values()) {
 			file.seek(offset);
 			int size = file.readInt();

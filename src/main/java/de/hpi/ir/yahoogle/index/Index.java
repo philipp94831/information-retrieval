@@ -162,10 +162,10 @@ public class Index extends Loadable {
 		}
 	}
 
-	public void warmUp() {
+	public void warmUp() throws IOException {
+		dictionary.warmUp();
 		patents.warmUp();
 		citations.warmUp();
-		dictionary.warmUp();
 	}
 
 	public int wordCount() {

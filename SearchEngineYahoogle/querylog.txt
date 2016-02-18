@@ -1,0 +1,62 @@
+selection
+device
+justify
+write
+file-system
+included
+storing
+comprises AND consists
+methods NOT invention
+data OR method
+prov* NOT free
+inc* OR memory
+"the presented invention"
+"mobile devices"
+processing
+computers
+"mobile devices"
+data
+digital
+rootkits
+network access
+digital #2
+rootkits #2
+network access #2
+access control #2
+computers #2
+data processing #2
+web servers #2
+vulnerability information #2
+computer-readable media #2
+access
+control
+image data
+program
+vulnerability
+"mobile device"
+add-on module
+digital signature
+data processing
+"a scanning"
+"graph editor"
+"social trend"
+fossil hydrocarbons
+physiological AND saline
+tires NOT pressure
+LinkTo:07920906
+LinkTo:07904949
+LinkTo:08078787
+LinkTo:07865308 AND 07925708
+LinkTo:07947864 AND 07947142
+review guidelines
+on-chip OR OCV
+Marker pen holder
+sodium polyphosphates
+"ionizing radiation"
+solar coronal holes
+patterns in scale-free networks
+"nail polish"
+"keyboard shortcuts"
+radiographic NOT ventilator
+multi-label AND learning
+LinkTo:07866385

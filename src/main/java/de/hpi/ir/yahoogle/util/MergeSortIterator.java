@@ -42,11 +42,12 @@ public class MergeSortIterator<S extends Iterable<V>, V extends Mergeable<K>, K 
 
 	private void put(V value, Integer i) {
 		MergeTreeEntry<V> entry = new MergeTreeEntry<>(i, value);
-		candidates.merge(value.getKey(), Collections.singletonList(entry), (v1, v2) -> {
-			ArrayList<MergeTreeEntry<V>> list = new ArrayList<>();
-			list.addAll(v1);
-			list.addAll(v2);
-			return list;
-		});
+		candidates.merge(value.getKey(), Collections.singletonList(entry),
+				(v1, v2) -> {
+					ArrayList<MergeTreeEntry<V>> list = new ArrayList<>();
+					list.addAll(v1);
+					list.addAll(v2);
+					return list;
+				});
 	}
 }

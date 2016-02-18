@@ -83,11 +83,11 @@ public class SearchEngineTest {
 		myEngine.loadIndex();
 		long time = (System.nanoTime() - startTime) / 1000000;
 		LOGGER.info("Time for index creation and loading: " + time + "ms");
+		System.out.println();
 	}
 
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
-		System.out.println();
 		String[] queries = allQueries();
 		for (String query : queries) {
 			printResults(search(query, 10), query);
@@ -97,12 +97,12 @@ public class SearchEngineTest {
 
 	private static void printResults(ArrayList<String> results, String query) {
 		System.out.println(query);
-		if (results.size() == 0) {
-			System.out.println("No matches found");
-		}
-		results.forEach(System.out::println);
-		LOGGER.finer(results.size() + " Results returned");
-		System.out.println();
+		// if (results.size() == 0) {
+		// System.out.println("No matches found");
+		// }
+		// results.forEach(System.out::println);
+		// LOGGER.finer(results.size() + " Results returned");
+		// System.out.println();
 	}
 
 	private static ArrayList<String> search(String query, int topK) {
@@ -110,7 +110,7 @@ public class SearchEngineTest {
 		long startTime = System.nanoTime();
 		ArrayList<String> results = myEngine.search(query, topK);
 		long time = (System.nanoTime() - startTime) / 1000000;
-		LOGGER.info("Time for search: " + time + "ms");
+		System.out.println("Time for search: " + time + "ms");
 		return results;
 	}
 }

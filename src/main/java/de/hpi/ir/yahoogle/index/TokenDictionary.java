@@ -3,7 +3,6 @@ package de.hpi.ir.yahoogle.index;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import SearchEngine.SearchEngineYahoogle;
@@ -38,10 +37,7 @@ public class TokenDictionary extends Loadable {
 		try {
 			Long offset = offsets.get(token);
 			if (offset != null) {
-				file.seek(offset);
-				int count = file.readInt();
-				return new BinaryPostingListIterator(this, count,
-						file.getFilePointer());
+				return read(offset);
 			}
 		} catch (IOException e) {
 			LOGGER.severe("Error initializing search for token " + token);
@@ -57,7 +53,7 @@ public class TokenDictionary extends Loadable {
 		return new BinaryPostingList(b);
 	}
 
-	public Set<String> getTokens() {
+	public List<String> getTokens() {
 		try {
 			return offsets.keys();
 		} catch (IOException e) {
@@ -103,7 +99,14 @@ public class TokenDictionary extends Loadable {
 		}
 	}
 
-	public void warmUp() {
+	private BinaryPostingListIterator read(Long offset) throws IOException {
+		file.seek(offset);
+		int count = file.readInt();
+		return new BinaryPostingListIterator(this, count,
+				file.getFilePointer());
+	}
+
+	public void warmUp() throws IOException {
 	}
 
 	@Override

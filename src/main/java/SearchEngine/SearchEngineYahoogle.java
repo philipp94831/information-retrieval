@@ -1,6 +1,8 @@
 package SearchEngine;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 
 /**
  *
@@ -46,6 +48,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineYahoogle.class.getName());
 	public static final int NUMBER_OF_THREADS = 4;
+	private static final String QUERYLOG = "/querylog.txt";
 	public static final boolean USE_NDCG = false;
 
 	private static double computeGain(int goldRank) {
@@ -157,9 +160,13 @@ public class SearchEngineYahoogle extends SearchEngine {
 	@Override
 	protected boolean loadIndex() {
 		index = new Index(dataDirectory);
-		try {
+		try (BufferedReader br = new BufferedReader(new FileReader(
+				SearchEngineYahoogle.getTeamDirectory() + QUERYLOG))) {
 			index.load();
-			index.warmUp();
+			String query;
+			while ((query = br.readLine()) != null) {
+				search(query, 10);
+			}
 			return true;
 		} catch (IOException e) {
 			LOGGER.severe("Error loading Index from disk");
