@@ -16,7 +16,7 @@ import de.hpi.ir.yahoogle.rm.Result;
 
 public class SnippetGenerator {
 
-	static final int MAX_WINDOW_LENGTH = 10;
+	static final int MAX_WINDOW_LENGTH = 15;
 	private final Index index;
 
 	public SnippetGenerator(Index index) {
@@ -65,6 +65,9 @@ public class SnippetGenerator {
 		}
 		tokenizer = new Tokenizer(patentAbstract, false, true);
 		StringBuilder snippet = new StringBuilder();
+		if (bestWindow.getPosition() != start) {
+			snippet.append("...");
+		}
 		while (tokenizer.hasNext()
 				&& start + tokenizer.getPosition() < bestWindow.getPosition()
 						+ MAX_WINDOW_LENGTH) {
@@ -79,6 +82,9 @@ public class SnippetGenerator {
 			} else {
 				tokenizer.next();
 			}
+		}
+		if(tokenizer.hasNext()) {
+			snippet.append(" ...");
 		}
 		return snippet.toString().trim();
 	}

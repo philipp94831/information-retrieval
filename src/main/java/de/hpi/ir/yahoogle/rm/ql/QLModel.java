@@ -2,6 +2,7 @@ package de.hpi.ir.yahoogle.rm.ql;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.MinMaxPriorityQueue;
@@ -21,7 +21,6 @@ import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 import de.hpi.ir.yahoogle.rm.Model;
 import de.hpi.ir.yahoogle.search.QueryProcessor;
-import de.hpi.ir.yahoogle.util.ValueComparator;
 
 public class QLModel extends Model<QLResult> {
 
@@ -125,10 +124,9 @@ public class QLModel extends Model<QLResult> {
 		if (totalHits.isEmpty()) {
 			return new HashSet<>();
 		}
-		TreeMap<Integer, Integer> sorted = ValueComparator
-				.sortByValueDescending(totalHits);
-		int minHits = new ArrayList<>(sorted.entrySet())
-				.get(Math.min(topK * 1000, sorted.size() - 1)).getValue();
+		List<Integer> hits = new ArrayList<>(totalHits.values());
+		Collections.sort(hits, Collections.reverseOrder());
+		int minHits = hits.get(Math.min(topK * 1000, hits.size() - 1));
 		return totalHits.entrySet().stream()
 				.filter(e -> e.getValue() >= minHits).map(Entry::getKey)
 				.collect(Collectors.toSet());
