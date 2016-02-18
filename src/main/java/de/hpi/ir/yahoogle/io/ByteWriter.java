@@ -15,8 +15,12 @@ public class ByteWriter implements AbstractWriter {
 	}
 
 	public ByteWriter(int size) {
-		this.size  = size;
+		this.size = size;
 		out = new ByteArrayOutputStream(size);
+	}
+
+	public int spaceLeft() {
+		return size - out.size();
 	}
 
 	@Override
@@ -26,6 +30,10 @@ public class ByteWriter implements AbstractWriter {
 
 	public void write(byte[] bytes) throws IOException {
 		out.write(bytes);
+	}
+
+	public void writeDouble(double d) throws IOException {
+		out.write(ByteBuffer.allocate(Double.BYTES).putDouble(d).array());
 	}
 
 	@Override
@@ -46,13 +54,5 @@ public class ByteWriter implements AbstractWriter {
 	public void writeUTF(String s) throws IOException {
 		writeShort((short) s.length());
 		out.write(s.getBytes(Charset.forName("UTF-8")));
-	}
-
-	public void writeDouble(double d) throws IOException {
-		out.write(ByteBuffer.allocate(Double.BYTES).putDouble(d).array());
-	}
-	
-	public int spaceLeft() {
-		return size - out.size();
 	}
 }

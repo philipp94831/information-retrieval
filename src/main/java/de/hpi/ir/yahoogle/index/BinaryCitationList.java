@@ -8,7 +8,8 @@ import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.util.Mergeable;
 
-public class BinaryCitationList implements Comparable<BinaryCitationList>, Mergeable<Integer> {
+public class BinaryCitationList
+		implements Comparable<BinaryCitationList>, Mergeable<Integer> {
 
 	private byte[] bytes;
 	private final int docNumber;

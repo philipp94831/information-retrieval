@@ -5,7 +5,7 @@ import java.io.RandomAccessFile;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.io.ByteWriter;

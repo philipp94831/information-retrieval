@@ -23,16 +23,6 @@ public class SnippetGenerator {
 		this.index = index;
 	}
 
-	public Map<Integer, String> generateSnippets(Collection<? extends Result> results, List<String> phrases) {
-		Map<Integer, String> snippets = new HashMap<>();
-		for (Result result : results) {
-			int docNumber = result.getDocNumber();
-			String snippet = generate(result, index.getPatent(docNumber), phrases);
-			snippets.put(docNumber, snippet);
-		}
-		return snippets;
-	}
-
 	private SnippetWindow buildWindow(Result result, int i, List<String> phrases) {
 		SnippetWindow window = new SnippetWindow(i);
 		for (String phrase : phrases) {
@@ -91,5 +81,16 @@ public class SnippetGenerator {
 			}
 		}
 		return snippet.toString().trim();
+	}
+
+	public Map<Integer, String> generateSnippets(Collection<? extends Result> results, List<String> phrases) {
+		Map<Integer, String> snippets = new HashMap<>();
+		for (Result result : results) {
+			int docNumber = result.getDocNumber();
+			String snippet = generate(result, index.getPatent(docNumber),
+					phrases);
+			snippets.put(docNumber, snippet);
+		}
+		return snippets;
 	}
 }

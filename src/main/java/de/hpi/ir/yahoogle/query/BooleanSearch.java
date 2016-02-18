@@ -21,6 +21,7 @@ public class BooleanSearch extends Search<BooleanResult> {
 			model.setTopK(topK);
 		}
 		Collection<BooleanResult> booleanResult = model.compute(query);
-		return booleanResult.stream().sorted().limit(topK).collect(Collectors.toList());
+		return booleanResult.stream().sorted().limit(topK)
+				.collect(Collectors.toList());
 	}
 }

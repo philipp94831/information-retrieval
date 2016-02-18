@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.language.StopWordList;
 import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.query.QueryType;

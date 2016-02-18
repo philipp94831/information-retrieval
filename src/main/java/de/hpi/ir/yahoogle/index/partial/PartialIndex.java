@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.language.Stemmer;

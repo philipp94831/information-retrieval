@@ -5,7 +5,8 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+
+import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialCitationIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.util.MergeSortIterator;
@@ -13,10 +14,12 @@ import de.hpi.ir.yahoogle.util.MergeSortIterator;
 public class CitationIndex extends Loadable {
 
 	private static final String FILE_NAME = "citations";
-	private static final Logger LOGGER = Logger.getLogger(CitationIndex.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(CitationIndex.class.getName());
 
 	private static String fileName() {
-		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME + FILE_EXTENSION;
+		return SearchEngineYahoogle.getTeamDirectory() + "/" + FILE_NAME
+				+ FILE_EXTENSION;
 	}
 
 	private RandomAccessFile file;
@@ -38,11 +41,13 @@ public class CitationIndex extends Loadable {
 				int size = file.readInt();
 				byte[] b = new byte[size];
 				file.read(b);
-				BinaryCitationList postingList = new BinaryCitationList(docNumber, b);
+				BinaryCitationList postingList = new BinaryCitationList(
+						docNumber, b);
 				return postingList.getDocNumbers();
 			}
 		} catch (IOException e) {
-			LOGGER.severe("Error reading citation list for docNumber " + docNumber);
+			LOGGER.severe(
+					"Error reading citation list for docNumber " + docNumber);
 		}
 		return new ArrayList<>();
 	}
@@ -56,11 +61,12 @@ public class CitationIndex extends Loadable {
 
 	public void merge(List<PartialCitationIndex> indexes) throws IOException {
 		LOGGER.info("Merging citation indices");
-		MergeSortIterator<PartialCitationIndex, BinaryCitationList, Integer> postingLists = new MergeSortIterator<>(indexes);
+		MergeSortIterator<PartialCitationIndex, BinaryCitationList, Integer> postingLists = new MergeSortIterator<>(
+				indexes);
 		while (postingLists.hasNext()) {
 			List<BinaryCitationList> postingListList = postingLists.next();
 			BinaryCitationList currentPostings = null;
-			for(BinaryCitationList postingList : postingListList) {
+			for (BinaryCitationList postingList : postingListList) {
 				if (currentPostings == null) {
 					currentPostings = postingList;
 					continue;

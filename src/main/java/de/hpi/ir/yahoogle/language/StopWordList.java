@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import SearchEngine.SearchEngineYahoogle;
 
 public class StopWordList {
 
@@ -35,6 +35,8 @@ public class StopWordList {
 
 	public static boolean isStopword(String word) {
 		String stem = Stemmer.stem(word);
-		return !word.endsWith("*") && (word.length() < 2 || stopwords.contains(stem) || stem.matches("[^a-zA-Z]*") || stem.trim().isEmpty());
+		return !word.endsWith("*")
+				&& (word.length() < 2 || stopwords.contains(stem)
+						|| stem.matches("[^a-zA-Z]*") || stem.trim().isEmpty());
 	}
 }

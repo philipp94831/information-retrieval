@@ -12,17 +12,27 @@ public class BinaryPostingList
 	private byte[] bytes;
 	private String token;
 
+	public BinaryPostingList(byte[] bytes) {
+		this.bytes = bytes;
+	}
+
 	public BinaryPostingList(String token, byte[] bytes) {
 		this.token = token;
 		this.bytes = bytes;
 	}
 
-	public BinaryPostingList(byte[] bytes) {
-		this.bytes = bytes;
-	}
-
 	public byte[] getBytes() {
 		return bytes;
+	}
+
+	@Override
+	public String getKey() {
+		return token;
+	}
+
+	public int getSize(int offset) {
+		ByteReader in = new ByteReader(bytes, offset, Integer.BYTES);
+		return in.readInt();
 	}
 
 	public String getToken() {
@@ -33,11 +43,6 @@ public class BinaryPostingList
 	public Iterator<DocumentPosting> iterator() {
 		return new DocumentPostingIterator(this);
 	}
-	
-	public int getSize(int offset) {
-		ByteReader in = new ByteReader(bytes, offset, Integer.BYTES);
-		return in.readInt();		
-	}
 
 	public DocumentPosting next(int offset, int size) throws IOException {
 		ByteReader in = new ByteReader(bytes, offset, size);
@@ -47,10 +52,5 @@ public class BinaryPostingList
 
 	public int size() {
 		return bytes.length;
-	}
-
-	@Override
-	public String getKey() {
-		return token;
 	}
 }

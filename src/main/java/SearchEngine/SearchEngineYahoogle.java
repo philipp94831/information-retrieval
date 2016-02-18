@@ -1,7 +1,6 @@
-package de.hpi.ir.yahoogle;
+package SearchEngine;
 
 import java.io.File;
-
 
 /**
  *
@@ -32,8 +31,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import de.hpi.ir.SearchEngine;
-import de.hpi.ir.WebFile;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PatentIndexer;
 import de.hpi.ir.yahoogle.query.BooleanSearch;
@@ -44,15 +41,12 @@ import de.hpi.ir.yahoogle.rm.bool.BooleanResult;
 import de.hpi.ir.yahoogle.rm.ql.QLResult;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 
-public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
-															// with your search
-															// engine's name,
-															// i.e.
-															// SearchEngineMyTeamName
+public class SearchEngineYahoogle extends SearchEngine {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineYahoogle.class.getName());
 	public static final int NUMBER_OF_THREADS = 4;
+	public static final boolean USE_NDCG = false;
 
 	private static double computeGain(int goldRank) {
 		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
@@ -102,8 +96,10 @@ public class SearchEngineYahoogle extends SearchEngine { // Replace 'Template'
 	protected ArrayList<String> generateOutput(Collection<? extends Result> results, Map<Integer, String> snippets, String query) {
 		ArrayList<String> output = new ArrayList<>();
 		String googleQuery = toGoogleQuery(query);
-		ArrayList<String> goldRanking = new WebFile()
-				.getGoogleRanking(googleQuery);
+		ArrayList<String> goldRanking = new ArrayList<>();
+		if (USE_NDCG) {
+			goldRanking = new WebFile().getGoogleRanking(googleQuery);
+		}
 		ArrayList<String> originalRanking = new ArrayList<>(
 				results.stream().map(r -> Integer.toString(r.getDocNumber()))
 						.collect(Collectors.toList()));

@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-public class ValueComparator<K, V extends Comparable<V>> implements Comparator<K> {
+public class ValueComparator<K, V extends Comparable<V>>
+		implements Comparator<K> {
 
 	public static <K, V extends Comparable<V>> TreeMap<K, V> sortByValueAscending(Map<K, V> result) {
 		return new ValueComparator<>(result, true).sort();

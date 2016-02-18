@@ -12,7 +12,22 @@ import de.hpi.ir.yahoogle.io.VByteReader;
 import de.hpi.ir.yahoogle.io.VByteWriter;
 import de.hpi.ir.yahoogle.util.Mergeable;
 
-public class DocumentPosting implements Comparable<DocumentPosting>, Mergeable<Integer> {
+public class DocumentPosting
+		implements Comparable<DocumentPosting>, Mergeable<Integer> {
+
+	public static DocumentPosting fromBytes(byte[] bytes) throws IOException {
+		ByteReader in = new ByteReader(bytes);
+		int docNumber = in.readInt();
+		VByteReader vin = new VByteReader(in.read(in.remaining()));
+		DocumentPosting document = new DocumentPosting(docNumber);
+		int oldPos = 0;
+		while (vin.hasLeft()) {
+			int p = vin.readInt();
+			document.add(oldPos + p);
+			oldPos += p;
+		}
+		return document;
+	}
 
 	private final int docNumber;
 	private final Set<Integer> positions = new TreeSet<>();
@@ -23,6 +38,10 @@ public class DocumentPosting implements Comparable<DocumentPosting>, Mergeable<I
 
 	public void add(Integer position) {
 		positions.add(position);
+	}
+
+	public void addAll(DocumentPosting document) {
+		positions.addAll(document.getAll());
 	}
 
 	@Override
@@ -36,6 +55,21 @@ public class DocumentPosting implements Comparable<DocumentPosting>, Mergeable<I
 
 	public int getDocNumber() {
 		return docNumber;
+	}
+
+	@Override
+	public Integer getKey() {
+		return docNumber;
+	}
+
+	public void merge(DocumentPosting next, int delta) {
+		if (docNumber != next.docNumber) {
+			throw new RuntimeException("Trying to merge different Documents");
+		}
+		Set<Integer> newPos = next.getAll();
+		Set<Integer> oldPos = positions;
+		oldPos.retainAll(newPos.stream().map(p -> p - delta)
+				.collect(Collectors.toSet()));
 	}
 
 	public int size() {
@@ -55,37 +89,5 @@ public class DocumentPosting implements Comparable<DocumentPosting>, Mergeable<I
 		out.writeInt(docNumber); // docNumber
 		out.write(encoded);
 		return out.toByteArray();
-	}
-
-	@Override
-	public Integer getKey() {
-		return docNumber;
-	}
-
-	public void addAll(DocumentPosting document) {
-		positions.addAll(document.getAll());
-	}
-
-	public void merge(DocumentPosting next, int delta) {
-		if (docNumber != next.docNumber) {
-			throw new RuntimeException("Trying to merge different Documents");
-		}
-		Set<Integer> newPos = next.getAll();
-		Set<Integer> oldPos = positions;
-		oldPos.retainAll(newPos.stream().map(p -> p - delta).collect(Collectors.toSet()));
-	}
-
-	public static DocumentPosting fromBytes(byte[] bytes) throws IOException {
-		ByteReader in = new ByteReader(bytes);
-		int docNumber = in.readInt();
-		VByteReader vin = new VByteReader(in.read(in.remaining()));
-		DocumentPosting document = new DocumentPosting(docNumber);
-		int oldPos = 0;
-		while (vin.hasLeft()) {
-			int p = vin.readInt();
-			document.add(oldPos + p);
-			oldPos += p;
-		}
-		return document;
 	}
 }

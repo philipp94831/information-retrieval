@@ -26,6 +26,10 @@ public class ByteReader implements AbstractReader {
 		return bytes;
 	}
 
+	public double readDouble() {
+		return in.getDouble();
+	}
+
 	@Override
 	public int readInt() {
 		return in.getInt();
@@ -50,9 +54,5 @@ public class ByteReader implements AbstractReader {
 
 	public int remaining() {
 		return in.remaining();
-	}
-
-	public double readDouble() {
-		return in.getDouble();
 	}
 }

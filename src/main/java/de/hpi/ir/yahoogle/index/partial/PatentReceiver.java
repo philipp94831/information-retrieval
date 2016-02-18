@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
+import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.parsing.Patent;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 

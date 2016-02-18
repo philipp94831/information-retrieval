@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import SearchEngine.SearchEngineYahoogle;
+
 import java.util.TreeMap;
 
-import de.hpi.ir.yahoogle.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.BinaryCitationList;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.io.ByteReader;

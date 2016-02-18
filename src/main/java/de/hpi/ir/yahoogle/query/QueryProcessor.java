@@ -10,6 +10,31 @@ public class QueryProcessor {
 
 	private static final String PHRASE_DELIMITER = "\"";
 
+	public static List<String> extractPhrases(String partialQuery) {
+		List<String> phrases = new ArrayList<>();
+		StringTokenizer tokenizer = new StringTokenizer(partialQuery);
+		StringBuilder buffer = new StringBuilder();
+		boolean inPhrase = false;
+		while (tokenizer.hasMoreTokens()) {
+			String token = tokenizer.nextToken();
+			if (token.startsWith(PHRASE_DELIMITER)) {
+				inPhrase = true;
+			}
+			if (token.endsWith(PHRASE_DELIMITER)) {
+				inPhrase = false;
+			}
+			String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
+			if (!StopWordList.isStopword(cleanedToken)) {
+				buffer.append(" ").append(cleanedToken);
+			}
+			if (!inPhrase && buffer.length() > 0) {
+				phrases.add(buffer.toString().trim());
+				buffer = new StringBuilder();
+			}
+		}
+		return phrases;
+	}
+
 	public static List<String> generateQueryPlan(String query) {
 		StringTokenizer tokenizer = new StringTokenizer(query);
 		List<String> queryPlan = new ArrayList<>();
@@ -57,31 +82,6 @@ public class QueryProcessor {
 			}
 		}
 		return queryPlan;
-	}
-
-	public static List<String> extractPhrases(String partialQuery) {
-		List<String> phrases = new ArrayList<>();
-		StringTokenizer tokenizer = new StringTokenizer(partialQuery);
-		StringBuilder buffer = new StringBuilder();
-		boolean inPhrase = false;
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			if (token.startsWith(PHRASE_DELIMITER)) {
-				inPhrase = true;
-			}
-			if (token.endsWith(PHRASE_DELIMITER)) {
-				inPhrase = false;
-			}
-			String cleanedToken = token.replaceAll(PHRASE_DELIMITER, "");
-			if (!StopWordList.isStopword(cleanedToken)) {
-				buffer.append(" ").append(cleanedToken);
-			}
-			if (!inPhrase && buffer.length() > 0) {
-				phrases.add(buffer.toString().trim());
-				buffer = new StringBuilder();
-			}
-		}
-		return phrases;
 	}
 
 	public static QueryType getQueryType(String query) {

@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 
 public class PageRank {
 
+	private static final double LAMBDA = 0.15;
 	private static final Logger LOGGER = Logger
 			.getLogger(PageRank.class.getName());
-	private static final double LAMBDA = 0.15;
 	private final Map<Integer, List<Integer>> cites;
 	private Map<Integer, Integer> outLinks;
 	private Map<Integer, Double> pageRank;
@@ -21,13 +21,6 @@ public class PageRank {
 	public PageRank(Map<Integer, List<Integer>> cites) {
 		this.cites = cites;
 		initialize();
-	}
-
-	private void initialize() {
-		outLinks = cites.values().stream().flatMap(Collection::stream)
-				.collect(Collectors.groupingBy(Function.identity())).entrySet()
-				.stream().collect(Collectors.toMap(Entry::getKey,
-						e -> e.getValue().size()));
 	}
 
 	public Map<Integer, Double> compute() {
@@ -45,27 +38,6 @@ public class PageRank {
 		return pageRank;
 	}
 
-	private double getDiff(Map<Integer, Double> newPageRank) {
-		return Math.sqrt(newPageRank.entrySet().stream()
-				.mapToDouble(e -> e.getValue()
-						- pageRank.getOrDefault(e.getKey(), 0.0))
-				.map(d -> d * d).sum());
-	}
-
-	private Map<Integer, Double> computeNewPageRank() {
-		Map<Integer, Double> newPageRank = new HashMap<>();
-		for (Integer docNumber : cites.keySet()) {
-			newPageRank.put(docNumber, compute(docNumber));
-		}
-		normalize(newPageRank);
-		return newPageRank;
-	}
-
-	private void normalize(Map<Integer, Double> newPageRank) {
-		double sum = newPageRank.values().stream().mapToDouble(d -> d).sum();
-		newPageRank.entrySet().forEach(e -> e.setValue(e.getValue() / sum));
-	}
-
 	private double compute(Integer docNumber) {
 		List<Integer> citedFrom = cites.get(docNumber);
 		double inScore = 0.0;
@@ -78,5 +50,33 @@ public class PageRank {
 			inScore += p / o;
 		}
 		return LAMBDA / cites.size() + (1 - LAMBDA) * inScore;
+	}
+
+	private Map<Integer, Double> computeNewPageRank() {
+		Map<Integer, Double> newPageRank = new HashMap<>();
+		for (Integer docNumber : cites.keySet()) {
+			newPageRank.put(docNumber, compute(docNumber));
+		}
+		normalize(newPageRank);
+		return newPageRank;
+	}
+
+	private double getDiff(Map<Integer, Double> newPageRank) {
+		return Math.sqrt(newPageRank.entrySet().stream()
+				.mapToDouble(e -> e.getValue()
+						- pageRank.getOrDefault(e.getKey(), 0.0))
+				.map(d -> d * d).sum());
+	}
+
+	private void initialize() {
+		outLinks = cites.values().stream().flatMap(Collection::stream)
+				.collect(Collectors.groupingBy(Function.identity())).entrySet()
+				.stream().collect(Collectors.toMap(Entry::getKey,
+						e -> e.getValue().size()));
+	}
+
+	private void normalize(Map<Integer, Double> newPageRank) {
+		double sum = newPageRank.values().stream().mapToDouble(d -> d).sum();
+		newPageRank.entrySet().forEach(e -> e.setValue(e.getValue() / sum));
 	}
 }

@@ -10,11 +10,11 @@ public class MergeTreeEntry<V> {
 		this.value = value;
 	}
 
-	public V getValue() {
-		return value;
-	}
-
 	public Integer getIndex() {
 		return index;
+	}
+
+	public V getValue() {
+		return value;
 	}
 }

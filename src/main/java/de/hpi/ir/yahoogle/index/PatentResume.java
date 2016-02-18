@@ -16,20 +16,20 @@ import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
 import de.hpi.ir.yahoogle.util.Mergeable;
 
-public class PatentResume
-		implements PatentParserCallback, Comparable<PatentResume>, Mergeable<Integer> {
+public class PatentResume implements PatentParserCallback,
+		Comparable<PatentResume>, Mergeable<Integer> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(PatentResume.class.getName());
 	private final int docNumber;
 	private final long end;
 	private final String fileName;
+	private double pageRank = 0.0;
 	private int[] parts = new int[PatentPart.values().length];
 	private Patent patent;
 	private String patentFolder;
 	private final long start;
 	private int wordCount;
-	private double pageRank = 0.0;
 
 	public PatentResume(byte[] bytes) {
 		ByteReader in = new ByteReader(bytes);
@@ -39,10 +39,10 @@ public class PatentResume
 		this.end = in.readLong();
 		this.wordCount = in.readInt();
 		this.pageRank = in.readDouble();
-//		this.setPosition(PatentPart.ABSTRACT, in.readInt());
-//		this.setPosition(PatentPart.CLAIM, in.readInt());
-//		this.setPosition(PatentPart.DESCRIPTION, in.readInt());
-//		this.setPosition(PatentPart.TITLE, in.readInt());
+		// this.setPosition(PatentPart.ABSTRACT, in.readInt());
+		// this.setPosition(PatentPart.CLAIM, in.readInt());
+		// this.setPosition(PatentPart.DESCRIPTION, in.readInt());
+		// this.setPosition(PatentPart.TITLE, in.readInt());
 		for (PatentPart part : PatentPart.values()) {
 			this.setPosition(part, in.readInt());
 		}
@@ -88,10 +88,19 @@ public class PatentResume
 		return patentFolder + "/" + fileName;
 	}
 
+	@Override
+	public Integer getKey() {
+		return docNumber;
+	}
+
+	public double getPageRank() {
+		return pageRank;
+	}
+
 	public PatentPart getPartAtPosition(int pos) {
 		PatentPart result = null;
-		for(PatentPart part : PatentPart.values()) {
-			if(pos < parts[part.ordinal()]) {
+		for (PatentPart part : PatentPart.values()) {
+			if (pos < parts[part.ordinal()]) {
 				return result;
 			}
 			result = part;
@@ -119,6 +128,10 @@ public class PatentResume
 		this.patent = patent;
 	}
 
+	public void setPageRank(double pageRank) {
+		this.pageRank = pageRank;
+	}
+
 	public void setPatentFolder(String patentFolder) {
 		this.patentFolder = patentFolder;
 	}
@@ -143,18 +156,5 @@ public class PatentResume
 			out.writeInt(getPosition(part));
 		}
 		return out.toByteArray();
-	}
-
-	public double getPageRank() {
-		return pageRank;
-	}
-
-	public void setPageRank(double pageRank) {
-		this.pageRank = pageRank;
-	}
-
-	@Override
-	public Integer getKey() {
-		return docNumber;
 	}
 }
