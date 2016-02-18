@@ -50,6 +50,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 	public static final int NUMBER_OF_THREADS = 4;
 	private static final String QUERYLOG = "querylog.txt";
 	public static final boolean USE_NDCG = false;
+	private static final boolean WARM_UP = true;
 
 	private static double computeGain(int goldRank) {
 		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
@@ -160,12 +161,10 @@ public class SearchEngineYahoogle extends SearchEngine {
 	@Override
 	protected boolean loadIndex() {
 		index = new Index(dataDirectory);
-		try (BufferedReader br = new BufferedReader(new FileReader(
-				SearchEngineYahoogle.getTeamDirectory() + QUERYLOG))) {
+		try {
 			index.load();
-			String query;
-			while ((query = br.readLine()) != null) {
-				search(query, 10);
+			if (WARM_UP) {
+				warmUp();
 			}
 			return true;
 		} catch (IOException e) {
@@ -200,5 +199,17 @@ public class SearchEngineYahoogle extends SearchEngine {
 		List<QLResult> results = s.search();
 		return generateOutput(results, new SnippetGenerator(index)
 				.generateSnippets(results, s.getPhrases()), s.getQuery());
+	}
+
+	private void warmUp() {
+		try (BufferedReader br = new BufferedReader(new FileReader(
+				SearchEngineYahoogle.getTeamDirectory() + QUERYLOG))) {
+			String query;
+			while ((query = br.readLine()) != null) {
+				search(query, 10);
+			}
+		} catch (IOException e) {
+			LOGGER.severe("Error warming up Search Engine");
+		}
 	}
 }

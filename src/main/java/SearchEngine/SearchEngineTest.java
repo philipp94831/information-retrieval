@@ -44,8 +44,9 @@ public class SearchEngineTest {
 			"physiological AND saline", "tires NOT pressure" };
 	private static final String[] EXECERSICE_12 = { "LinkTo:07920906",
 			"LinkTo:07904949", "LinkTo:08078787",
-			"LinkTo:07865308 AND 07925708", "LinkTo:07947864 AND 07947142",
-			"review guidelines", "on-chip OR OCV" };
+			"LinkTo:07865308 AND LinkTo:07925708",
+			"LinkTo:07947864 AND LinkTo:07947142", "review guidelines",
+			"on-chip OR OCV" };
 	private static final String[] EXECERSICE_14 = { "Marker pen holder",
 			"sodium polyphosphates", "\"ionizing radiation\"",
 			"solar coronal holes", "patterns in scale-free networks",
@@ -55,6 +56,7 @@ public class SearchEngineTest {
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineTest.class.getName());
 	private static SearchEngine myEngine = new SearchEngineYahoogle();
+	private static final boolean PRINT_RESULTS = false;
 
 	private static String[] allQueries() {
 		List<String> all = new ArrayList<>();
@@ -97,12 +99,14 @@ public class SearchEngineTest {
 
 	private static void printResults(ArrayList<String> results, String query) {
 		System.out.println(query);
-		// if (results.size() == 0) {
-		// System.out.println("No matches found");
-		// }
-		// results.forEach(System.out::println);
-		// LOGGER.finer(results.size() + " Results returned");
-		// System.out.println();
+		if (PRINT_RESULTS) {
+			if (results.size() == 0) {
+				System.out.println("No matches found");
+			}
+			results.forEach(System.out::println);
+			LOGGER.finer(results.size() + " Results returned");
+			System.out.println();
+		}
 	}
 
 	private static ArrayList<String> search(String query, int topK) {
