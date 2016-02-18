@@ -1,14 +1,12 @@
 package de.hpi.ir.yahoogle.io;
 
-import java.io.IOException;
-
 public interface AbstractReader {
 
 	boolean hasLeft();
 
-	int readInt() throws IOException;
+	int readInt();
 
-	long readLong() throws IOException;
+	long readLong();
 
-	short readShort() throws IOException;
+	short readShort();
 }

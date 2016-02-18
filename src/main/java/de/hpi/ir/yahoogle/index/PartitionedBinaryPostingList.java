@@ -6,7 +6,7 @@ import java.util.List;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
-public class PartitionedBinaryPostingList {
+class PartitionedBinaryPostingList {
 
 	private static final int MAX_SIZE = 16 * 1024 * 1024;
 	private final List<BinaryPostingList> bytes = new ArrayList<>();

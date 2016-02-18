@@ -2,7 +2,8 @@ package de.hpi.ir.yahoogle.test;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.Test;
 
 import de.hpi.ir.yahoogle.snippets.SnippetWindow;
@@ -16,9 +17,9 @@ public class SnippetWindowTest {
 		window1.addDistinctMatch();
 		assertTrue(window1.compareTo(window2) < 0);
 		window2.addDistinctMatch();
-		window1.addMatches(Arrays.asList(1));
+		window1.addMatches(Collections.singletonList(1));
 		assertTrue(window1.compareTo(window2) < 0);
-		window2.addMatches(Arrays.asList(1));
+		window2.addMatches(Collections.singletonList(1));
 		window1.checkLeftMost(4);
 		window1.checkRightMost(5);
 		window2.checkLeftMost(3);

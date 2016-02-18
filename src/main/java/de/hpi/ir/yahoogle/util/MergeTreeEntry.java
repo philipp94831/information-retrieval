@@ -1,6 +1,6 @@
 package de.hpi.ir.yahoogle.util;
 
-public class MergeTreeEntry<V> {
+class MergeTreeEntry<V> {
 
 	private final Integer index;
 	private final V value;

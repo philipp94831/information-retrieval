@@ -9,9 +9,9 @@ import de.hpi.ir.yahoogle.index.DocumentPosting;
 
 public class PhraseResultIterator implements Iterator<DocumentPosting> {
 
-	private List<TokenResultIterator> sources;
-	private TokenResultIterator first;
-	private Map<Integer, DocumentPosting> storage = new HashMap<>();
+	private final List<TokenResultIterator> sources;
+	private final TokenResultIterator first;
+	private final Map<Integer, DocumentPosting> storage = new HashMap<>();
 	private DocumentPosting currentNext;
 
 	public PhraseResultIterator(List<TokenResultIterator> sources) {

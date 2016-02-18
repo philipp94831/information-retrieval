@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.query;
+package de.hpi.ir.yahoogle.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,11 +78,11 @@ public class RelevantSearch extends Search<QLResult> {
 		return searchResults(ALL_RESULTS);
 	}
 
-	public List<QLResult> searchResults(int topK) {
+	private List<QLResult> searchResults(int topK) {
 		return searchResults(topK, null);
 	}
 
-	public List<QLResult> searchResults(int topK, Set<Integer> whiteList) {
+	private List<QLResult> searchResults(int topK, Set<Integer> whiteList) {
 		QLModel model = new QLModel(index);
 		if (topK != ALL_RESULTS) {
 			model.setTopK(topK);

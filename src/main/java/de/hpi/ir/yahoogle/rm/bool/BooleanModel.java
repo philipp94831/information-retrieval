@@ -14,8 +14,8 @@ import com.google.common.collect.MinMaxPriorityQueue;
 import de.hpi.ir.yahoogle.index.DocumentPosting;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
-import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
+import de.hpi.ir.yahoogle.search.QueryProcessor;
 
 public class BooleanModel extends Model<BooleanResult> {
 
@@ -84,7 +84,7 @@ public class BooleanModel extends Model<BooleanResult> {
 				if(result.containsKey(next.getDocNumber())) {
 					BooleanResult br = new BooleanResult(next.getDocNumber());
 					br.addPositions(phrase, next.getAll());
-					result.merge(next.getDocNumber(), br, (v1, v2) -> v1.merge(v2));
+					result.merge(next.getDocNumber(), br, BooleanResult::merge);
 				}
 			}
 		}

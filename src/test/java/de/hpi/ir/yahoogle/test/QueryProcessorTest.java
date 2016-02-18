@@ -7,8 +7,8 @@ import org.junit.Test;
 
 import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.language.StopWordList;
-import de.hpi.ir.yahoogle.query.QueryProcessor;
-import de.hpi.ir.yahoogle.query.QueryType;
+import de.hpi.ir.yahoogle.search.QueryProcessor;
+import de.hpi.ir.yahoogle.search.QueryType;
 
 
 public class QueryProcessorTest {

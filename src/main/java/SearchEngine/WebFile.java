@@ -89,7 +89,7 @@ public class WebFile {
     private Object readStream(int length, java.io.InputStream stream)
             throws java.io.IOException {
         final int buflen = Math.max(1024, Math.max(length, stream.available()));
-        byte[] buf = new byte[buflen];;
+        byte[] buf = new byte[buflen];
         byte[] bytes = null;
 
         for (int nRead = stream.read(buf); nRead != -1; nRead = stream.read(buf)) {

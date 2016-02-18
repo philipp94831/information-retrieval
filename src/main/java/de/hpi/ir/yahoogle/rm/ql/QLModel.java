@@ -19,8 +19,8 @@ import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
-import de.hpi.ir.yahoogle.query.QueryProcessor;
 import de.hpi.ir.yahoogle.rm.Model;
+import de.hpi.ir.yahoogle.search.QueryProcessor;
 import de.hpi.ir.yahoogle.util.ValueComparator;
 
 public class QLModel extends Model<QLResult> {
@@ -32,7 +32,7 @@ public class QLModel extends Model<QLResult> {
 	private int[] cis;
 	private Set<Integer> all;
 	private List<Map<Integer, byte[]>> found;
-	private Map<Integer, Integer> totalHits = new HashMap<>();
+	private final Map<Integer, Integer> totalHits = new HashMap<>();
 	private Set<Integer> whiteList;
 
 	public QLModel(Index index) {
@@ -51,7 +51,7 @@ public class QLModel extends Model<QLResult> {
 		return Math.log(first + second);
 	}
 
-	public List<QLResult> compute(List<String> query) {
+	private List<QLResult> compute(List<String> query) {
 		initializeModel(query);
 		return computeAll();
 	}
@@ -65,9 +65,7 @@ public class QLModel extends Model<QLResult> {
 	private List<QLResult> computeAll() {
 		MinMaxPriorityQueue<QLResult> res = MinMaxPriorityQueue
 				.maximumSize(topK).create();
-		for (int docNumber : all) {
-			res.add(computeForPatent(docNumber));
-		}
+		res.addAll(all.stream().map(this::computeForPatent).collect(Collectors.toList()));
 		return new ArrayList<>(res);
 	}
 
@@ -108,12 +106,7 @@ public class QLModel extends Model<QLResult> {
 			Set<Integer> positions = new HashSet<>();
 			byte[] bytes = found.get(i).remove(docNumber);
 			if (bytes != null) {
-				try {
-					positions = DocumentPosting.fromBytes(bytes).getAll();
-				} catch (IOException e) {
-					LOGGER.severe(
-							"Error decoding DocumentPosting " + docNumber);
-				}
+				positions = DocumentPosting.fromBytes(bytes).getAll();
 			}
 			result.addPositions(phrases.get(i), positions);
 			double fi = positions.stream()

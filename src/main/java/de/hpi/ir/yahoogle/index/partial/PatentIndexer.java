@@ -15,8 +15,8 @@ public class PatentIndexer extends Thread {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(PatentIndexer.class.getName());
-	private Queue<File> files;
-	private PatentReceiver receiver;
+	private final Queue<File> files;
+	private final PatentReceiver receiver;
 
 	public PatentIndexer(String name, Queue<File> files) {
 		this.files = files;

@@ -1,7 +1,5 @@
 package de.hpi.ir.yahoogle.io;
 
-import java.io.IOException;
-
 public class EliasDeltaReader implements AbstractReader {
 
 	private final BitReader in;
@@ -16,12 +14,12 @@ public class EliasDeltaReader implements AbstractReader {
 	}
 
 	@Override
-	public int readInt() throws IOException {
+	public int readInt() {
 		return (int) readLong();
 	}
 
 	@Override
-	public long readLong() throws IOException {
+	public long readLong() {
 		long num = 1;
 		int len = 1;
 		int lengthOfLen = 0;
@@ -44,7 +42,7 @@ public class EliasDeltaReader implements AbstractReader {
 	}
 
 	@Override
-	public short readShort() throws IOException {
+	public short readShort() {
 		return (short) readLong();
 	}
 }

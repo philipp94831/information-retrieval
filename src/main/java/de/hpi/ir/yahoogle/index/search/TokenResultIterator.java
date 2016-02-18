@@ -8,7 +8,7 @@ import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
 public class TokenResultIterator implements Iterator<DocumentPosting> {
 
-	private MergeSortIterator<BinaryPostingListIterator, DocumentPosting, Integer> documents;
+	private final MergeSortIterator<BinaryPostingListIterator, DocumentPosting, Integer> documents;
 
 	public TokenResultIterator(List<BinaryPostingListIterator> sources) {
 		documents = new MergeSortIterator<>(sources);

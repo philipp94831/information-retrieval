@@ -1,18 +1,14 @@
 package de.hpi.ir.yahoogle.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 public class MergeSortIterator<S extends Iterable<V>, V extends Mergeable<K>, K extends Comparable<K>>
 		implements Iterator<List<V>> {
 
-	private TreeMap<K, List<MergeTreeEntry<V>>> candidates = new TreeMap<>();
-	private List<Iterator<V>> iterators;
+	private final TreeMap<K, List<MergeTreeEntry<V>>> candidates = new TreeMap<>();
+	private final List<Iterator<V>> iterators;
 
 	public MergeSortIterator(List<S> sources) {
 		iterators = sources.stream().map(S::iterator)
@@ -46,7 +42,7 @@ public class MergeSortIterator<S extends Iterable<V>, V extends Mergeable<K>, K 
 
 	private void put(V value, Integer i) {
 		MergeTreeEntry<V> entry = new MergeTreeEntry<>(i, value);
-		candidates.merge(value.getKey(), Arrays.asList(entry), (v1, v2) -> {
+		candidates.merge(value.getKey(), Collections.singletonList(entry), (v1, v2) -> {
 			ArrayList<MergeTreeEntry<V>> list = new ArrayList<>();
 			list.addAll(v1);
 			list.addAll(v2);

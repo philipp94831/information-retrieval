@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import de.hpi.ir.yahoogle.index.PatentIndex;
-
 /**
  *
  * @author: Your team name
@@ -18,7 +16,6 @@ import de.hpi.ir.yahoogle.index.PatentIndex;
  *          this file during the development of your search engine. Any changes
  *          you make here will be ignored for the final test!
  */
-@SuppressWarnings("unused")
 public class SearchEngineTest {
 
 	private static final boolean CREATE_INDEX = false;

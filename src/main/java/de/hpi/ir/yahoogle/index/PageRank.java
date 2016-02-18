@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class PageRank {
+class PageRank {
 
 	private static final double LAMBDA = 0.15;
 	private static final Logger LOGGER = Logger

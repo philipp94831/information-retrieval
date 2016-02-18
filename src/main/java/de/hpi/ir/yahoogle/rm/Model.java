@@ -11,7 +11,7 @@ public abstract class Model<T extends Result> {
 	protected List<String> phrases;
 	protected int topK = Integer.MAX_VALUE / 1000;
 
-	public Model(Index index) {
+	protected Model(Index index) {
 		this.index = index;
 	}
 

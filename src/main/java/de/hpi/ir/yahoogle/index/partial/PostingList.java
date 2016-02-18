@@ -17,10 +17,6 @@ class PostingList
 		this.token = token;
 	}
 
-	public void add(DocumentPosting posting) {
-		documents.put(posting.getDocNumber(), posting);
-	}
-
 	public void add(int docNumber, Integer posting) {
 		if (documents.get(docNumber) == null) {
 			documents.put(docNumber, new DocumentPosting(docNumber));
@@ -36,10 +32,6 @@ class PostingList
 		} else {
 			return comp;
 		}
-	}
-
-	public DocumentPosting get(int i) {
-		return documents.get(i);
 	}
 
 	public String getToken() {

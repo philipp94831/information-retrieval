@@ -15,7 +15,7 @@ import de.hpi.ir.yahoogle.util.Mergeable;
 public class DocumentPosting
 		implements Comparable<DocumentPosting>, Mergeable<Integer> {
 
-	public static DocumentPosting fromBytes(byte[] bytes) throws IOException {
+	public static DocumentPosting fromBytes(byte[] bytes) {
 		ByteReader in = new ByteReader(bytes);
 		int docNumber = in.readInt();
 		VByteReader vin = new VByteReader(in.read(in.remaining()));
@@ -70,10 +70,6 @@ public class DocumentPosting
 		Set<Integer> oldPos = positions;
 		oldPos.retainAll(newPos.stream().map(p -> p - delta)
 				.collect(Collectors.toSet()));
-	}
-
-	public int size() {
-		return positions.size();
 	}
 
 	public byte[] toByteArray() throws IOException {

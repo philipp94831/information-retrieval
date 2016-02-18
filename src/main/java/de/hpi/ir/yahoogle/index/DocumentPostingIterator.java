@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-public class DocumentPostingIterator implements Iterator<DocumentPosting> {
+class DocumentPostingIterator implements Iterator<DocumentPosting> {
 
 	private static final Logger LOGGER = Logger
 			.getLogger(DocumentPostingIterator.class.getName());
-	private BinaryPostingList postingList;
+	private final BinaryPostingList postingList;
 	private int read = 0;
 
 	public DocumentPostingIterator(BinaryPostingList binaryPostingList) {

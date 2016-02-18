@@ -9,7 +9,7 @@ import de.hpi.ir.yahoogle.util.Mergeable;
 public class BinaryPostingList
 		implements Iterable<DocumentPosting>, Mergeable<String> {
 
-	private byte[] bytes;
+	private final byte[] bytes;
 	private String token;
 
 	public BinaryPostingList(byte[] bytes) {

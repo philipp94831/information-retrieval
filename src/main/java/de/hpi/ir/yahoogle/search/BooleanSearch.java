@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.query;
+package de.hpi.ir.yahoogle.search;
 
 import java.util.Collection;
 import java.util.List;

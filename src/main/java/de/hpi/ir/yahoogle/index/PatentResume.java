@@ -25,7 +25,7 @@ public class PatentResume implements PatentParserCallback,
 	private final long end;
 	private final String fileName;
 	private double pageRank = 0.0;
-	private int[] parts = new int[PatentPart.values().length];
+	private final int[] parts = new int[PatentPart.values().length];
 	private Patent patent;
 	private String patentFolder;
 	private final long start;
@@ -39,10 +39,6 @@ public class PatentResume implements PatentParserCallback,
 		this.end = in.readLong();
 		this.wordCount = in.readInt();
 		this.pageRank = in.readDouble();
-		// this.setPosition(PatentPart.ABSTRACT, in.readInt());
-		// this.setPosition(PatentPart.CLAIM, in.readInt());
-		// this.setPosition(PatentPart.DESCRIPTION, in.readInt());
-		// this.setPosition(PatentPart.TITLE, in.readInt());
 		for (PatentPart part : PatentPart.values()) {
 			this.setPosition(part, in.readInt());
 		}

@@ -33,12 +33,12 @@ import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PatentIndexer;
-import de.hpi.ir.yahoogle.query.BooleanSearch;
-import de.hpi.ir.yahoogle.query.QueryProcessor;
-import de.hpi.ir.yahoogle.query.RelevantSearch;
 import de.hpi.ir.yahoogle.rm.Result;
 import de.hpi.ir.yahoogle.rm.bool.BooleanResult;
 import de.hpi.ir.yahoogle.rm.ql.QLResult;
+import de.hpi.ir.yahoogle.search.BooleanSearch;
+import de.hpi.ir.yahoogle.search.QueryProcessor;
+import de.hpi.ir.yahoogle.search.RelevantSearch;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 
 public class SearchEngineYahoogle extends SearchEngine {
@@ -95,9 +95,9 @@ public class SearchEngineYahoogle extends SearchEngine {
 
 	protected ArrayList<String> generateOutput(Collection<? extends Result> results, Map<Integer, String> snippets, String query) {
 		ArrayList<String> output = new ArrayList<>();
-		String googleQuery = toGoogleQuery(query);
 		ArrayList<String> goldRanking = new ArrayList<>();
 		if (USE_NDCG) {
+			String googleQuery = toGoogleQuery(query);
 			goldRanking = new WebFile().getGoogleRanking(googleQuery);
 		}
 		ArrayList<String> originalRanking = new ArrayList<>(
@@ -115,24 +115,14 @@ public class SearchEngineYahoogle extends SearchEngine {
 		return output;
 	}
 
-	protected ArrayList<String> generateSlimOutput(Collection<? extends Result> r) {
-		ArrayList<String> results = new ArrayList<>();
-		for (Result result : r) {
-			results.add(String.format("%08d", result.getDocNumber()) + "\t"
-					+ index.getPatent(result.getDocNumber()).getPatent()
-							.getInventionTitle());
-		}
-		return results;
-	}
-
 	@Override
 	public void index() {
 		try {
 			File patents = new File(dataDirectory);
-			Queue<File> files = new ConcurrentLinkedQueue<File>(
+			Queue<File> files = new ConcurrentLinkedQueue<>(
 					Arrays.asList(patents.listFiles()));
 			int size = files.size();
-			List<PatentIndexer> threads = new ArrayList<PatentIndexer>();
+			List<PatentIndexer> threads = new ArrayList<>();
 			for (int i = 0; i < Math.min(NUMBER_OF_THREADS, size); i++) {
 				PatentIndexer indexer = new PatentIndexer(Integer.toString(i),
 						files);

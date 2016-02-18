@@ -1,6 +1,5 @@
 package de.hpi.ir.yahoogle.io;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class VByteReader implements AbstractReader {
@@ -21,12 +20,12 @@ public class VByteReader implements AbstractReader {
 	}
 
 	@Override
-	public int readInt() throws IOException {
+	public int readInt() {
 		return (int) readLong();
 	}
 
 	@Override
-	public long readLong() throws IOException {
+	public long readLong() {
 		long l = 0;
 		while (true) {
 			byte b = in.get();
@@ -39,7 +38,7 @@ public class VByteReader implements AbstractReader {
 	}
 
 	@Override
-	public short readShort() throws IOException {
+	public short readShort() {
 		return (short) readLong();
 	}
 }
