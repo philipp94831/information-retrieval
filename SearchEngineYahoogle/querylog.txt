@@ -46,8 +46,8 @@ tires NOT pressure
 LinkTo:07920906
 LinkTo:07904949
 LinkTo:08078787
-LinkTo:07865308 AND 07925708
-LinkTo:07947864 AND 07947142
+LinkTo:07865308 AND LinkTo:07925708
+LinkTo:07947864 AND LinkTo:07947142
 review guidelines
 on-chip OR OCV
 Marker pen holder
