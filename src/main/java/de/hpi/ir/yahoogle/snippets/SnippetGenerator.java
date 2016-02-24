@@ -49,6 +49,9 @@ public class SnippetGenerator {
 
 	private String generate(Result result, PatentResume resume, List<String> phrases) {
 		String patentAbstract = resume.getPatentAbstract();
+		if (patentAbstract == null) {
+			return "[Snippet not available]";
+		}
 		Tokenizer tokenizer = new Tokenizer(patentAbstract);
 		while (tokenizer.hasNext()) {
 			tokenizer.next();

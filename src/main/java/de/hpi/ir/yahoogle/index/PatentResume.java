@@ -87,7 +87,7 @@ public class PatentResume implements PatentParserCallback,
 	public String getInventionTitle() {
 		Patent patent = getPatent();
 		if (patent == null) {
-			return "";
+			return "[Title not available]";
 		}
 		return patent.getInventionTitle();
 	}
@@ -122,7 +122,7 @@ public class PatentResume implements PatentParserCallback,
 	public String getPatentAbstract() {
 		Patent patent = getPatent();
 		if (patent == null) {
-			return "";
+			return null;
 		}
 		return patent.getPatentAbstract();
 	}
