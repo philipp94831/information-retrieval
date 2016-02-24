@@ -62,10 +62,10 @@ public class QLModel extends Model<QLResult> {
 	}
 
 	private List<QLResult> computeAll() {
-		MinMaxPriorityQueue<QLResult> res = MinMaxPriorityQueue
+		MinMaxPriorityQueue<QLResult> result = MinMaxPriorityQueue
 				.maximumSize(topK).create();
-		all.stream().forEach(i -> res.add(computeForPatent(i)));
-		return new ArrayList<>(res);
+		all.stream().forEach(i -> result.add(computeForPatent(i)));
+		return new ArrayList<>(result);
 	}
 
 	private List<Map<Integer, byte[]>> findPatents() {
@@ -93,6 +93,7 @@ public class QLModel extends Model<QLResult> {
 				}
 			}
 			listOfResults.add(result);
+			i++;
 		}
 		return listOfResults;
 	}

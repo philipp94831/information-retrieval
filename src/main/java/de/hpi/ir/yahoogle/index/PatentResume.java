@@ -84,6 +84,14 @@ public class PatentResume implements PatentParserCallback,
 		return patentFolder + fileName;
 	}
 
+	public String getInventionTitle() {
+		Patent patent = getPatent();
+		if (patent == null) {
+			return "";
+		}
+		return patent.getInventionTitle();
+	}
+
 	@Override
 	public Integer getKey() {
 		return docNumber;
@@ -104,11 +112,19 @@ public class PatentResume implements PatentParserCallback,
 		return result;
 	}
 
-	public Patent getPatent() {
+	private Patent getPatent() {
 		if (patent == null) {
 			fetchPatent();
 		}
 		return patent;
+	}
+
+	public String getPatentAbstract() {
+		Patent patent = getPatent();
+		if (patent == null) {
+			return "";
+		}
+		return patent.getPatentAbstract();
 	}
 
 	public int getPosition(PatentPart part) {

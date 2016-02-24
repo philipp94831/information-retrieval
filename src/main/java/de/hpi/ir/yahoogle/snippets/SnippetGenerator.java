@@ -48,7 +48,7 @@ public class SnippetGenerator {
 	}
 
 	private String generate(Result result, PatentResume resume, List<String> phrases) {
-		String patentAbstract = resume.getPatent().getPatentAbstract();
+		String patentAbstract = resume.getPatentAbstract();
 		Tokenizer tokenizer = new Tokenizer(patentAbstract);
 		while (tokenizer.hasNext()) {
 			tokenizer.next();
