@@ -9,6 +9,7 @@ import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialTokenDictionary;
 import de.hpi.ir.yahoogle.index.search.BinaryPostingListIterator;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.FileUtils;
 import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
 public class TokenDictionary extends Loadable {
@@ -27,7 +28,7 @@ public class TokenDictionary extends Loadable {
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
 		offsets = new StringOffsetsIndex(FILE_NAME);
 		offsets.create();

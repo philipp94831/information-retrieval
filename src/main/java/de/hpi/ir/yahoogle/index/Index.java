@@ -20,6 +20,7 @@ import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
 import de.hpi.ir.yahoogle.index.search.TokenResultIterator;
 import de.hpi.ir.yahoogle.language.Stemmer;
 import de.hpi.ir.yahoogle.language.Tokenizer;
+import de.hpi.ir.yahoogle.util.FileUtils;
 
 public class Index extends Loadable {
 
@@ -151,7 +152,7 @@ public class Index extends Loadable {
 
 	private void printDictionary() {
 		try {
-			deleteIfExists(DICTIONARY_FILE);
+			FileUtils.deleteIfExists(DICTIONARY_FILE);
 			PrintWriter writer = new PrintWriter(DICTIONARY_FILE, "UTF-8");
 			dictionary.getTokens().forEach(writer::println);
 			writer.close();

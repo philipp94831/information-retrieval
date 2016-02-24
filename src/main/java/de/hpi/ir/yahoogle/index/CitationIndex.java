@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialCitationIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.FileUtils;
 import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
 public class CitationIndex extends Loadable {
@@ -27,7 +28,7 @@ public class CitationIndex extends Loadable {
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
 		offsets = new IntegerOffsetsIndex(FILE_NAME);
 		offsets.create();

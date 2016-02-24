@@ -1,16 +1,10 @@
 package de.hpi.ir.yahoogle.index;
 
-import java.io.File;
 import java.io.IOException;
 
 public abstract class Loadable {
 
 	protected static final String FILE_EXTENSION = ".yahoogle";
-
-	protected static boolean deleteIfExists(String fileName) {
-		File f = new File(fileName);
-		return !f.exists() || f.delete();
-	}
 
 	public abstract void create() throws IOException;
 

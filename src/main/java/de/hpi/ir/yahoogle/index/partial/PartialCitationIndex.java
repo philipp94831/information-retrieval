@@ -13,6 +13,7 @@ import de.hpi.ir.yahoogle.index.BinaryCitationList;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.FileUtils;
 
 public class PartialCitationIndex extends Loadable
 		implements Iterable<BinaryCitationList> {
@@ -35,7 +36,7 @@ public class PartialCitationIndex extends Loadable
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 		citations = new TreeMap<>();
 	}
 
@@ -45,7 +46,7 @@ public class PartialCitationIndex extends Loadable
 
 	public void delete() throws IOException {
 		file.close();
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 	}
 
 	private String fileName() {

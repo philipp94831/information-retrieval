@@ -14,6 +14,7 @@ import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.ObjectReader;
 import de.hpi.ir.yahoogle.io.ObjectWriter;
+import de.hpi.ir.yahoogle.util.FileUtils;
 
 public abstract class OffsetsIndex<K> extends Loadable {
 
@@ -33,8 +34,8 @@ public abstract class OffsetsIndex<K> extends Loadable {
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
-		deleteIfExists(skipListFileName());
+		FileUtils.deleteIfExists(fileName());
+		FileUtils.deleteIfExists(skipListFileName());
 		skiplist = new TreeMap<>();
 		file = new RandomAccessFile(fileName(), "rw");
 	}

@@ -9,6 +9,7 @@ import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.FileUtils;
 
 public class PartialPatentIndex extends Loadable
 		implements Iterable<PatentResume> {
@@ -28,7 +29,7 @@ public class PartialPatentIndex extends Loadable
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 		patents = new TreeSet<>();
 	}
 
@@ -38,7 +39,7 @@ public class PartialPatentIndex extends Loadable
 
 	public void delete() throws IOException {
 		file.close();
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 	}
 
 	private String fileName() {

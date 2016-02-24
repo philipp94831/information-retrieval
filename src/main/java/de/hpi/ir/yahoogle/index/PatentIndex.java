@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialPatentIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.FileUtils;
 import de.hpi.ir.yahoogle.util.MergeSortIterator;
 
 public class PatentIndex extends Loadable {
@@ -47,7 +48,7 @@ public class PatentIndex extends Loadable {
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 		file = new RandomAccessFile(fileName(), "rw");
 		file.seek(TOTAL_WORD_COUNT_OFFSET);
 		file.writeInt(-1); // totalWordCount

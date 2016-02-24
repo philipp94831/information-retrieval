@@ -1,9 +1,5 @@
 package SearchEngine;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-
 /**
  *
  * @author: Yahoogle
@@ -21,6 +17,9 @@ import java.io.FileReader;
  * 
  * Keep in mind to include your implementation decisions also in the pdf file of each assignment
  */
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -112,8 +111,8 @@ public class SearchEngineYahoogle extends SearchEngine {
 			int docNumber = result.getDocNumber();
 			double ndcg = computeNdcg(goldRanking, originalRanking, i);
 			output.add(String.format("%08d", docNumber) + "\t"
-					+ index.getPatent(docNumber).getInventionTitle()
-					+ "\t" + ndcg + "\n" + snippets.get(docNumber));
+					+ index.getPatent(docNumber).getInventionTitle() + "\t"
+					+ ndcg + "\n" + snippets.get(docNumber));
 			i++;
 		}
 		return output;

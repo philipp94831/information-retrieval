@@ -12,6 +12,7 @@ import java.util.TreeMap;
 import de.hpi.ir.yahoogle.index.BinaryPostingList;
 import de.hpi.ir.yahoogle.index.Loadable;
 import de.hpi.ir.yahoogle.io.ByteWriter;
+import de.hpi.ir.yahoogle.util.FileUtils;
 
 public class PartialTokenDictionary extends Loadable
 		implements Iterable<BinaryPostingList> {
@@ -34,7 +35,7 @@ public class PartialTokenDictionary extends Loadable
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 		dictionary = new TreeMap<>();
 	}
 
@@ -44,7 +45,7 @@ public class PartialTokenDictionary extends Loadable
 
 	public void delete() throws IOException {
 		file.close();
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 	}
 
 	private String fileName() {

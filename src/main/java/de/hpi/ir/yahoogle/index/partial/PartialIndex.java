@@ -11,6 +11,7 @@ import de.hpi.ir.yahoogle.language.Stemmer;
 import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.parsing.Patent;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
+import de.hpi.ir.yahoogle.util.FileUtils;
 
 public class PartialIndex extends Loadable {
 
@@ -57,7 +58,7 @@ public class PartialIndex extends Loadable {
 
 	@Override
 	public void create() throws IOException {
-		deleteIfExists(fileName());
+		FileUtils.deleteIfExists(fileName());
 		patents = new PartialPatentIndex(name);
 		patents.create();
 		citations = new PartialCitationIndex(name);
