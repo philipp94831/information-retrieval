@@ -33,9 +33,9 @@ public abstract class Search<T extends Result> {
 
 	public abstract SearchResult search();
 
-	protected SearchResult search(Model<? extends Result> model) {
-		Collection<? extends Result> results = model.compute(query);
-		Stream<? extends Result> stream = results.stream().sorted();
+	protected SearchResult search(Model<T> model) {
+		Collection<T> results = model.compute(query);
+		Stream<T> stream = results.stream().sorted();
 		if (topK != ALL_RESULTS) {
 			stream = stream.limit(topK);
 		}
