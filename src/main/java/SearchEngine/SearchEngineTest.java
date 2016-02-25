@@ -56,7 +56,9 @@ public class SearchEngineTest {
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineTest.class.getName());
 	private static SearchEngine myEngine = new SearchEngineYahoogle();
+	private static final int NDCG_P = 10;
 	private static final boolean PRINT_RESULTS = false;
+	private static final boolean USE_NDCG = false;
 
 	private static String[] allQueries() {
 		List<String> all = new ArrayList<>();
@@ -73,6 +75,12 @@ public class SearchEngineTest {
 		all.addAll(Arrays.asList(EXECERSICE_14));
 		String[] result = new String[all.size()];
 		return all.toArray(result);
+	}
+
+	private static double getNdcg(String query, ArrayList<String> ranking, int p) {
+		ArrayList<String> goldRanking = new WebFile()
+				.getGoogleRanking(toGoogleQuery(query));
+		return myEngine.computeNdcg(goldRanking, ranking, p);
 	}
 
 	private static void initialize(boolean create) {
@@ -104,17 +112,22 @@ public class SearchEngineTest {
 				System.out.println("No matches found");
 			}
 			results.forEach(System.out::println);
-			LOGGER.finer(results.size() + " Results returned");
 			System.out.println();
+			if (USE_NDCG) {
+				System.out.println("NDCG@" + NDCG_P + ": "
+						+ getNdcg(query, results, NDCG_P));
+				System.out.println();
+			}
 		}
 	}
 
 	private static ArrayList<String> search(String query, int topK) {
 		LOGGER.finer("Searching...");
-		long startTime = System.nanoTime();
-		ArrayList<String> results = myEngine.search(query, topK);
-		long time = (System.nanoTime() - startTime) / 1000000;
-		System.out.println("Time for search: " + time + "ms");
-		return results;
+		return myEngine.search(query, topK);
+	}
+
+	private static String toGoogleQuery(String query) {
+		return query.toLowerCase().replaceAll("\\snot\\s", " -")
+				.replaceAll("^not\\s", "-");
 	}
 }

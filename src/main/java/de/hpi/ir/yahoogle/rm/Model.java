@@ -9,6 +9,7 @@ public abstract class Model<T extends Result> {
 
 	protected final Index index;
 	protected List<String> phrases;
+	protected int results;
 	protected int topK = Integer.MAX_VALUE / 1000;
 
 	protected Model(Index index) {
@@ -19,6 +20,10 @@ public abstract class Model<T extends Result> {
 
 	public List<String> getPhrases() {
 		return phrases;
+	}
+
+	public int getResults() {
+		return results;
 	}
 
 	public void setTopK(int topK) {

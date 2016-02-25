@@ -52,8 +52,8 @@ public class BooleanModel extends Model<BooleanResult> {
 					result = findLinks(newPhrases);
 				} else {
 					result = findToken(newPhrases);
-					if(operator != Operator.NOT) {
-						phrases.addAll(newPhrases);						
+					if (operator != Operator.NOT) {
+						phrases.addAll(newPhrases);
 					}
 				}
 				switch (operator) {
@@ -72,16 +72,17 @@ public class BooleanModel extends Model<BooleanResult> {
 				break;
 			}
 		}
+		results = booleanResult.size();
 		MinMaxPriorityQueue<BooleanResult> cropped = MinMaxPriorityQueue
 				.maximumSize(topK).create();
 		booleanResult.forEach(i -> cropped.add(new BooleanResult(i)));
 		Map<Integer, BooleanResult> result = new HashMap<>();
 		cropped.forEach(b -> result.put(b.getDocNumber(), b));
-		for(String phrase : phrases) {
+		for (String phrase : phrases) {
 			PhraseResultIterator iterator = index.findPositions(phrase);
-			while(iterator.hasNext()) {
+			while (iterator.hasNext()) {
 				DocumentPosting next = iterator.next();
-				if(result.containsKey(next.getDocNumber())) {
+				if (result.containsKey(next.getDocNumber())) {
 					BooleanResult br = new BooleanResult(next.getDocNumber());
 					br.addPositions(phrase, next.getAll());
 					result.merge(next.getDocNumber(), br, BooleanResult::merge);
@@ -92,7 +93,8 @@ public class BooleanModel extends Model<BooleanResult> {
 	}
 
 	private boolean isLinkPhrase(List<String> newPhrases) {
-		return newPhrases.stream().anyMatch(s -> s.toLowerCase().startsWith(LINK_KEYWORD));
+		return newPhrases.stream()
+				.anyMatch(s -> s.toLowerCase().startsWith(LINK_KEYWORD));
 	}
 
 	private Set<Integer> findToken(List<String> phrases) {
@@ -100,7 +102,8 @@ public class BooleanModel extends Model<BooleanResult> {
 	}
 
 	private Set<Integer> findLinks(List<String> phrases) {
-		phrases = phrases.stream().map(p -> p.toLowerCase().replaceAll(LINK_KEYWORD, ""))
+		phrases = phrases.stream()
+				.map(p -> p.toLowerCase().replaceAll(LINK_KEYWORD, ""))
 				.collect(Collectors.toList());
 		return index.findLinks(phrases);
 	}

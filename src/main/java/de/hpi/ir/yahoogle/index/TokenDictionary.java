@@ -107,7 +107,7 @@ public class TokenDictionary extends Loadable {
 				file.getFilePointer());
 	}
 
-	public void warmUp() throws IOException {
+	public void warmUp() {
 	}
 
 	@Override

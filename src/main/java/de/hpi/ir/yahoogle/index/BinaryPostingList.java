@@ -1,6 +1,5 @@
 package de.hpi.ir.yahoogle.index;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import de.hpi.ir.yahoogle.io.ByteReader;
@@ -44,7 +43,7 @@ public class BinaryPostingList
 		return new DocumentPostingIterator(this);
 	}
 
-	public DocumentPosting next(int offset, int size) throws IOException {
+	public DocumentPosting next(int offset, int size) {
 		ByteReader in = new ByteReader(bytes, offset, size);
 		byte[] bytes = in.read(size);
 		return DocumentPosting.fromBytes(bytes);

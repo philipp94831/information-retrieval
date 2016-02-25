@@ -58,6 +58,7 @@ public class QLModel extends Model<QLResult> {
 	private void initializeModel(List<String> query) {
 		phrases = query;
 		found = findPatents();
+		results = totalHits.size();
 		all = getAllCandidates();
 	}
 

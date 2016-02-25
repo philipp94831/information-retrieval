@@ -2,13 +2,10 @@ package de.hpi.ir.yahoogle.search;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.language.Stemmer;
 import de.hpi.ir.yahoogle.language.Tokenizer;
@@ -57,11 +54,11 @@ public class RelevantSearch extends Search<QLResult> {
 	}
 
 	@Override
-	public List<QLResult> search() {
-		List<QLResult> results = searchResults(Math.max(topK, prf));
+	public SearchResult search() {
+		SearchResult results = searchResults(Math.max(topK, prf));
 		phrases = QueryProcessor.extractPhrases(query);
 		Map<Integer, String> snippets = new SnippetGenerator(index)
-				.generateSnippets(results, phrases);
+				.generateSnippets(results.getResults(), phrases);
 		if (prf > 0) {
 			List<String> topWords = getTopWords(TOP_WORDS, snippets.values());
 			List<String> newPhrases = new ArrayList<>();
@@ -74,29 +71,11 @@ public class RelevantSearch extends Search<QLResult> {
 		return results;
 	}
 
-	public List<QLResult> searchResults() {
-		return searchResults(ALL_RESULTS);
-	}
-
-	private List<QLResult> searchResults(int topK) {
-		return searchResults(topK, null);
-	}
-
-	private List<QLResult> searchResults(int topK, Set<Integer> whiteList) {
+	private SearchResult searchResults(int topK) {
 		QLModel model = new QLModel(index);
 		if (topK != ALL_RESULTS) {
 			model.setTopK(topK);
 		}
-		model.setWhiteList(whiteList);
-		List<QLResult> results = model.compute(query);
-		Collections.sort(results);
-		if (topK != ALL_RESULTS) {
-			results = results.subList(0, Math.min(topK, results.size()));
-		}
-		return results;
-	}
-
-	public Iterable<QLResult> searchResults(Set<Integer> whiteList) {
-		return searchResults(ALL_RESULTS, whiteList);
+		return search(model);
 	}
 }

@@ -30,16 +30,18 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PatentIndexer;
 import de.hpi.ir.yahoogle.rm.Result;
-import de.hpi.ir.yahoogle.rm.bool.BooleanResult;
-import de.hpi.ir.yahoogle.rm.ql.QLResult;
 import de.hpi.ir.yahoogle.search.BooleanSearch;
 import de.hpi.ir.yahoogle.search.QueryProcessor;
 import de.hpi.ir.yahoogle.search.RelevantSearch;
+import de.hpi.ir.yahoogle.search.Search;
+import de.hpi.ir.yahoogle.search.SearchResult;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 
 public class SearchEngineYahoogle extends SearchEngine {
@@ -48,8 +50,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 			.getLogger(SearchEngineYahoogle.class.getName());
 	public static final int NUMBER_OF_THREADS = 4;
 	private static final String QUERYLOG = "querylog.txt";
-	public static final boolean USE_NDCG = true;
-	private static final boolean WARM_UP = false;
+	private static final boolean WARM_UP = true;
 
 	private static double computeGain(int goldRank) {
 		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
@@ -57,11 +58,6 @@ public class SearchEngineYahoogle extends SearchEngine {
 
 	public static String getTeamDirectory() {
 		return teamDirectory + "/";
-	}
-
-	private static String toGoogleQuery(String query) {
-		return query.toLowerCase().replaceAll("\\snot\\s", " -")
-				.replaceAll("^not\\s", "-");
 	}
 
 	private Index index;
@@ -72,18 +68,28 @@ public class SearchEngineYahoogle extends SearchEngine {
 	}
 
 	@Override
-	protected void compressIndex() {
+	void compressIndex() {
 		index();
 	}
 
 	@Override
-	protected Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
+	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
 		double originalDcg = 0.0;
 		double goldDcg = 0.0;
 		for (int i = 0; i < p; i++) {
-			String originalRank = ranking.get(i);
-			int goldRank = goldRanking.indexOf(originalRank) + 1;
-			double originalGain = goldRank == 0 ? 0 : computeGain(goldRank);
+			double originalGain = 0.0;
+			if (i < ranking.size()) {
+				String result = ranking.get(i);
+				Matcher m = Pattern.compile("^(\\d+)\t").matcher(result);
+				if(m.find()) {
+					String docNumber = Integer
+							.toString(Integer.parseInt(m.group(1)));
+					int goldRank = goldRanking.indexOf(docNumber) + 1;
+					if (goldRank > 0) {
+						originalGain = computeGain(goldRank);
+					}
+				}
+			}
 			double goldGain = computeGain(i + 1);
 			if (i == 0) {
 				originalDcg = originalGain;
@@ -96,30 +102,21 @@ public class SearchEngineYahoogle extends SearchEngine {
 		return originalDcg / goldDcg;
 	}
 
-	protected ArrayList<String> generateOutput(Collection<? extends Result> results, Map<Integer, String> snippets, String query) {
+	private ArrayList<String> generateOutput(Collection<? extends Result> results, List<String> phrases) {
 		ArrayList<String> output = new ArrayList<>();
-		ArrayList<String> goldRanking = new ArrayList<>();
-		if (USE_NDCG) {
-			String googleQuery = toGoogleQuery(query);
-			goldRanking = new WebFile().getGoogleRanking(googleQuery);
-		}
-		ArrayList<String> originalRanking = new ArrayList<>(
-				results.stream().map(r -> Integer.toString(r.getDocNumber()))
-						.collect(Collectors.toList()));
-		int i = 1;
+		Map<Integer, String> snippets = new SnippetGenerator(index)
+				.generateSnippets(results, phrases);
 		for (Result result : results) {
 			int docNumber = result.getDocNumber();
-			double ndcg = computeNdcg(goldRanking, originalRanking, i);
 			output.add(String.format("%08d", docNumber) + "\t"
 					+ index.getPatent(docNumber).getInventionTitle() + "\t"
-					+ ndcg + "\n" + snippets.get(docNumber));
-			i++;
+					+ "\n" + snippets.get(docNumber));
 		}
 		return output;
 	}
 
 	@Override
-	public void index() {
+	void index() {
 		try {
 			File patents = new File(dataDirectory);
 			Queue<File> files = new ConcurrentLinkedQueue<>(
@@ -153,12 +150,12 @@ public class SearchEngineYahoogle extends SearchEngine {
 	}
 
 	@Override
-	protected boolean loadCompressedIndex() {
+	boolean loadCompressedIndex() {
 		return loadIndex();
 	}
 
 	@Override
-	protected boolean loadIndex() {
+	boolean loadIndex() {
 		index = new Index(dataDirectory);
 		try {
 			index.load();
@@ -173,42 +170,46 @@ public class SearchEngineYahoogle extends SearchEngine {
 	}
 
 	@Override
-	protected ArrayList<String> search(String query, int topK) {
+	ArrayList<String> search(String query, int topK) {
+		return search(query, topK, false);
+	}
+
+	private ArrayList<String> search(String query, int topK, boolean silent) {
+		long startTime = System.nanoTime();
+		Search<?> s;
 		switch (QueryProcessor.getQueryType(query)) {
 		case RELEVANT:
-			return searchRelevant(query, topK);
+			s = new RelevantSearch(index, query);
+			break;
 		case BOOLEAN:
-			return searchBoolean(query, topK);
+			s = new BooleanSearch(index, query);
+			break;
 		default:
 			return new ArrayList<>();
 		}
-	}
-
-	private ArrayList<String> searchBoolean(String query, int topK) {
-		BooleanSearch s = new BooleanSearch(index, query);
 		s.setTopK(topK);
-		List<BooleanResult> results = s.search();
-		return generateOutput(results, new SnippetGenerator(index)
-				.generateSnippets(results, s.getPhrases()), s.getQuery());
-	}
-
-	private ArrayList<String> searchRelevant(String query, int topK) {
-		RelevantSearch s = new RelevantSearch(index, query);
-		s.setTopK(topK);
-		List<QLResult> results = s.search();
-		return generateOutput(results, new SnippetGenerator(index)
-				.generateSnippets(results, s.getPhrases()), s.getQuery());
+		SearchResult result = s.search();
+		ArrayList<String> output = generateOutput(result.getResults(),
+				s.getPhrases());
+		long time = (System.nanoTime() - startTime) / 1000000;
+		if (!silent) {
+			System.out.println(result.getResultSize() + " results returned");
+			System.out.println("Time for search: " + time + "ms");
+		}
+		return output;
 	}
 
 	private void warmUp() {
+		LOGGER.info("Warming up...");
 		try (BufferedReader br = new BufferedReader(new FileReader(
 				SearchEngineYahoogle.getTeamDirectory() + QUERYLOG))) {
 			String query;
 			while ((query = br.readLine()) != null) {
-				search(query, 10);
+				search(query, 10, true);
 			}
 		} catch (IOException e) {
 			LOGGER.severe("Error warming up Search Engine");
 		}
+		LOGGER.info("Finished warm up");
 	}
 }
