@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Function;
-
 import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
 import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
