@@ -50,7 +50,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 			.getLogger(SearchEngineYahoogle.class.getName());
 	public static final int NUMBER_OF_THREADS = 4;
 	private static final String QUERYLOG = "querylog.txt";
-	private static final boolean WARM_UP = true;
+	private static final boolean WARM_UP = false;
 
 	private static double computeGain(int goldRank) {
 		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));

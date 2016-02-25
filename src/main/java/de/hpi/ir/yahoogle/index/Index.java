@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import com.google.common.base.Function;
 
 import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialIndex;
@@ -86,7 +89,7 @@ public class Index extends Loadable {
 			tokens.add(Stemmer.stem(token));
 		}
 		return new TokenResultIterator(tokens.stream().map(dictionary::find)
-				.collect(Collectors.toList()));
+				.filter(Objects::nonNull).collect(Collectors.toList()));
 	}
 
 	public Set<Integer> findLinks(List<String> phrases) {
