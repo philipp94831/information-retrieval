@@ -43,7 +43,7 @@ public class PhraseResultIterator implements Iterator<DocumentPosting> {
 					base.merge(next, i + 1);
 				}
 			}
-			if (!invalid) {
+			if (!(invalid || base.getAll().isEmpty())) {
 				return base;
 			}
 		}

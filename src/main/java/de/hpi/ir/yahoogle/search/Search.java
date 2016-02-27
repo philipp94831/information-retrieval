@@ -27,10 +27,6 @@ public abstract class Search<T extends Result> {
 		return phrases;
 	}
 
-	public String getQuery() {
-		return query;
-	}
-
 	public abstract SearchResult search();
 
 	protected SearchResult search(Model<T> model) {

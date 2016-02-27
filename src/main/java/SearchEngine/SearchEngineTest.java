@@ -57,8 +57,8 @@ public class SearchEngineTest {
 			.getLogger(SearchEngineTest.class.getName());
 	private static SearchEngine myEngine = new SearchEngineYahoogle();
 	private static final int NDCG_P = 10;
-	private static final boolean PRINT_RESULTS = true;
-	private static final boolean USE_NDCG = true;
+	private static final boolean PRINT_RESULTS = false;
+	private static final boolean USE_NDCG = false;
 
 	private static String[] allQueries() {
 		List<String> all = new ArrayList<>();
@@ -93,7 +93,7 @@ public class SearchEngineTest {
 		}
 		long startTime = System.nanoTime();
 		LOGGER.info("Loading index...");
-		myEngine.loadIndex();
+		myEngine.loadCompressedIndex();
 		long time = (System.nanoTime() - startTime) / 1000000;
 		LOGGER.info("Time for index loading: " + time + "ms");
 		System.out.println();
@@ -101,7 +101,7 @@ public class SearchEngineTest {
 
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
-		String[] queries = EXECERSICE_14;
+		String[] queries = allQueries();
 		for (String query : queries) {
 			printResults(search(query, 10), query);
 		}

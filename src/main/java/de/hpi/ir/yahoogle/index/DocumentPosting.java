@@ -67,9 +67,8 @@ public class DocumentPosting
 			throw new RuntimeException("Trying to merge different Documents");
 		}
 		Set<Integer> newPos = next.getAll();
-		Set<Integer> oldPos = positions;
-		oldPos.retainAll(newPos.stream().map(p -> p - delta)
-				.collect(Collectors.toSet()));
+		positions.retainAll(newPos.stream().map(p -> p - delta)
+				.collect(Collectors.toList()));
 	}
 
 	public byte[] toByteArray() throws IOException {
@@ -82,7 +81,7 @@ public class DocumentPosting
 		}
 		byte[] encoded = pout.toByteArray();
 		ByteWriter out = new ByteWriter();
-		out.writeInt(docNumber); // docNumber
+		out.writeInt(docNumber);
 		out.write(encoded);
 		return out.toByteArray();
 	}

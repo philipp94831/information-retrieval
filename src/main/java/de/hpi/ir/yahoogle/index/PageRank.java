@@ -30,8 +30,8 @@ class PageRank {
 		while (!converged) {
 			Map<Integer, Double> newPageRank = computeNewPageRank();
 			double delta = getDiff(newPageRank);
-			LOGGER.info("Delta after " + ++i + " iteration" + (i > 1 ? "s" : "")
-					+ ": " + delta);
+			LOGGER.finer("Delta after " + ++i + " iteration"
+					+ (i > 1 ? "s" : "") + ": " + delta);
 			pageRank = newPageRank;
 			converged = delta < Math.pow(10, -17) || (i > 200);
 		}

@@ -49,7 +49,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 			.getLogger(SearchEngineYahoogle.class.getName());
 	public static final int NUMBER_OF_THREADS = 4;
 	private static final String QUERYLOG = "querylog.txt";
-	private static final boolean WARM_UP = false;
+	private static final boolean WARM_UP = true;
 
 	public static String getTeamDirectory() {
 		return teamDirectory + "/";

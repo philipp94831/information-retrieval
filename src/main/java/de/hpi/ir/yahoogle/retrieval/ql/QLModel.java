@@ -33,6 +33,7 @@ public class QLModel extends Model<QLResult> {
 	private List<Map<Integer, byte[]>> found;
 	private final Map<Integer, Integer> totalHits = new HashMap<>();
 	private Set<Integer> whiteList;
+	private List<String> phrases;
 
 	public QLModel(Index index) {
 		this(index, 0.2);
@@ -55,8 +56,8 @@ public class QLModel extends Model<QLResult> {
 		return computeAll();
 	}
 
-	private void initializeModel(List<String> query) {
-		phrases = query;
+	private void initializeModel(List<String> phrases) {
+		this.phrases = phrases;
 		found = findPatents();
 		results = totalHits.size();
 		all = getAllCandidates();

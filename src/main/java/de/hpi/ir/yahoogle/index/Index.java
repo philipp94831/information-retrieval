@@ -81,7 +81,7 @@ public class Index extends Loadable {
 	private TokenResultIterator findAll(String token) {
 		List<String> tokens = new ArrayList<>();
 		if (isPrefixToken(token)) {
-			String prefix = token.substring(0, token.length() - 1);
+			String prefix = token.substring(0, token.indexOf("*"));
 			tokens = dictionary.getTokensForPrefix(prefix);
 		} else {
 			tokens.add(Stemmer.stem(token));

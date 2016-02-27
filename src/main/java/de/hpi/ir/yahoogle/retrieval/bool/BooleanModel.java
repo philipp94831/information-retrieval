@@ -33,7 +33,7 @@ public class BooleanModel extends Model<BooleanResult> {
 		if (!queryPlan.isEmpty() && queryPlan.get(0).equalsIgnoreCase("not")) {
 			booleanResult.addAll(index.getAllDocNumbers());
 		}
-		phrases = new ArrayList<>();
+		List<String> phrases = new ArrayList<>();
 		for (String phrase : queryPlan) {
 			switch (phrase.toLowerCase()) {
 			case "and":
@@ -92,7 +92,7 @@ public class BooleanModel extends Model<BooleanResult> {
 		return result.values();
 	}
 
-	private boolean isLinkPhrase(List<String> newPhrases) {
+	private static boolean isLinkPhrase(List<String> newPhrases) {
 		return newPhrases.stream()
 				.anyMatch(s -> s.toLowerCase().startsWith(LINK_KEYWORD));
 	}
