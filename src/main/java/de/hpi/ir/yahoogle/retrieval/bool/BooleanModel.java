@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.rm.bool;
+package de.hpi.ir.yahoogle.retrieval.bool;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +14,7 @@ import com.google.common.collect.MinMaxPriorityQueue;
 import de.hpi.ir.yahoogle.index.DocumentPosting;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
-import de.hpi.ir.yahoogle.rm.Model;
+import de.hpi.ir.yahoogle.retrieval.Model;
 import de.hpi.ir.yahoogle.search.QueryProcessor;
 
 public class BooleanModel extends Model<BooleanResult> {

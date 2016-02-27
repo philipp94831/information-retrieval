@@ -1,8 +1,8 @@
 package de.hpi.ir.yahoogle.search;
 
 import de.hpi.ir.yahoogle.index.Index;
-import de.hpi.ir.yahoogle.rm.bool.BooleanModel;
-import de.hpi.ir.yahoogle.rm.bool.BooleanResult;
+import de.hpi.ir.yahoogle.retrieval.bool.BooleanModel;
+import de.hpi.ir.yahoogle.retrieval.bool.BooleanResult;
 
 public class BooleanSearch extends Search<BooleanResult> {
 

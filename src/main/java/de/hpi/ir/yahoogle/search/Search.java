@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import de.hpi.ir.yahoogle.index.Index;
-import de.hpi.ir.yahoogle.rm.Model;
-import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.retrieval.Model;
+import de.hpi.ir.yahoogle.retrieval.Result;
 
 public abstract class Search<T extends Result> {
 

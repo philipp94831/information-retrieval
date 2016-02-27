@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.util;
+package de.hpi.ir.yahoogle.util.merge;
 
 class MergeTreeEntry<V> {
 

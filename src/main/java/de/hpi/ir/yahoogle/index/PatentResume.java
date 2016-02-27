@@ -14,7 +14,7 @@ import de.hpi.ir.yahoogle.parsing.Patent;
 import de.hpi.ir.yahoogle.parsing.PatentParser;
 import de.hpi.ir.yahoogle.parsing.PatentParserCallback;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
-import de.hpi.ir.yahoogle.util.Mergeable;
+import de.hpi.ir.yahoogle.util.merge.Mergeable;
 
 public class PatentResume implements PatentParserCallback,
 		Comparable<PatentResume>, Mergeable<Integer> {

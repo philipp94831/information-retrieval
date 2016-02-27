@@ -12,7 +12,7 @@ import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.language.Tokenizer;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
-import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.retrieval.Result;
 
 public class SnippetGenerator {
 

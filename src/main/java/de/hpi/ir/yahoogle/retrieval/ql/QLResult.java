@@ -1,6 +1,6 @@
-package de.hpi.ir.yahoogle.rm.ql;
+package de.hpi.ir.yahoogle.retrieval.ql;
 
-import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.retrieval.Result;
 
 public class QLResult extends Result implements Comparable<QLResult> {
 

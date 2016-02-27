@@ -1,7 +1,8 @@
 package de.hpi.ir.yahoogle.search;
 
 import java.util.Collection;
-import de.hpi.ir.yahoogle.rm.Result;
+
+import de.hpi.ir.yahoogle.retrieval.Result;
 
 public class SearchResult {
 

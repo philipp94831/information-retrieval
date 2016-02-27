@@ -57,8 +57,8 @@ public class SearchEngineTest {
 			.getLogger(SearchEngineTest.class.getName());
 	private static SearchEngine myEngine = new SearchEngineYahoogle();
 	private static final int NDCG_P = 10;
-	private static final boolean PRINT_RESULTS = false;
-	private static final boolean USE_NDCG = false;
+	private static final boolean PRINT_RESULTS = true;
+	private static final boolean USE_NDCG = true;
 
 	private static String[] allQueries() {
 		List<String> all = new ArrayList<>();
@@ -84,21 +84,24 @@ public class SearchEngineTest {
 	}
 
 	private static void initialize(boolean create) {
-		long startTime = System.nanoTime();
 		if (create) {
+			long startTime = System.nanoTime();
 			LOGGER.info("Indexing...");
 			myEngine.index();
+			long time = (System.nanoTime() - startTime) / 1000000;
+			LOGGER.info("Time for index creation: " + time + "ms");
 		}
+		long startTime = System.nanoTime();
 		LOGGER.info("Loading index...");
 		myEngine.loadIndex();
 		long time = (System.nanoTime() - startTime) / 1000000;
-		LOGGER.info("Time for index creation and loading: " + time + "ms");
+		LOGGER.info("Time for index loading: " + time + "ms");
 		System.out.println();
 	}
 
 	public static void main(String args[]) throws Exception {
 		initialize(CREATE_INDEX);
-		String[] queries = allQueries();
+		String[] queries = EXECERSICE_14;
 		for (String query : queries) {
 			printResults(search(query, 10), query);
 		}
@@ -108,22 +111,25 @@ public class SearchEngineTest {
 	private static void printResults(ArrayList<String> results, String query) {
 		System.out.println(query);
 		if (PRINT_RESULTS) {
-			if (results.size() == 0) {
+			if (results.isEmpty()) {
 				System.out.println("No matches found");
 			}
 			results.forEach(System.out::println);
-			System.out.println();
-			if (USE_NDCG) {
-				System.out.println("NDCG@" + NDCG_P + ": "
-						+ getNdcg(query, results, NDCG_P));
-				System.out.println();
-			}
 		}
+		if (USE_NDCG) {
+			System.out.println(
+					"NDCG@" + NDCG_P + ": " + getNdcg(query, results, NDCG_P));
+		}
+		System.out.println();
 	}
 
 	private static ArrayList<String> search(String query, int topK) {
 		LOGGER.finer("Searching...");
-		return myEngine.search(query, topK);
+		long startTime = System.nanoTime();
+		ArrayList<String> result = myEngine.search(query, topK);
+		long time = (System.nanoTime() - startTime) / 1000000;
+		System.out.println("Time for search: " + time + "ms");
+		return result;
 	}
 
 	private static String toGoogleQuery(String query) {

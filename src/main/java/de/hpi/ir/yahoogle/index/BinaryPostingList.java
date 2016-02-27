@@ -3,7 +3,7 @@ package de.hpi.ir.yahoogle.index;
 import java.util.Iterator;
 
 import de.hpi.ir.yahoogle.io.ByteReader;
-import de.hpi.ir.yahoogle.util.Mergeable;
+import de.hpi.ir.yahoogle.util.merge.Mergeable;
 
 public class BinaryPostingList
 		implements Iterable<DocumentPosting>, Mergeable<String> {

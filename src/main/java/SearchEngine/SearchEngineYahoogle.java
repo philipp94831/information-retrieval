@@ -30,13 +30,12 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import de.hpi.ir.yahoogle.evaluation.Ndcg;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.partial.PatentIndexer;
-import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.retrieval.Result;
 import de.hpi.ir.yahoogle.search.BooleanSearch;
 import de.hpi.ir.yahoogle.search.QueryProcessor;
 import de.hpi.ir.yahoogle.search.RelevantSearch;
@@ -51,10 +50,6 @@ public class SearchEngineYahoogle extends SearchEngine {
 	public static final int NUMBER_OF_THREADS = 4;
 	private static final String QUERYLOG = "querylog.txt";
 	private static final boolean WARM_UP = false;
-
-	private static double computeGain(int goldRank) {
-		return 1 + Math.floor(10 * Math.pow(0.5, 0.1 * goldRank));
-	}
 
 	public static String getTeamDirectory() {
 		return teamDirectory + "/";
@@ -74,32 +69,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 
 	@Override
 	Double computeNdcg(ArrayList<String> goldRanking, ArrayList<String> ranking, int p) {
-		double originalDcg = 0.0;
-		double goldDcg = 0.0;
-		for (int i = 0; i < p; i++) {
-			double originalGain = 0.0;
-			if (i < ranking.size()) {
-				String result = ranking.get(i);
-				Matcher m = Pattern.compile("^(\\d+)\t").matcher(result);
-				if(m.find()) {
-					String docNumber = Integer
-							.toString(Integer.parseInt(m.group(1)));
-					int goldRank = goldRanking.indexOf(docNumber) + 1;
-					if (goldRank > 0) {
-						originalGain = computeGain(goldRank);
-					}
-				}
-			}
-			double goldGain = computeGain(i + 1);
-			if (i == 0) {
-				originalDcg = originalGain;
-				goldDcg = goldGain;
-			} else {
-				originalDcg += originalGain * Math.log(2) / Math.log(i + 1);
-				goldDcg += goldGain * Math.log(2) / Math.log(i + 1);
-			}
-		}
-		return originalDcg / goldDcg;
+		return new Ndcg(goldRanking, ranking).at(p);
 	}
 
 	private ArrayList<String> generateOutput(Collection<? extends Result> results, List<String> phrases) {
@@ -175,7 +145,6 @@ public class SearchEngineYahoogle extends SearchEngine {
 	}
 
 	private ArrayList<String> search(String query, int topK, boolean silent) {
-		long startTime = System.nanoTime();
 		Search<?> s;
 		switch (QueryProcessor.getQueryType(query)) {
 		case RELEVANT:
@@ -191,24 +160,22 @@ public class SearchEngineYahoogle extends SearchEngine {
 		SearchResult result = s.search();
 		ArrayList<String> output = generateOutput(result.getResults(),
 				s.getPhrases());
-		long time = (System.nanoTime() - startTime) / 1000000;
 		if (!silent) {
 			System.out.println(result.getResultSize() + " results returned");
-			System.out.println("Time for search: " + time + "ms");
 		}
 		return output;
 	}
 
 	private void warmUp() {
 		LOGGER.info("Warming up...");
-		try (BufferedReader br = new BufferedReader(new FileReader(
-				SearchEngineYahoogle.getTeamDirectory() + QUERYLOG))) {
+		try (BufferedReader br = new BufferedReader(
+				new FileReader(getTeamDirectory() + QUERYLOG))) {
 			String query;
 			while ((query = br.readLine()) != null) {
 				search(query, 10, true);
 			}
 		} catch (IOException e) {
-			LOGGER.severe("Error warming up Search Engine");
+			LOGGER.severe("Error reading query log");
 		}
 		LOGGER.info("Finished warm up");
 	}

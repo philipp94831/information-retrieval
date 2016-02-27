@@ -10,7 +10,7 @@ import SearchEngine.SearchEngineYahoogle;
 import de.hpi.ir.yahoogle.index.partial.PartialCitationIndex;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.util.FileUtils;
-import de.hpi.ir.yahoogle.util.MergeSortIterator;
+import de.hpi.ir.yahoogle.util.merge.MergeSortIterator;
 
 public class CitationIndex extends Loadable {
 

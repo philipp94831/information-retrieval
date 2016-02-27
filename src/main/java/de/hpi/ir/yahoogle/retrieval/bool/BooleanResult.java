@@ -1,6 +1,6 @@
-package de.hpi.ir.yahoogle.rm.bool;
+package de.hpi.ir.yahoogle.retrieval.bool;
 
-import de.hpi.ir.yahoogle.rm.Result;
+import de.hpi.ir.yahoogle.retrieval.Result;
 
 public class BooleanResult extends Result implements Comparable<BooleanResult> {
 

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import de.hpi.ir.yahoogle.io.ByteWriter;
-import de.hpi.ir.yahoogle.util.MergeSortIterator;
+import de.hpi.ir.yahoogle.util.merge.MergeSortIterator;
 
 class PartitionedBinaryPostingList {
 

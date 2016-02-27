@@ -1,4 +1,4 @@
-package de.hpi.ir.yahoogle.rm.ql;
+package de.hpi.ir.yahoogle.retrieval.ql;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.index.PatentResume;
 import de.hpi.ir.yahoogle.index.search.PhraseResultIterator;
 import de.hpi.ir.yahoogle.parsing.PatentPart;
-import de.hpi.ir.yahoogle.rm.Model;
+import de.hpi.ir.yahoogle.retrieval.Model;
 import de.hpi.ir.yahoogle.search.QueryProcessor;
 
 public class QLModel extends Model<QLResult> {

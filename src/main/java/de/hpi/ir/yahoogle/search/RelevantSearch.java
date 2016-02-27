@@ -9,8 +9,8 @@ import java.util.TreeMap;
 import de.hpi.ir.yahoogle.index.Index;
 import de.hpi.ir.yahoogle.language.Stemmer;
 import de.hpi.ir.yahoogle.language.Tokenizer;
-import de.hpi.ir.yahoogle.rm.ql.QLModel;
-import de.hpi.ir.yahoogle.rm.ql.QLResult;
+import de.hpi.ir.yahoogle.retrieval.ql.QLModel;
+import de.hpi.ir.yahoogle.retrieval.ql.QLResult;
 import de.hpi.ir.yahoogle.snippets.SnippetGenerator;
 import de.hpi.ir.yahoogle.util.ValueComparator;
 

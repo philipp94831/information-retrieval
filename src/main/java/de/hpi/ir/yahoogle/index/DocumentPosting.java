@@ -10,7 +10,7 @@ import de.hpi.ir.yahoogle.io.ByteReader;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.io.VByteReader;
 import de.hpi.ir.yahoogle.io.VByteWriter;
-import de.hpi.ir.yahoogle.util.Mergeable;
+import de.hpi.ir.yahoogle.util.merge.Mergeable;
 
 public class DocumentPosting
 		implements Comparable<DocumentPosting>, Mergeable<Integer> {

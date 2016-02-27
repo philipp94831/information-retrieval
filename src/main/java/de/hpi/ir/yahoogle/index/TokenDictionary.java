@@ -10,7 +10,7 @@ import de.hpi.ir.yahoogle.index.partial.PartialTokenDictionary;
 import de.hpi.ir.yahoogle.index.search.BinaryPostingListIterator;
 import de.hpi.ir.yahoogle.io.ByteWriter;
 import de.hpi.ir.yahoogle.util.FileUtils;
-import de.hpi.ir.yahoogle.util.MergeSortIterator;
+import de.hpi.ir.yahoogle.util.merge.MergeSortIterator;
 
 public class TokenDictionary extends Loadable {
 
