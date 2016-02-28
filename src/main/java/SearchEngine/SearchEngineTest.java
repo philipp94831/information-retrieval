@@ -56,6 +56,7 @@ public class SearchEngineTest {
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineTest.class.getName());
 	private static SearchEngine myEngine = new SearchEngineYahoogle();
+	private static final int NANOS_IN_MILLIS = 1000000;
 	private static final int NDCG_P = 10;
 	private static final boolean PRINT_RESULTS = false;
 	private static final boolean USE_NDCG = false;
@@ -83,24 +84,24 @@ public class SearchEngineTest {
 		return myEngine.computeNdcg(goldRanking, ranking, p);
 	}
 
-	private static void initialize(boolean create) {
-		if (create) {
+	private static void initialize() {
+		if (CREATE_INDEX) {
 			long startTime = System.nanoTime();
 			LOGGER.info("Indexing...");
 			myEngine.index();
-			long time = (System.nanoTime() - startTime) / 1000000;
+			long time = (System.nanoTime() - startTime) / NANOS_IN_MILLIS;
 			LOGGER.info("Time for index creation: " + time + "ms");
 		}
 		long startTime = System.nanoTime();
 		LOGGER.info("Loading index...");
 		myEngine.loadCompressedIndex();
-		long time = (System.nanoTime() - startTime) / 1000000;
+		long time = (System.nanoTime() - startTime) / NANOS_IN_MILLIS;
 		LOGGER.info("Time for index loading: " + time + "ms");
 		System.out.println();
 	}
 
 	public static void main(String args[]) throws Exception {
-		initialize(CREATE_INDEX);
+		initialize();
 		String[] queries = allQueries();
 		for (String query : queries) {
 			printResults(search(query, 10), query);
@@ -127,7 +128,7 @@ public class SearchEngineTest {
 		LOGGER.finer("Searching...");
 		long startTime = System.nanoTime();
 		ArrayList<String> result = myEngine.search(query, topK);
-		long time = (System.nanoTime() - startTime) / 1000000;
+		long time = (System.nanoTime() - startTime) / NANOS_IN_MILLIS;
 		System.out.println("Time for search: " + time + "ms");
 		return result;
 	}
