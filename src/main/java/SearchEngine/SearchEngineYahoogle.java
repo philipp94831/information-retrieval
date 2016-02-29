@@ -49,10 +49,14 @@ public class SearchEngineYahoogle extends SearchEngine {
 			.getLogger(SearchEngineYahoogle.class.getName());
 	public static final int NUMBER_OF_THREADS = 4;
 	private static final String QUERYLOG = "querylog.txt";
-	private static final boolean WARM_UP = true;
+	private static final boolean WARM_UP = false;
 
 	public static String getTeamDirectory() {
 		return teamDirectory + "/";
+	}
+
+	private static String patentFolder() {
+		return dataDirectory + "/";
 	}
 
 	private Index index;
@@ -88,7 +92,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 	@Override
 	void index() {
 		try {
-			File patents = new File(dataDirectory);
+			File patents = new File(patentFolder());
 			Queue<File> files = new ConcurrentLinkedQueue<>(
 					Arrays.asList(patents.listFiles()));
 			int size = files.size();
@@ -108,7 +112,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 			}
 			List<String> names = threads.stream().map(PatentIndexer::getNames)
 					.flatMap(Collection::stream).collect(Collectors.toList());
-			index = new Index(dataDirectory);
+			index = new Index(patentFolder());
 			index.create();
 			index.mergeIndices(names);
 			index.write();
@@ -126,7 +130,7 @@ public class SearchEngineYahoogle extends SearchEngine {
 
 	@Override
 	boolean loadIndex() {
-		index = new Index(dataDirectory);
+		index = new Index(patentFolder());
 		try {
 			index.load();
 			if (WARM_UP) {

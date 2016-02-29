@@ -56,7 +56,7 @@ public class SearchEngineTest {
 	private static final Logger LOGGER = Logger
 			.getLogger(SearchEngineTest.class.getName());
 	private static SearchEngine myEngine = new SearchEngineYahoogle();
-	private static final int NANOS_IN_MILLIS = 1000000;
+	private static final int MILLIS_IN_NANOS = 1000000;
 	private static final int NDCG_P = 10;
 	private static final boolean PRINT_RESULTS = false;
 	private static final boolean USE_NDCG = false;
@@ -89,13 +89,13 @@ public class SearchEngineTest {
 			long startTime = System.nanoTime();
 			LOGGER.info("Indexing...");
 			myEngine.index();
-			long time = (System.nanoTime() - startTime) / NANOS_IN_MILLIS;
+			long time = (System.nanoTime() - startTime) / MILLIS_IN_NANOS;
 			LOGGER.info("Time for index creation: " + time + "ms");
 		}
 		long startTime = System.nanoTime();
 		LOGGER.info("Loading index...");
 		myEngine.loadCompressedIndex();
-		long time = (System.nanoTime() - startTime) / NANOS_IN_MILLIS;
+		long time = (System.nanoTime() - startTime) / MILLIS_IN_NANOS;
 		LOGGER.info("Time for index loading: " + time + "ms");
 		System.out.println();
 	}
@@ -128,7 +128,7 @@ public class SearchEngineTest {
 		LOGGER.finer("Searching...");
 		long startTime = System.nanoTime();
 		ArrayList<String> result = myEngine.search(query, topK);
-		long time = (System.nanoTime() - startTime) / NANOS_IN_MILLIS;
+		long time = (System.nanoTime() - startTime) / MILLIS_IN_NANOS;
 		System.out.println("Time for search: " + time + "ms");
 		return result;
 	}
